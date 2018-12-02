@@ -1,0 +1,19 @@
+<nav class="menu" id="main-menu" [class.menu-show]="open">
+<div
+     *ngFor="let button of buttons; trackBy: trackButtons"
+     class="link-container centered-block"
+     [class.active-link-container]="link.isActive"
+>
+    <a  #link="routerLinkActive"
+    
+        [classList]="button.classList || ''"
+
+        [routerLink]="button.routerLink"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }"
+
+        (click)="itemSelected.emit(button); openChange.emit(open = false);"
+        
+    >{{button.name}}</a>
+</div>
+</nav>

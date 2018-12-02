@@ -1,0 +1,21 @@
+{
+    "schema": "../backend/public-api/v1.gql",
+    "overwrite": true,
+    "documents": "src/app/_services/documents.gql",
+    "generates": {
+        "src/app/_services/gql.ts": {
+            "config": {
+                "scalars": {
+                    "Date": "string",
+                    "BOID": "string"
+                },
+                "interfacePrefix": ""
+            },
+            "plugins": [
+                "typescript-common",
+                "typescript-client",
+                "typescript-apollo-angular"
+            ]
+        }
+    }
+}

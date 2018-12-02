@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="./styles/graphdoc.css" />
+    <title>include</title>
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700" rel="stylesheet"><link type="text/css" rel="stylesheet" href="./assets/code.css" /><link type="text/css" rel="stylesheet" href="./assets/require-by.css" />
+</head>
+<body class="slds-scrollable--y">
+    <nav class="slds-grid slds-grid--vertical slds-col--rule-right">
+        <header class="slds-p-around--medium slds-col slds-shrik slds-grow-none">
+            <button class="slds-button slds-button--icon slds-float--right js-toggle-navigation less-than-medium">
+                <i class="material-icons">close</i>
+            </button>
+                <h3 class="slds-text-heading--medium"><a href="./">GraphQL Schema</a></h3>
+            <div class="slds-p-top--small">
+                <input id="type-search" type="text" placeholder="Search a type" autofocus="" class="slds-input" />
+            </div>
+        </header>
+        <div id="navication-scroll" class="slds-scrollable--y slds-col slds-grow">
+<div class="slds-grid slds-grid--vertical slds-navigation-list--vertical">
+    <h4 class="slds-text-title--caps slds-p-around--medium">Schema</h4>
+    <ul>
+        <li  title="Query">
+            <a href="query.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                Query
+            </a>
+        </li>
+        <li  title="Mutation">
+            <a href="mutation.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                Mutation
+            </a>
+        </li>
+    </ul>
+</div>
+<div class="slds-grid slds-grid--vertical slds-navigation-list--vertical">
+    <h4 class="slds-text-title--caps slds-p-around--medium">Scalars</h4>
+    <ul>
+        <li  title="BOID">
+            <a href="boid.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                BOID
+            </a>
+        </li>
+        <li  title="Boolean">
+            <a href="boolean.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                Boolean
+            </a>
+        </li>
+        <li  title="Date">
+            <a href="date.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                Date
+            </a>
+        </li>
+        <li  title="Float">
+            <a href="float.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                Float
+            </a>
+        </li>
+        <li  title="Int">
+            <a href="int.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                Int
+            </a>
+        </li>
+        <li  title="String">
+            <a href="string.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                String
+            </a>
+        </li>
+    </ul>
+</div>
+<div class="slds-grid slds-grid--vertical slds-navigation-list--vertical">
+    <h4 class="slds-text-title--caps slds-p-around--medium">Enums</h4>
+    <ul>
+        <li  title="TaskType">
+            <a href="tasktype.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                TaskType
+            </a>
+        </li>
+        <li  title="UserRole">
+            <a href="userrole.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UserRole
+            </a>
+        </li>
+        <li  title="__DirectiveLocation">
+            <a href="directivelocation.spec.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                __DirectiveLocation
+            </a>
+        </li>
+        <li  title="__TypeKind">
+            <a href="typekind.spec.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                __TypeKind
+            </a>
+        </li>
+    </ul>
+</div>
+<div class="slds-grid slds-grid--vertical slds-navigation-list--vertical">
+    <h4 class="slds-text-title--caps slds-p-around--medium">Objects</h4>
+    <ul>
+        <li  title="Course">
+            <a href="course.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                Course
+            </a>
+        </li>
+        <li  title="CourseCreateResponse">
+            <a href="coursecreateresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                CourseCreateResponse
+            </a>
+        </li>
+        <li  title="CreateTaskResponse">
+            <a href="createtaskresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                CreateTaskResponse
+            </a>
+        </li>
+        <li  title="DeleteCourseResponse">
+            <a href="deletecourseresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                DeleteCourseResponse
+            </a>
+        </li>
+        <li  title="DeleteTaskResponse">
+            <a href="deletetaskresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                DeleteTaskResponse
+            </a>
+        </li>
+        <li  title="DeleteUserResponse">
+            <a href="deleteuserresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                DeleteUserResponse
+            </a>
+        </li>
+        <li  title="GetCoursesResponse">
+            <a href="getcoursesresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetCoursesResponse
+            </a>
+        </li>
+        <li  title="GetTasksResponse">
+            <a href="gettasksresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetTasksResponse
+            </a>
+        </li>
+        <li  title="GetUsersResponse">
+            <a href="getusersresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetUsersResponse
+            </a>
+        </li>
+        <li  title="Task">
+            <a href="task.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                Task
+            </a>
+        </li>
+        <li  title="UpdateCourseResponse">
+            <a href="updatecourseresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateCourseResponse
+            </a>
+        </li>
+        <li  title="UpdateMeResponse">
+            <a href="updatemeresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateMeResponse
+            </a>
+        </li>
+        <li  title="UpdateTaskResponse">
+            <a href="updatetaskresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateTaskResponse
+            </a>
+        </li>
+        <li  title="UpdateUserResponse">
+            <a href="updateuserresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateUserResponse
+            </a>
+        </li>
+        <li  title="User">
+            <a href="user.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                User
+            </a>
+        </li>
+        <li  title="__Directive">
+            <a href="directive.spec.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                __Directive
+            </a>
+        </li>
+        <li  title="__EnumValue">
+            <a href="enumvalue.spec.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                __EnumValue
+            </a>
+        </li>
+        <li  title="__Field">
+            <a href="field.spec.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                __Field
+            </a>
+        </li>
+        <li  title="__InputValue">
+            <a href="inputvalue.spec.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                __InputValue
+            </a>
+        </li>
+        <li  title="__Schema">
+            <a href="schema.spec.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                __Schema
+            </a>
+        </li>
+        <li  title="__Type">
+            <a href="type.spec.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                __Type
+            </a>
+        </li>
+    </ul>
+</div>
+<div class="slds-grid slds-grid--vertical slds-navigation-list--vertical">
+    <h4 class="slds-text-title--caps slds-p-around--medium">Input Objects</h4>
+    <ul>
+        <li  title="CoursesSearch">
+            <a href="coursessearch.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                CoursesSearch
+            </a>
+        </li>
+        <li  title="CourseUpdatePatch">
+            <a href="courseupdatepatch.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                CourseUpdatePatch
+            </a>
+        </li>
+        <li  title="CreateCourseRequest">
+            <a href="createcourserequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                CreateCourseRequest
+            </a>
+        </li>
+        <li  title="CreateTaskRequest">
+            <a href="createtaskrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                CreateTaskRequest
+            </a>
+        </li>
+        <li  title="DeleteCourseRequest">
+            <a href="deletecourserequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                DeleteCourseRequest
+            </a>
+        </li>
+        <li  title="DeleteTaskRequest">
+            <a href="deletetaskrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                DeleteTaskRequest
+            </a>
+        </li>
+        <li  title="DeleteUserRequest">
+            <a href="deleteuserrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                DeleteUserRequest
+            </a>
+        </li>
+        <li  title="GetCourseRequest">
+            <a href="getcourserequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetCourseRequest
+            </a>
+        </li>
+        <li  title="GetCoursesRequest">
+            <a href="getcoursesrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetCoursesRequest
+            </a>
+        </li>
+        <li  title="GetTaskRequest">
+            <a href="gettaskrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetTaskRequest
+            </a>
+        </li>
+        <li  title="GetTasksRequest">
+            <a href="gettasksrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetTasksRequest
+            </a>
+        </li>
+        <li  title="GetUserRequest">
+            <a href="getuserrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetUserRequest
+            </a>
+        </li>
+        <li  title="GetUsersRequest">
+            <a href="getusersrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                GetUsersRequest
+            </a>
+        </li>
+        <li  title="TasksSearch">
+            <a href="taskssearch.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                TasksSearch
+            </a>
+        </li>
+        <li  title="TaskUpdatePatch">
+            <a href="taskupdatepatch.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                TaskUpdatePatch
+            </a>
+        </li>
+        <li  title="UpdateCourseRequest">
+            <a href="updatecourserequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateCourseRequest
+            </a>
+        </li>
+        <li  title="UpdateMePatch">
+            <a href="updatemepatch.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateMePatch
+            </a>
+        </li>
+        <li  title="UpdateMeRequest">
+            <a href="updatemerequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateMeRequest
+            </a>
+        </li>
+        <li  title="UpdateTaskRequest">
+            <a href="updatetaskrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateTaskRequest
+            </a>
+        </li>
+        <li  title="UpdateUserPatch">
+            <a href="updateuserpatch.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateUserPatch
+            </a>
+        </li>
+        <li  title="UpdateUserRequest">
+            <a href="updateuserrequest.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UpdateUserRequest
+            </a>
+        </li>
+        <li  title="UsersSearch">
+            <a href="userssearch.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                UsersSearch
+            </a>
+        </li>
+    </ul>
+</div>
+<div class="slds-grid slds-grid--vertical slds-navigation-list--vertical">
+    <h4 class="slds-text-title--caps slds-p-around--medium">Directives</h4>
+    <ul>
+        <li  title="allow">
+            <a href="allow.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                allow
+            </a>
+        </li>
+        <li  title="deny">
+            <a href="deny.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                deny
+            </a>
+        </li>
+        <li  title="deprecated">
+            <a href="deprecated.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                deprecated
+            </a>
+        </li>
+        <li class="slds-is-active" title="include">
+            <a href="include.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                include
+            </a>
+        </li>
+        <li  title="login">
+            <a href="login.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                login
+            </a>
+        </li>
+        <li  title="notEmpty">
+            <a href="notempty.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                notEmpty
+            </a>
+        </li>
+        <li  title="password">
+            <a href="password.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                password
+            </a>
+        </li>
+        <li  title="positiveInt">
+            <a href="positiveint.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                positiveInt
+            </a>
+        </li>
+        <li  title="skip">
+            <a href="skip.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                skip
+            </a>
+        </li>
+        <li  title="userFullname">
+            <a href="userfullname.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                userFullname
+            </a>
+        </li>
+        <li  title="zeroOrPositiveInt">
+            <a href="zeroorpositiveint.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                zeroOrPositiveInt
+            </a>
+        </li>
+        <li  title="zeroOrPositiveNumber">
+            <a href="zeroorpositivenumber.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
+                zeroOrPositiveNumber
+            </a>
+        </li>
+    </ul>
+</div>
+        </div>
+    </nav>
+    <main><section class="title slds-theme--inverse">
+    <div class="container slds-grid">
+        <div>
+        <button class="slds-button js-toggle-navigation less-than-medium">
+            <i class="material-icons slds-button__icon slds-button__icon--left">menu</i>
+            <span class="slds-text-title--caps">Types<span>
+        </button>
+        </div>
+        </div>
+    </div>
+    <div class="container">
+        <p class="slds-text-title--caps slds-text-color--weak"></p>
+        <h1 class="slds-text-heading--large">include</h1>
+        <div class="slds-text-body--regular"><p>Directs the executor to include this field or fragment only when the <code>if</code> argument is true.</p>
+</div>
+    </div>
+</section>
+<section>
+    <div class="container">
+        <h2 id="graphql-schema-definition" class="graphdoc-section__title slds-text-heading--medium slds-m-top--small">
+            <a href="#graphql-schema-definition">
+                <i class="material-icons">link</i>
+            </a>
+            GraphQL Schema definition
+        </h2>
+        <code class="highlight"><ul class="code" style="padding-left:28px"><li><span class="keyword operator ts">directive</span> <span class="keyword operator ts">@include</span>(<span class="meta">if</span>: <a class="support type" href="boolean.doc.html">Boolean</a>!) on <span class="keyword operator ts">FIELD</span> | <span class="keyword operator ts">FRAGMENT_SPREAD</span> | <span class="keyword operator ts">INLINE_FRAGMENT</span></li></ul></code>
+    </div>
+</section>
+<section>
+    <div class="container">
+        <h2 id="require-by" class="graphdoc-section__title slds-text-heading--medium slds-m-top--small">
+            <a href="#require-by">
+                <i class="material-icons">link</i>
+            </a>
+            Require by
+        </h2>
+        <div class="require-by anyone">This element is not required by anyone</div>
+    </div>
+</section>
+<footer>
+<div class="container slds-p-around--large">
+    <p class="slds-text-align--right slds-text-title--caps">
+        Generated with <a href="https://github.com/2fd/graphdoc#readme" target="_blank">graphdoc 2.4.0</a>
+    </p>
+</div>
+</footer>
+</main>
+    <script src="./scripts/focus-active.js"></script>
+    <script src="./scripts/filter-types.js"></script>
+    <script src="./scripts/toggle-navigation.js"></script>
+</body>

@@ -1,0 +1,96 @@
+@import 'my-variables';
+
+:host {
+    height: 100%;
+    left: 0;
+    position: fixed;
+    z-index: 10;
+
+    &,
+    * {
+        overflow: visible;
+    }
+
+    .menu {
+        background-color: $main-accent-color;
+        font-size: 1.5em;
+        font-weight: bold;
+        height: 100%;
+        list-style: none;
+        min-width: 7em;
+        position: absolute;
+        padding-top: 10px;
+        right: 0;
+        top: 0;
+        transition: .25s;
+        width: 6em;
+
+
+        $link-container-padding: 6px;
+        $link-container-margin:  0;
+
+        .active-link-container {
+            background-color: $accent !important;
+            border: {
+                bottom-left-radius: 15%;
+                top-left-radius: 15%;
+            }
+            transform:  translate(5%);
+            transition: 200ms ease-in;
+            visibility: hidden;
+            box-shadow: $slide-menu-shadow;
+        }
+
+
+        &-show {
+            box-shadow: $slide-menu-shadow;
+            transform: translateX(100%);
+
+            .active-link-container {
+                visibility: visible;
+                transition: 200ms;
+            }
+        }
+
+        .link-container {
+            margin-top: $link-container-margin;
+            padding: {
+                top:    $link-container-padding;
+                bottom: $link-container-padding;
+            }
+            background-color: $main-accent-color;
+
+
+
+            a {
+                padding: 0;
+                text-decoration: none;
+                color: $main-accent-cocolor;
+                font-size: 1.18em;
+                position: relative;
+
+                &:hover {
+                    background-color: transparent;
+                    color: $slide-link-color;
+
+                    &::after {
+                        visibility: visible;
+                        width: 100%;
+                    }
+                }
+
+                &::after {
+                    border: 2px solid $slide-link-color;
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    transition: 200ms ease-out;
+                    visibility: hidden;
+                    width: 0;
+                    left: 0;
+                }
+
+            }
+        }
+    }
+}

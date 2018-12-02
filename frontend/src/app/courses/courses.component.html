@@ -1,0 +1,45 @@
+<div class="col-md-10 mx-auto">
+    <vee-search-input 
+        placeholder="Course name"
+        (searchDemand)="doSearchRequest({ page: 1, search: $event })"
+    ></vee-search-input>   
+    <ng-container *ngIf="api?.data">
+        <mat-paginator #paginator
+            [length]         ="api!.total"
+            [pageSize]       ="pagination.limit"
+            [pageIndex]      ="pagination.page - 1"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="
+                doSearchRequest({
+                    page:  $event.pageIndex + 1,
+                    limit: $event.pageSize
+                });
+            "
+            color="primary"
+            showFirstLastButtons
+        ></mat-paginator>
+
+
+        <ng-container *ngFor="let course of api!.data">
+            <mat-divider></mat-divider>
+            <h3 class="course-title">
+                <a [routerLink]="rt.to.course(course.id)">
+                    {{course.name}}
+                </a>
+            </h3>
+            <markdown [data]="course.description"></markdown>        
+        </ng-container>
+        <p
+            *ngIf="!api.data.length"
+            class="text-info"
+        >No courses were found</p>
+        <p *ngIf="pagination.search" class="text-muted"
+        >Search results for "{{pagination.search}}"
+        </p>
+    </ng-container>
+    <h2 
+        *ngIf="!api" 
+        class="text-center text-info"
+    >Loading...
+    </h2>
+</div>

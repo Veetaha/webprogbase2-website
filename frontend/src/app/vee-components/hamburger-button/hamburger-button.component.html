@@ -1,0 +1,9 @@
+<div
+    class="hamburger-button"
+    [class.hamburger-button-open]="open"
+    (click)="openChange.emit(open = !open)"
+>
+    <div class="button-bar button-bar-top"></div>
+    <div class="button-bar button-bar-middle"></div>
+    <div class="button-bar button-bar-bottom"></div>
+</div>

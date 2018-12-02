@@ -1,0 +1,42 @@
+{
+    "schema": "public-api/v1.gql",
+    "overwrite": true,
+    "generates": {
+        "declarations/gql-gen-v1.ts": {
+            "config": {
+                "scalars": {
+                    "Date": "Date",
+                    "BOID": "ObjectId",
+                    "TypeMatchedScalar": "never"
+                },
+                "mappers": {
+                    "Task":   "./gql-params-v1#Task",
+                    "Course": "./gql-params-v1#Course",
+                    "Group":  "./gql-params-v1#Group",
+                    "User":   "./gql-params-v1#User"
+                },
+                "interfacePrefix": "",
+                "contextType": "./gql-params-v1#ResolveContext"
+            },
+            "plugins": [
+                { "add":  "import * as Mongoose from 'mongoose';\nimport ObjectId = Mongoose.Types.ObjectId;" },
+                "typescript-common",
+                "typescript-server",
+                "typescript-resolvers"
+            ]
+        },
+        "public-api/gql-v1.ts": {
+            "config": {
+                "scalars": {
+                    "Date": "Date",
+                    "BOID": "string"
+                },
+                "interfacePrefix": ""
+            },
+            "plugins": [
+                "typescript-common",
+                "typescript-server"
+            ]
+        }
+    }
+}

@@ -1,0 +1,72 @@
+{
+  "extends": "../tsconfig.json",
+  "compileOnSave": false,
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "checkJs": false,
+    "paths": {
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@routes/*": [
+        "src/app/_routes/*",
+        "src/app/_routes/*-routing.module"
+      ],
+      "@common/*": [
+        "src/app/_common/*"
+      ],
+      "@vee/*": [
+        "src/app/vee-*"
+      ],
+      "@directives/*": [
+        "src/app/_directives/*.directive"
+      ],
+      "@services/*": [
+        "src/app/_services/*",
+        "src/app/_services/*.service"
+      ],
+      "@utils/*": [
+        "src/app/_utils/*"
+      ],
+      "@guards/*": [
+        "src/app/_guards/*"
+      ],
+      "@public-api/*": [
+        "../backend/public-api/*"
+      ]
+    },
+    "baseUrl": ".",
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "module": "es2015",
+    "moduleResolution": "node",
+    "target": "es5",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2017",
+      "dom",
+      "esnext",
+      "esnext.asynciterable"
+    ],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "exclude": [
+    "node_modules",
+    "node_modules/**/*",
+    "**/node_modules/**/*",
+    "./**/node_modules/**/*",
+    "./**/dist/**/*"
+  ]
+}

@@ -1,0 +1,65 @@
+<div class="col-md-10 offset-md-1">
+    <form
+          (ngSubmit)="submitButton.disabled = true; onFormSubmit();"
+          #taskForm="ngForm"
+    >
+        <mat-form-field class="mr-3">
+            <mat-select #taskTypeSelect
+                placeholder="Task type" 
+                [(ngModel)]="taskType"
+                name="task-type"
+                required
+            >
+                <mat-option *ngFor="let type of taskTypes" 
+                    [value]="type"
+                >{{type}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="mr-3">
+            <input 
+                matInput 
+                type="text"
+                [(ngModel)]="title"
+                placeholder="Task name"
+                name="task-title"
+                required
+            >
+        </mat-form-field>
+        <mat-form-field>
+            <input
+                matInput
+                [(ngModel)]="maxMark"
+                type="number"
+                value="0"
+                min="0"
+                name="max-mark"
+                placeholder="Max Mark"
+                required
+            >
+        </mat-form-field>
+        <div class="form-group">
+            <ngx-uploadcare-widget
+                (on-upload-complete)="attachedFileUrl = $event.cdnUrl"
+                public-key="11454e13e4be7273d843"
+            >
+            </ngx-uploadcare-widget>
+        </div>
+        <label for="task-body-editor">Input body (Markdown):</label>
+        <angular-markdown-editor
+            textareaId="task-body-editor"
+            rows="12"
+            name="markdownText"
+            [(ngModel)]="body"
+            [options]="editorOptions"
+        ></angular-markdown-editor>
+        <br>
+        <button
+            #submitButton
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="col-3"
+            [disabled]="!body || taskForm.invalid"
+        ><mat-icon>add</mat-icon>Add</button>
+    </form>
+</div>

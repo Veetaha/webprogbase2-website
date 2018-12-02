@@ -1,0 +1,22 @@
+{
+    "name": "lab6",
+    "version": "1.0.0",
+    "description": "My lab6 website",
+    "main": "index.js",
+    "scripts": {
+        "start": "sh heroku-build.sh",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "postinstall": "npm install --prefix backend && npm install --prefix frontend"
+    },
+    "author": "Vitaly Kryvenko",
+    "license": "MIT",
+    "dependencies": {
+        "backend": "file:backend/",
+        "frontend": "file:frontend/",
+        "node": "11.0.0",
+        "npm": "^6.4.1"
+    },
+    "devDependencies": {
+        "@playlyfe/gql": "^2.6.0"
+    }
+}

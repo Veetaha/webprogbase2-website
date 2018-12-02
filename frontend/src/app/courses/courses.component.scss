@@ -1,0 +1,13 @@
+@import 'my-variables';
+
+hr {
+    border-width: 1px;
+    border-color: $main-accent-color-light;
+}
+
+h3 a.course-title {
+    background-color: $main-accent-color;
+    color: $main-accent-cocolor;
+    padding: 1em;
+}
+

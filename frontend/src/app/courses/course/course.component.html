@@ -1,0 +1,46 @@
+<div class="col-md-10 offset-md-1">
+<markdown *ngIf="course" [data]="course.description"></markdown>
+<vee-search-input
+    placeholder="Task name..."
+    (searchDemand)="doSearchRequest({ page: 1, search: $event })"
+></vee-search-input>
+<ng-container *ngIf="course?.tasks; else elseCourseNotLoaded">
+    <mat-paginator #paginator
+        [length]         ="course!.tasks.total"
+        [pageSize]       ="pagination.limit"
+        [pageIndex]      ="pagination.page - 1"
+        [pageSizeOptions]="pageSizeOptions"
+        (page)="
+            doSearchRequest({
+                page:  $event.pageIndex + 1,
+                limit: $event.pageSize
+            });
+        "
+        color="primary"
+        showFirstLastButtons
+    ></mat-paginator>
+
+
+    <ul *ngIf="course.tasks.data?.length; else elseNoTasks" 
+        id="task-list" 
+        class="pagination-list"
+    >
+        <li *ngFor="let task of course.tasks.data"><a
+            [routerLink]="rt.to.task(task.id)"
+        >{{task.title}}</a>
+        </li>
+    </ul>
+    <ng-template #elseNoTasks>
+        <p id="not-found" class="text-info">
+            Nothing was found
+        </p>
+    </ng-template>
+
+    <p *ngIf="pagination.search" id="search-info" class="text-muted">
+        Search results for "{{pagination.search}}"
+    </p>
+</ng-container>
+<ng-template #elseCourseNotLoaded>
+    <h2 class="text-center text-info">Loading...</h2>
+</ng-template>
+</div>

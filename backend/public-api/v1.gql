@@ -1,0 +1,450 @@
+scalar TypeMatchedScalar
+# ISO-8601 format compliant date-time string.
+scalar Date
+# Bson ObjectId format compliant string, i.e. 24 hexadecimal characters.
+scalar BOID 
+# Denies access to an object or field for the users with the given roles.
+directive @deny(
+    roles: [UserRole]
+) on OBJECT | FIELD_DEFINITION
+# Grants access to an object or field only for the users with the given roles.
+directive @allow(
+    roles: [UserRole]
+) on OBJECT | FIELD_DEFINITION
+# Requires a string to contain at least one non-whitespace character.
+directive @notEmpty             on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+# Requires an integer within the range [1, +Infinity)
+directive @positiveInt          on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+# Requires an integer within the range [0, +Infinity)
+directive @zeroOrPositiveInt    on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+# Requires a number within the range [0, +Infinity)
+directive @zeroOrPositiveNumber on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+# Requires a specific login string format, which is /^[A-Za-z\d_-]{4,32}$/
+directive @login                on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+# Requires a specific password string format, which is /^\S{6,32}$/
+directive @password             on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+# Requires a specific user fullname string format, wich is /^\S{3,32}$/
+directive @userFullname         on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+# Root queries endpoint.
+type Query {
+    # Returns user data assigned to the request issuer, according to the given
+    # bearer token in http 'Authorization' header.
+    me: User!                                                @deny(roles: [guest])
+    # Returns a paginated array of users according to the given page and search arguments.
+    getUsers  (req: GetUsersRequest!  ): GetUsersResponse!   @deny(roles: [guest])
+    # Returns a paginated array of courses according to the given page and search arguments.
+    getCourses(req: GetCoursesRequest!): GetCoursesResponse! 
+    # Returns a paginated array of courses according to the given page and search arguments.
+    getGroups(req: GetGroupsRequest!): GetGroupsResponse! 
+    # Returns a single user by id, throws an error if it was not found.
+    getUser   (req: GetUserRequest!   ): User!               @deny(roles: [guest])
+    # Returns a single task by id, throws an error if it was not found.
+    getTask   (req: GetTaskRequest!   ): Task!               @deny(roles: [guest])
+    # Returns a single course by id, throws an error if it was not found.
+    getCourse (req: GetCourseRequest! ): Course!             
+    # Returns a single group by id, throws an error if it was not found.
+    getGroup  (req: GetGroupRequest!  ): Group!
+}
+
+# Root mutations endpoint
+type Mutation {
+    # Creates a new task with the given input data.
+    createTask  (req: CreateTaskRequest!  ): CreateTaskResponse!   @allow(roles: [teacher, admin])
+    # Creates a new course with the given input data.
+    createCourse(req: CreateCourseRequest!): CourseCreateResponse! @allow(roles: [teacher, admin])
+
+    createGroup (req: CreateGroupRequest! ): CreateGroupResponse!  @allow(roles: [admin])
+    updateGroup (req: UpdateGroupRequest! ): UpdateGroupResponse!  @allow(roles: [admin])
+    deleteGroup (req: DeleteGroupRequest! ): DeleteGroupResponse!  @allow(roles: [admin])
+
+    # Updates request issuer's user with the given input data.
+    updateMe    (req: UpdateMeRequest!    ): UpdateMeResponse!     @deny (roles: [guest])
+    # Updates particular user with the given input data.
+    # Throws an error if the user was not found.
+    updateUser  (req: UpdateUserRequest!  ): UpdateUserResponse!   @allow(roles: [admin])
+    # Updates particular task with the given input data.
+    # Throws an error if the task was not found.
+    updateTask  (req: UpdateTaskRequest!  ): UpdateTaskResponse!   @allow(roles: [teacher, admin])
+    # Updates particular course with the given input data.
+    # Throws an error if the course was not found.
+    updateCourse(req: UpdateCourseRequest!): UpdateCourseResponse! @allow(roles: [teacher, admin])
+
+    # Deletes the user by id.
+    # Throws an error if the user was not found.
+    deleteUser  (req: DeleteUserRequest!  ): DeleteUserResponse!   @allow(roles: [admin])
+    # Deletes the task by id.
+    # Throws an error if the task was not found.
+    deleteTask  (req: DeleteTaskRequest!  ): DeleteTaskResponse!   @allow(roles: [teacher, admin])
+    # Deletes the course by id.
+    # Throws an error if the course was not found.
+    deleteCourse(req: DeleteCourseRequest!): DeleteCourseResponse! @allow(roles: [teacher, admin])  
+}
+
+
+
+
+input GetUserRequest      { 
+    # Target user id.
+    id: BOID! 
+}
+input GetTaskRequest      { 
+    # Target task id.
+    id: BOID! 
+}
+input GetCourseRequest    { 
+    # Target course id.
+    id: BOID! 
+}
+input DeleteUserRequest   { 
+    # Target user id.
+    id: BOID! 
+}
+input DeleteTaskRequest   { 
+    # Target task id.
+    id: BOID! 
+}
+input DeleteCourseRequest { 
+    # Target course id.
+    id: BOID! 
+}
+
+input GetGroupRequest {
+    # Target group id.
+    id: BOID!
+}
+
+type GetUsersResponse {
+    # Page of users that satisfy input search filters.
+    data: [User!]!
+    # Total amount of users that may be queried for the given search input.
+    total: Int!          @zeroOrPositiveInt
+}
+input GetUsersRequest {
+    # Amount of users per page.
+    limit: Int!          @positiveInt
+    # 1-based page number.
+    page:  Int!          @positiveInt
+    # Search filters.
+    search: UsersSearch
+}
+input UsersSearch {
+    # User's login filter (case and substring position insensitive)
+    login: String       
+}
+# User role limits access for some resources.
+# See @deny and @access directives for each endpoint.
+# By default, if no such directive is applied, the endpoint is freely accessible.
+enum UserRole { 
+    # Role which is assigned to all unauthorized clients.
+    guest 
+    # Default role for all registered users.
+    # Has limited edit capabilities.
+    student 
+    # Advanced user that may edit courses and tasks.
+    teacher 
+    # Administrator that has access to all endpoints.
+    # ADMIN VSEGDA PRAV!
+    admin 
+}
+input UpdateMeRequest {
+    # Payload of the data to update.
+    patch: UpdateMePatch!
+}
+input UpdateMePatch {
+    fullname: String  @userFullname
+    avaUrl:   String
+}
+type UpdateMeResponse {
+    # Updated user.
+    me: User!
+}
+input UpdateUserRequest {
+    # Target user id.
+    id:    BOID!     
+    # Payload of the data to update.   
+    patch: UpdateUserPatch!
+}
+input UpdateUserPatch {
+    role:          UserRole  
+    fullname:      String    @userFullname
+    avaUrl:        String
+    isDisabled:    Boolean
+}
+type UpdateUserResponse {
+    # Updated user.
+    user: User!
+}
+type DeleteUserResponse {
+    # Deleted user.
+    user: User!
+}
+type User {
+    # Unique user identifier.
+    id:            BOID!
+    # Id of the group this user is assigned to.
+    groupId:       BOID
+    # Group this user is assigned to.
+    group:         Group
+    # Unique user identifier. It is mostly used as a user nickname.
+    login:         String!    @login
+    # User's role. Defines it access limits.
+    role:          UserRole!  
+    # User's real fullname. It schould include a firstname and a lastname.
+    fullname:      String!    @userFullname
+    # Date when the user was registered on the server.
+    registeredAt:  Date!
+    # User's avatar image url.
+    avaUrl:        String!
+    # Flag to define wheter user is banned or not.
+    isDisabled:    Boolean!
+}
+input GetCoursesRequest {
+    # Amount of courses per page.
+    limit: Int! @positiveInt
+    # 1-based page number.
+    page:  Int! @positiveInt 
+    # Search filters.
+    search: CoursesSearch
+}
+input CoursesSearch {
+    # Course's name filter (case and substring position insensitive)
+    name: String
+}
+type GetCoursesResponse {
+    # Page of courses that satisfy input search filters.
+    data: [Course!]!
+    # Total amount of courses that may be queried for the given search input.
+    total: Int! @zeroOrPositiveInt
+}
+input UpdateCourseRequest {
+    # Target course id.
+    id:    BOID!
+    # Payload of the data to update. 
+    patch: CourseUpdatePatch!
+}
+input CourseUpdatePatch {
+    description: String 
+    name:        String @notEmpty
+}
+type UpdateCourseResponse {
+    # Updated course.
+    course: Course!
+}
+type DeleteCourseResponse {
+    # Deleted course.
+    course: Course!
+}
+type CourseCreateResponse {
+    # Created course.
+    course: Course!
+}
+# Holds the payload of the new course.
+input CreateCourseRequest {
+    description:     String!
+    name:            String! @notEmpty
+}
+type Course {
+    # Unique course identifier.
+    id:              BOID!
+    # Course creator user id.
+    authorId:        BOID!
+    # User, that created this course (course.author.id === course.authorId)
+    # Use authorId if rather than author.id, as it is much fuster to query.
+    author:          User!
+    # Course description written in markdown language.
+    description:     String!
+    # A short and laconic header for the course.
+    name:            String! @notEmpty
+    # Date when this course was created on the server.
+    publicationDate: Date!
+    # Returns a paginated array of tasks of this course 
+    # according to the given page and search arguments.
+    getTasks(req: GetTasksRequest!): GetTasksResponse!
+}
+input GetTasksRequest {
+    # 1-based page number.
+    page:  Int! @positiveInt
+    # Amount of tasks per page.
+    limit: Int! @positiveInt
+    # Search filters.
+    search: TasksSearch
+}
+input TasksSearch {
+    # Course's title filter (case and substring position insensitive)
+    title: String
+}
+type GetTasksResponse {
+    # Page of tasks that satisfy input search filters.
+    data: [Task!]!
+    # Total amount of tasks that may be queried for the given search input.
+    total: Int!
+}
+input UpdateTaskRequest {
+    # Target task id.
+    id:    BOID!
+    # Payload of the data to update.
+    patch: TaskUpdatePatch!
+}
+
+input TaskUpdatePatch {
+    taskType:        TaskType
+    title:           String @notEmpty
+    body:            String
+    attachedFileUrl: String
+    maxMark:         Float  @zeroOrPositiveNumber
+}
+type UpdateTaskResponse {
+    # Updated task.
+    task: Task!
+}
+type CreateTaskResponse {
+    # Created task.
+    task: Task!
+}
+type DeleteTaskResponse {
+    # Deleted task.
+    task: Task!
+}
+# Represents an academic task type, currently it has no special meaning.
+enum TaskType { 
+    homework 
+    lab 
+    test 
+    exam 
+}
+# Holds the payload of the new task.
+input CreateTaskRequest {
+    courseId:        BOID!
+    taskType:        TaskType!
+    title:           String!  @notEmpty
+    body:            String!
+    attachedFileUrl: String
+    maxMark:         Float!   @zeroOrPositiveNumber
+}
+type Task {
+    # Unique task identifier (unique amoung all the tasks of all courses).
+    id:              BOID!
+    # Course id this task is attached to.
+    courseId:        BOID!
+    # Task creator user id.
+    authorId:        BOID!
+    # Date when this task was created on the server.
+    publicationDate: Date!
+    # Task academic type.
+    taskType:        TaskType!
+    # A shortand laconic header for the course.
+    title:           String!  @notEmpty
+    # Task body written in markdown language.
+    # It should mention task requirements, execution workflow 
+    # and useful ad hoc information.
+    body:            String!
+    # Url of the file which is atteched to the task, 
+    # users can download it via the given href.
+    attachedFileUrl: String
+    # Maximum mark a student can get for fulfilling this task.
+    # It has no special meaning currently.
+    maxMark:         Float!   @zeroOrPositiveNumber
+    # Task creator user.
+    author:          User!
+    # Course this task is attached to.
+    course:          Course!
+}
+
+
+# Represents an academic group of students.
+type Group @deny(roles: [guest]) {
+    id:   BOID! 
+    name: String! @notEmpty
+    # Date when this group was created
+    creationDate: Date!
+    # Returns a paginated array of courses openned accessible by this group,
+    # according to the given page and search arguments.
+    getCourses(req: GetGroupCoursesRequest!): GetGroupCoursesResponse!
+    getMembers(req: GetGroupMembersRequest!): GetGroupMembersResponse!
+}
+input GroupMembersSearch {
+    login: String
+}
+input GetGroupMembersRequest {
+    # Amount of members per page.
+    limit: Int! @positiveInt
+    # 1-based page number.
+    page:  Int! @positiveInt 
+    # Search filters.
+    search: GroupMembersSearch
+}
+type GetGroupMembersResponse {
+    # Page of members that satisfy input search filters.
+    data: [User!]!
+    # Total amount of members that may be queried for the given search input.
+    total: Int! @zeroOrPositiveInt
+}
+
+input GroupsSearch {
+    name: String
+}
+input GetGroupsRequest {
+    # Amount of courses per page.
+    limit: Int! @positiveInt
+    # 1-based page number.
+    page:  Int! @positiveInt 
+    # Search filters.
+    search: GroupsSearch
+}
+type GetGroupsResponse {
+    # Page of courses that satisfy input search filters.
+    data: [Group!]!
+    # Total amount of courses that may be queried for the given search input.
+    total: Int! @zeroOrPositiveInt
+}
+input GetGroupCoursesRequest {
+    # Amount of courses per page.
+    limit: Int! @positiveInt
+    # 1-based page number.
+    page:  Int! @positiveInt 
+    # Search filters.
+    search: CoursesSearch
+}
+type GetGroupCoursesResponse {
+    # Page of courses that satisfy input search filters.
+    data: [Course!]!
+    # Total amount of courses that may be queried for the given search input.
+    total: Int! @zeroOrPositiveInt
+}
+input CreateGroupRequest {
+    name: String!
+    # Array of user ids.
+    members: [BOID!]
+    # Array of courses ids.
+    courses: [BOID!]
+}
+type CreateGroupResponse {
+    group: Group!
+}
+input UpdateGroupRequest {
+    # Target group id.
+    id: BOID!
+    # Update payload.
+    patch: UpdateGroupPatch!
+}
+input UpdateGroupPatch {
+    name:          String
+    addMembers:    [BOID!]
+    addCourses:    [BOID!]
+    removeMembers: [BOID!]
+    removeCourses: [BOID!]
+}
+type UpdateGroupResponse {
+    # Update group.
+    group: Group!
+}
+input DeleteGroupRequest {
+    # Target group id.
+    id: BOID!
+} 
+type DeleteGroupResponse {
+    # Deleted group.
+    group: Group!
+}
+

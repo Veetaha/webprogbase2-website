@@ -1,0 +1,41 @@
+<div class="col-md-10 mt-5 mx-auto">
+    <form #courseForm="ngForm"
+          (ngSubmit)="onFormSubmit()"  
+          class="col-md-10 mx-auto"
+    >
+        <mat-form-field class="col-12">
+            <input
+                matInput
+                type="text"
+                name="name"
+                placeholder="Course name"
+                required
+                [(ngModel)]="newCourse.name"
+            >
+        </mat-form-field>
+        <label for="course-description-editor"
+        >Course description (Markdown):</label>
+        <br>
+        <angular-markdown-editor
+            textareaId="course-description-editor"
+            rows="12"
+            name="markdownText"
+            [(ngModel)]="newCourse.description"
+            [options]="editorOptions">
+        </angular-markdown-editor>
+        <br>
+        <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="col-3 btn btn-primary btn-lg mb-3"
+            [disabled]="!courseForm.valid      || 
+                        !newCourse.description || 
+                        !newCourse.name"
+        >
+            <mat-icon>add</mat-icon>
+            <strong>Add course</strong>
+        </button>
+    </form>
+</div>
+

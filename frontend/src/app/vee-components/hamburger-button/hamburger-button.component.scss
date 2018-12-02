@@ -1,0 +1,64 @@
+@import 'functions';  // Bootstrap Functions
+@import 'my-variables';
+
+.hamburger-button {
+    position:   relative;
+    padding:    4px;
+    transition: .25s;
+    width:      38px;
+    z-index:    15;
+
+    &,
+    * {
+        box-sizing: content-box;
+    }
+
+    &:hover {
+        cursor: pointer;
+    }
+
+    .button-bar {
+        color: $hamburger-button-color;
+        border: {
+            radius: 2px;
+            style:  solid;
+            width:  6px;
+            bottom: none;
+        }
+        position:      relative;
+        transition:         .5s;
+        width:             26px;
+    }
+
+    .button-bar-middle {
+        $margin: 4px;
+        margin: {
+            bottom: $margin;
+            top:    $margin;
+        }
+    }
+
+    &-open {
+        $edge-bars-transition: .5s;
+        $middle-bar-transition: .1s ease-in;
+
+        .button-bar-top {
+            transform:        rotate(45deg) translateY(-3px);
+            transform-origin: top left;
+            transition:       $edge-bars-transition;
+        }
+
+        .button-bar-middle {
+            opacity:    0;
+            transform:  translate(500%);
+            transition: $middle-bar-transition;
+        }
+
+        .button-bar-bottom {
+            transform:        rotate(-45deg) translateY(4px);
+            transform-origin: bottom left;
+            transition:       $edge-bars-transition;
+        }
+    }
+
+}

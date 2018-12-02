@@ -1,0 +1,9 @@
+.user-avatar {
+    $size: 100px;
+    height: $size;
+    width: $size;
+
+    &:hover {
+        cursor: pointer;
+    }
+}

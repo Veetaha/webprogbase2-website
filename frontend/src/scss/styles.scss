@@ -1,0 +1,138 @@
+@import 'my-variables';
+@import '~@ngx-prism/rxjs/dist/themes/prism.css';
+@import '../../node_modules/bootstrap/dist/css/bootstrap.css';
+@import '../../node_modules/bootstrap-markdown/css/bootstrap-markdown.min.css';
+@import '../../node_modules/font-awesome/css/font-awesome.css';
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
+
+a[type="button"] {
+    -webkit-appearance: unset;
+}
+
+.shadow-large {
+    box-shadow: $shadow-large;
+}
+
+.shadow-middle {
+    box-shadow: $shadow-middle;
+}
+
+body {
+    color: $body-color;
+    font-family: Ubuntu, sans-serif !important;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+
+.centered-element {
+    margin:     0 auto;
+    text-align: center;
+}
+
+.centered-block {
+    @extend .centered-element;
+    display:    block;
+}
+
+.button-flat:focus {
+    outline: none !important;
+}
+
+.custom-file {
+    cursor: pointer;
+
+    * {
+        cursor: pointer;
+    }
+
+    &-input {
+        visibility: hidden;
+    }
+
+    &-label:hover {
+        box-shadow: 0 0 2px 1px $main-accent-color;
+    }
+}
+
+.file-download-label {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.file-download-link {
+    width: fit-content;
+    display: block;
+    padding: 9px;
+    background-color: $main-accent-color;
+    color: $main-accent-cocolor;
+
+    &:hover {
+        background-color: $main-accent-cocolor2;
+    }
+
+    * {
+        background-color: inherit;
+        color: inherit;
+    }
+}
+
+.labels-right-aligned {
+    .col-form-label {
+        text-align: right;
+    }
+}
+
+textarea.form-control {
+    border: {
+        color: #aaa;
+        style: solid;
+        width: 2px;
+    };
+}
+
+.pagination-list {
+    $border-width: 1px;
+    $border-color: silver;
+    border: {
+        width: 0 0 $border-width $border-width;
+        color: $border-color;
+        style: solid;
+    }
+
+    padding: 0;
+
+    > li {
+        border: {
+            width: $border-width $border-width 0 0;
+            color: $border-color;
+            style: solid;
+        }
+        list-style: none;
+        padding: .4em;
+    }
+}
+
+.user-avatar {
+    $size: 20px;
+    border: {
+        color: $primary;
+        radius: 50%;
+        style:  solid;
+        width:  2px;
+    };
+    height:     $size;
+    object-fit: cover;
+    padding:    1px;
+    width:      $size;
+}
+
+

@@ -1,0 +1,52 @@
+@import 'my-variables';
+
+$toolbar-min-height: 64px;
+
+#main-body {
+    margin-top: 20px;
+}
+
+
+.page-toolbar {
+    background-color: $primary;
+    box-shadow: $shadow-large;
+    color: $primary-text;
+    z-index: 9;
+    top: 0;
+    left: 0;
+    right: 0;
+    min-height: $toolbar-min-height;
+    align-items: center;
+    padding: {
+        left: 15px;
+        right: 30px;
+    }
+
+    * {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+}
+
+
+.user-avatar {
+    $size: 35px;
+    height: $size;
+    width:  $size;
+}
+
+.page-title {
+    font-size:        2em;
+    font-weight:      bold;
+    padding:          .2em 0;
+    text-align:       center;
+}
+
+
+.page-toolbuttons {
+    float: right;
+}
+

@@ -1,0 +1,97 @@
+<form
+    (ngSubmit)="onFormSubmit()"
+    #userForm="ngForm"
+    class="col-md-10 mx-auto"
+>   
+    <mat-card *ngIf="user; else elseUserNotLoaded">
+        <mat-card-header>
+            <img mat-card-avatar 
+                [src]="input!.avaUrl" 
+                alt="User avatar"
+                class="user-avatar"
+                (click)="avaUploader.openDialog()"
+            >
+            <ngx-uploadcare-widget-custom #avaUploader
+                (on-upload-complete)="
+                    input.avaUrl = $event.cdnUrl;
+                    pageHeader.loading = false;
+                "
+                (on-progress)="pageHeader.loading = true"
+                public-key="11454e13e4be7273d843"
+                images-only
+            >
+            </ngx-uploadcare-widget-custom>
+
+
+            <mat-card-title>{{user!.login}}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="mt-2">
+            <mat-form-field *ngIf="RoleLimit[session.userRole].fullname"
+                class="d-block">
+                <input #fullnameEl matInput
+                    [(ngModel)]="input.fullname"
+                    [pattern]="Api.Fullname.regexp"
+                    type       ="text"
+                    placeholder="Fullname"
+                    name       ="fullname"
+                    required
+                >
+                <mat-hint align="start">
+                    <strong>{{Api.Fullname.formatHint}}</strong>
+                </mat-hint>
+                <mat-hint align="end">
+                    {{fullnameEl.value.length}} / {{Api.Fullname.maxLength}}
+                </mat-hint>
+            </mat-form-field>
+            <mat-form-field *ngIf="RoleLimit[session.userRole].role"
+                class="d-block mt-2"
+            >
+                <mat-select 
+                    [(ngModel)]="input.role"
+                    name="user-role"
+                    placeholder="User role" 
+                    required
+                >
+                    <mat-option *ngFor="let role of userRoles"
+                        [value]="role"
+                    >{{role}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <ng-container *ngIf="RoleLimit[session.userRole].isDisabled">
+                <mat-checkbox
+                    [(ngModel)]="input.isDisabled"
+                    labelPosition="after"
+                    name="is-disabled"
+                    >
+                    Disabled
+                </mat-checkbox>
+            </ng-container>
+            <!-- <ng-container *ngIf="user!.group">
+                <mat-divider></mat-divider>
+                <p><strong>Group:</strong>  {{user!.group}}</p>
+            </ng-container> -->
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-raised-button
+                type="submit"
+                color="primary"
+                [disabled]="userForm.invalid"
+            ><mat-icon>save</mat-icon>
+                Save
+            </button>
+            <ng-container *ngIf="canDeleteUser">
+            <button mat-raised-button
+                (click)="onDeleteDemand()"
+                type="button"
+                color="warn"
+                class="ml-2"
+            >Delete user
+            </button>
+        </ng-container>
+        </mat-card-actions>
+    </mat-card>
+    <ng-template #elseUserNotLoaded>
+        <h2 class="text-info">Loading...</h2>
+    </ng-template>
+</form>

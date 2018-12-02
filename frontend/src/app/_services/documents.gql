@@ -1,0 +1,53 @@
+# import * from "./../../../../backend/public-api/v1.gql"
+
+query getCourses($req: GetCoursesRequest!) {
+    getCourses(req: $req) {
+        total
+        data {
+            id
+            name
+            description
+        }
+    }
+}
+
+query getUsers($req: GetUsersRequest!) {
+    getUsers(req: $req) {
+        total
+        data {
+            id
+            role
+            login
+            fullname
+            avaUrl
+        }
+    }
+}
+
+query getUser($req: GetUserRequest!) {
+    getUser(req: $req) {
+        id
+        login
+        role
+        fullname
+        registeredAt
+        avaUrl
+        isDisabled
+    }
+}
+
+mutation updateUser($req: UpdateUserRequest!) {
+    updateUser(req: $req) {
+        user {
+            isDisabled
+        }
+    }
+}
+
+mutation updateMe($req: UpdateMeRequest!) {
+    updateMe(req: $req) {
+        me {
+            isDisabled
+        }
+    }
+}

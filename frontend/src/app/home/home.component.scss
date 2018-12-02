@@ -1,0 +1,15 @@
+@import 'my-variables';
+
+#vee-logo {
+    background-color: white;
+    box-shadow: $shadow-large;
+    margin-top: .5em;
+    width: 40%;
+}
+
+#logo-container {
+    background-color: #333;
+    box-shadow: $shadow-middle;
+    margin-bottom: .5em;
+    padding: .8em 0;
+}

@@ -1,0 +1,118 @@
+<form
+    #courseForm="ngForm"
+    (ngSubmit)="onFormSubmit()"
+    class="col-md-10 offset-md-1"
+>
+    <mat-form-field class="col-12">
+        <input
+            matInput
+            [(ngModel)]="userInput.name"
+            name="course-name"
+            type="text"
+            required
+            placeholder="Course name"
+        >
+    </mat-form-field>
+    <angular-markdown-editor
+        [(ngModel)]="userInput.description"
+        [options]="editorOptions"
+        textareaId="course-description-editor"
+        rows="12"
+        name="markdownText">
+    </angular-markdown-editor>
+    <div class="row mt-2" id="tool-menu">
+        <div class="col-md-2">
+        <a  #addTaskButton
+            mat-raised-button
+            color="primary"
+            [routerLink]="rt.to.taskNew(courseId)"
+        ><mat-icon>add</mat-icon>
+            Add new task
+        </a>
+        </div>
+        <div class="col-md-2">
+        <button #deleteButton
+            mat-raised-button
+            (click)="onDeleteCourseDemand()"
+            type="button"
+            color="warn"
+        ><mat-icon>delete</mat-icon>
+            Delete course
+        </button>
+        </div>
+        <div class="col-md-2">
+        <button 
+            mat-raised-button
+            [disabled]="!courseForm.valid || !userInput.description"
+            type="submit"
+            color="primary"
+        ><mat-icon>save</mat-icon>
+            Save
+        </button>
+        </div>
+    </div>
+    <div class="mt-4">
+        <vee-search-input
+            (searchDemand)="doSearchRequest({ search: $event, page: 1 })"
+            placeholder="Task name..."
+        ></vee-search-input>
+    </div>
+    <ng-container *ngIf="course?.tasks; else elseCourseNotLoaded">
+        <mat-paginator #paginator
+            [length]         ="course!.tasks.total"
+            [pageSize]       ="pagination.limit"
+            [pageIndex]      ="pagination.page - 1"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="
+                doSearchRequest({
+                    page:  $event.pageIndex + 1,
+                    limit: $event.pageSize
+                });
+            "
+            color="primary"
+            showFirstLastButtons
+        ></mat-paginator>
+
+        <ul *ngIf="course!.tasks.data.length; else elseNoTasks" 
+            id="task-list"
+            class="pagination-list"
+        >
+            <li *ngFor="let task of course!.tasks.data">
+                <a   
+                    mat-flat-button
+                    type="button"
+                    color="warn"
+                    class="ml-1"
+                    (click)="onTaskDeleteDemand(task)"
+                >
+                    <mat-icon>delete</mat-icon>
+                </a>
+                <a
+                    mat-flat-button
+                    class="ml-1 mr-1"
+                    [routerLink]="rt.to.taskEdit(task.id)"
+                ><mat-icon>edit</mat-icon>
+                </a>
+                <a [routerLink]="rt.to.task(task.id)">
+                {{task.title}}
+                </a>
+            </li>
+        </ul>
+        <ng-template #elseNoTasks>
+            <p id="not-found" class="text-info">
+                No tasks were found
+            </p>
+        </ng-template>
+
+        <p *ngIf="pagination.search" 
+            id="search-info" 
+            class="text-muted"
+        >
+            Search results for "{{pagination.search}}"
+        </p>
+    </ng-container>
+    <ng-template #elseCourseNotLoaded>
+        <h2 class="text-center text-info">Loading...</h2>
+    </ng-template>
+</form>
+

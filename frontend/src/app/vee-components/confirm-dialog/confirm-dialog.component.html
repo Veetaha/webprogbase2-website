@@ -1,0 +1,18 @@
+<h1 mat-dialog-title>{{data.titleHtml}}</h1>
+<div mat-dialog-content [innerHtml]="data.contentHtml"></div>
+<mat-divider></mat-divider>
+<div mat-dialog-actions 
+    class="float-right mt-2"
+>
+    <button mat-button  
+        [innerHtml]="data.okButtonHtml"
+        [mat-dialog-close]="true"
+        [color]="data.okButtonColor"
+    ></button>
+    <button mat-button cdkFocusInitial
+        [innerHtml]="data.cancelButtonHtml"
+        [mat-dialog-close]="false"
+        [color]="data.cancelButtonColor"
+        class="ml-2"
+    ></button>
+</div>

@@ -1,0 +1,73 @@
+<form
+    (ngSubmit)="onFormSubmit()"
+    #courseForm="ngForm"
+    class="col-md-10 mx-auto"
+>   
+    <div class="form-group row">
+    <mat-form-field class="mr-3">
+        <mat-select 
+            [(ngModel)]="taskType"
+            name="task-type"
+            placeholder="Task type" 
+            required
+        >
+            <mat-option *ngFor="let type of taskTypes"
+                [value]="type"
+            >{{type}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field class="mr-3">
+        <input matInput 
+            [(ngModel)]="title"
+            type="text"
+            placeholder="Task name"
+            name="task-title"
+            required
+        >
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput
+            [(ngModel)]="maxMark"
+            placeholder="Max Mark"
+            type="number"
+            name="maxMark"
+            name="max-mark"
+            value="0"
+            min="0"
+            required
+        >
+    </mat-form-field>
+    </div>
+    <div class="form-group">
+        <ngx-uploadcare-widget
+            [value]="task?.attachedFileUrl"
+            (on-upload-complete)="attachedFileUrl = $event.cdnUrl"
+            public-key="11454e13e4be7273d843"
+        >
+        </ngx-uploadcare-widget>
+    </div>    
+    <angular-markdown-editor 
+        [(ngModel)]="body"
+        [options]="editorOptions"
+        textareaId="course-description-editor"
+        rows="12"
+        name="markdownText">
+    </angular-markdown-editor>
+    <button mat-raised-button
+        [disabled]="courseForm.invalid || !task || !body"
+        color="primary"
+        type="submit"
+        class="col-3 mb-3"
+    ><mat-icon>save</mat-icon>
+        Save
+    </button>
+    <button #deleteButton mat-raised-button
+        (click)="onDeleteTaskDemand()"
+        [disabled]="!task"  
+        type="button"
+        color="warn"
+        class="col-3 ml-1"
+    ><mat-icon>delete</mat-icon>
+        Delete task
+    </button>
+</form>

@@ -172,10 +172,9 @@ typings/
 # Serverless directories
 .serverless
 
-.idea
-.vscode
-
-dist/
-
-
-
+#########################
+.idea/
+build/
+bin/
+data/
+server-build/

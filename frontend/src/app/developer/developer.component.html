@@ -1,0 +1,54 @@
+<div class="col-md-10 mx-auto">
+    <h1>GraphQL API</h1>
+    <a mat-flat-button
+        href="{{rt.to.external.graphqlPlayground()}}"
+        color="primary"
+        target="_blank"
+    >
+        <mat-icon>play_arrow</mat-icon>
+        Try in playground
+    </a>
+    <a mat-flat-button
+        href="{{rt.to.external.apiDocs()}}" 
+        color="primary"
+        target="_blank"
+        class="ml-2"
+    >
+        <mat-icon>open_in_new</mat-icon>
+        Browse documentation
+    </a>
+    <p class="mt-4">Authorization is provided via JWT.</p>
+    <p *ngIf="session.rawToken"
+        class="mt-2"
+    >
+        Click
+        <button mat-raised-button ngxClipboard
+            [cbContent]="session.rawToken"
+            (click)="onTokenCopied()"
+        >here</button>
+        to copy your JWT bearer token to clipboard.
+    </p>
+    <h3>Login</h3>
+    <p>
+        Do a RESTful <code>POST</code> request on <code lang="js">'/auth/login'</code>
+        with the body, which contains your credentials.
+        <ngx-prism language="json" [code]="loginRequestSample"></ngx-prism>
+    </p>
+    <h3>Registration</h3>
+    <p>
+        Do a RESTful <code>POST</code> request on <code lang="js">'/auth/register'</code>
+        with the body, which contains your new credentials and fullname.
+        <ngx-prism language="json" [code]="registerRequestSample"></ngx-prism>
+    </p>
+    <h3>Auth response</h3>
+    <p>
+        In response to login or register request you will get a JWT or an error response.
+        <ngx-prism language="json" [code]="authResponseSample"></ngx-prism>
+    </p>
+    <p>All errors from GraphQL API are returned as a standard GraphQL error response json object:
+        <ngx-prism language="json" [code]="gqlJsonErrorSample"></ngx-prism>
+    </p>
+    <p>All errors from REST API are returned as an object with an <code lang="js">'erorr'</code> key:
+        <ngx-prism language="json" [code]="restJsonErrorSample"></ngx-prism>
+    </p>
+</div>

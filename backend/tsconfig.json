@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "server-build",
+    "lib": ["esnext", "esnext.array", "es2015", "es2015.core"],
+    "target": "es2018",
+    "module": "commonjs",
+    "typeRoots": [
+      "declarations", "node_modules/@types"
+    ],
+    "baseUrl": ".",
+    "paths": {
+        "@declarations/*": [ "declarations/*" ],
+        "@modules/*":      [ "modules/*"      ],
+        "@routes/*":       [ "routes/*"       ],
+        "@models/*":       [ "models/*"       ],
+        "@public-api/*":   [ "public-api/*"   ],
+        "@app/*":          [ "./*"            ]
+    },
+
+    "sourceMap":      false,
+    "declaration":    false, /* Generates corresponding '.d.ts' file. */
+    "declarationMap": false, /* Generates a sourcemap for each corresponding '.d.ts' file. */
+    "experimentalDecorators":     true,
+    "strict":                     true,
+    "noUnusedLocals":             true,
+    "noUnusedParameters":         true,
+    "noImplicitAny":              true,
+    "noImplicitThis":             true,
+    "noImplicitReturns":          true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "checkJs": false
+  },
+  "files": ["app.ts"],
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [
+      "node_modules/**/*",
+      "public/src/*",
+      "server-build/*"
+  ]
+}

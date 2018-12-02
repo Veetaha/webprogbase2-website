@@ -1,0 +1,78 @@
+<nav class="row page-toolbar" #pageTopNav>
+    <vee-hamburger-button #hbutton
+        class="col-md"
+    ></vee-hamburger-button>
+    <h1 class="col-md page-title">{{pageHeader.title}}</h1>
+    <div class="col-md">
+        <nav class="btn-group-sm page-toolbuttons row">
+            <ng-container *ngIf="session.user; else elseUnauthoried">
+                <ng-container *ngIf="pageHeader.toolButtons?.length">
+                    <button mat-icon-button
+                        [matMenuTriggerFor]="settingsMenu"
+                        class="button-flat"
+                    >
+                        <mat-icon>settings</mat-icon>
+                    </button>
+                    <mat-menu #settingsMenu="matMenu">
+                        <button *ngFor="let toolButton of pageHeader.toolButtons"
+                            mat-menu-item
+                            [routerLink]="toolButton.routerLink"
+                            [ngStyle]=   "toolButton.styles || {}"
+                            ngClass="{{toolButton.classList || ''}} button-flat"
+                        ><mat-icon>{{toolButton.iconName}}</mat-icon>
+                            {{toolButton.name}}
+                        </button>
+                    </mat-menu>
+                </ng-container>
+                <button mat-icon-button 
+                    [matMenuTriggerFor]="notificationsMenu"
+                    class="button-flat"
+                >
+                    <mat-icon>notifications</mat-icon>
+                </button>
+                <mat-menu #notificationsMenu="matMenu">
+                    <button mat-menu-item class="button-flat">Notification 1</button>
+                    <button mat-menu-item class="button-flat">Notification 2</button>
+                </mat-menu>
+                <button mat-button
+                    [routerLink]="rt.to.user(session.user!.id)" 
+                    class="button-flat">
+                    <img class="user-avatar" [src]="session.user!.avaUrl">
+                    {{session.user!.login}}
+                </button>
+            </ng-container>
+            <ng-template #elseUnauthoried>
+                <button
+                    mat-button
+                    [routerLink]="rt.to.login()"
+                    class="button-flat"
+                >Login
+                </button>
+                <button 
+                    mat-button
+                    [routerLink]="rt.to.register()"
+                    class="button-flat"
+                >Register
+                </button>
+            </ng-template>
+        </nav>  
+    </div>
+</nav>
+<mat-progress-bar
+    color="primary"
+    [mode]="pageHeader.loading ? 'query' : 'determinate'"
+    [value]="100"
+></mat-progress-bar>
+<vee-slide-menu
+    [(open)]="hbutton.open"
+    [buttons]="menuButtons"
+    (itemSelected)="selected = $event"
+    class="mat-app-background"
+></vee-slide-menu>
+<div id="main-body">
+    <router-outlet (deactivate)="hbutton.open = false">
+    </router-outlet>
+</div>
+<footer>
+    <!--TODO-->
+</footer>
