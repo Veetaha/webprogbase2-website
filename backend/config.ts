@@ -19,7 +19,7 @@ export const DefaultUserAvatarUrl = (
 );
 
 export const GqlSchema = fs.readFileSync(relativeToRoot(
-    'backend/public-api/v1.gql'
+    'backend/public-api/v1/schema.gql'
 )).toString();
 
 export const FrontendDistDir   = relativeToRoot('frontend/dist/lab5');

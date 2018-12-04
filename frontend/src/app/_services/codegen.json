@@ -1,5 +1,5 @@
 {
-    "schema": "../backend/public-api/v1.gql",
+    "schema": "../backend/public-api/v1/schema.gql",
     "overwrite": true,
     "documents": "src/app/_services/documents.gql",
     "generates": {

@@ -1,5 +1,4 @@
-import * as Mongoose from "mongoose";
-import ObjectId = Mongoose.Types.ObjectId;
+import { ObjectId } from "./gql-params-v1";
 
 export interface GetGroupCoursesRequest {
   /** Amount of courses per page. */
@@ -15,7 +14,7 @@ export interface CoursesSearch {
   name?: string | null;
 }
 
-export interface GetTasksRequest {
+export interface GetCourseTasksRequest {
   /** 1-based page number. */
   page: number;
   /** Amount of tasks per page. */
@@ -49,11 +48,26 @@ export interface GetUsersRequest {
   page: number;
   /** Search filters. */
   search?: UsersSearch | null;
+
+  filter?: UsersFilter | null;
 }
 
 export interface UsersSearch {
   /** User's login filter (case and substring position insensitive) */
   login?: string | null;
+}
+
+export interface UsersFilter {
+  include?: UsersFilterData | null;
+
+  exclude?: UsersFilterData | null;
+}
+
+export interface UsersFilterData {
+  /** User's group id filter (exact match) */
+  groupId?: ObjectId | null;
+  /** User's role */
+  role?: UserRole | null;
 }
 
 export interface GetCoursesRequest {
@@ -210,11 +224,6 @@ export interface CourseUpdatePatch {
   name?: string | null;
 }
 
-export interface DeleteUserRequest {
-  /** Target user id. */
-  id: ObjectId;
-}
-
 export interface DeleteTaskRequest {
   /** Target task id. */
   id: ObjectId;
@@ -222,6 +231,11 @@ export interface DeleteTaskRequest {
 
 export interface DeleteCourseRequest {
   /** Target course id. */
+  id: ObjectId;
+}
+
+export interface DeleteUserRequest {
+  /** Target user id. */
   id: ObjectId;
 }
 /** Represents an academic task type, currently it has no special meaning. */
@@ -265,13 +279,13 @@ export interface Query {
   /** Returns a paginated array of courses according to the given page and search arguments. */
   getGroups: GetGroupsResponse;
   /** Returns a single user by id, throws an error if it was not found. */
-  getUser: User;
+  getUser: GetUserResponse;
   /** Returns a single task by id, throws an error if it was not found. */
-  getTask: Task;
+  getTask: GetTaskResponse;
   /** Returns a single course by id, throws an error if it was not found. */
-  getCourse: Course;
+  getCourse: GetCourseResponse;
   /** Returns a single group by id, throws an error if it was not found. */
-  getGroup: Group;
+  getGroup: GetGroupResponse;
 }
 
 export interface User {
@@ -302,7 +316,7 @@ export interface Group {
   name: string;
   /** Date when this group was created */
   creationDate: Date;
-  /** Returns a paginated array of courses openned accessible by this group,according to the given page and search arguments. */
+  /** Returns a paginated array of courses accessible by this group,according to the given page and search arguments. */
   getCourses: GetGroupCoursesResponse;
 
   getMembers: GetGroupMembersResponse;
@@ -329,10 +343,10 @@ export interface Course {
   /** Date when this course was created on the server. */
   publicationDate: Date;
   /** Returns a paginated array of tasks of this course according to the given page and search arguments. */
-  getTasks: GetTasksResponse;
+  getTasks: GetCourseTasksResponse;
 }
 
-export interface GetTasksResponse {
+export interface GetCourseTasksResponse {
   /** Page of tasks that satisfy input search filters. */
   data: Task[];
   /** Total amount of tasks that may be queried for the given search input. */
@@ -392,6 +406,22 @@ export interface GetGroupsResponse {
   total: number;
 }
 
+export interface GetUserResponse {
+  user: User;
+}
+
+export interface GetTaskResponse {
+  task: Task;
+}
+
+export interface GetCourseResponse {
+  course: Course;
+}
+
+export interface GetGroupResponse {
+  group: Group;
+}
+
 /** Root mutations endpoint */
 export interface Mutation {
   /** Creates a new task with the given input data. */
@@ -412,8 +442,6 @@ export interface Mutation {
   updateTask: UpdateTaskResponse;
   /** Updates particular course with the given input data.Throws an error if the course was not found. */
   updateCourse: UpdateCourseResponse;
-  /** Deletes the user by id.Throws an error if the user was not found. */
-  deleteUser: DeleteUserResponse;
   /** Deletes the task by id.Throws an error if the task was not found. */
   deleteTask: DeleteTaskResponse;
   /** Deletes the course by id.Throws an error if the course was not found. */
@@ -464,11 +492,6 @@ export interface UpdateCourseResponse {
   course: Course;
 }
 
-export interface DeleteUserResponse {
-  /** Deleted user. */
-  user: User;
-}
-
 export interface DeleteTaskResponse {
   /** Deleted task. */
   task: Task;
@@ -477,6 +500,11 @@ export interface DeleteTaskResponse {
 export interface DeleteCourseResponse {
   /** Deleted course. */
   course: Course;
+}
+
+export interface DeleteUserResponse {
+  /** Deleted user. */
+  user: User;
 }
 
 // ====================================================
@@ -511,7 +539,7 @@ export interface GetMembersGroupArgs {
   req: GetGroupMembersRequest;
 }
 export interface GetTasksCourseArgs {
-  req: GetTasksRequest;
+  req: GetCourseTasksRequest;
 }
 export interface CreateTaskMutationArgs {
   req: CreateTaskRequest;
@@ -539,9 +567,6 @@ export interface UpdateTaskMutationArgs {
 }
 export interface UpdateCourseMutationArgs {
   req: UpdateCourseRequest;
-}
-export interface DeleteUserMutationArgs {
-  req: DeleteUserRequest;
 }
 export interface DeleteTaskMutationArgs {
   req: DeleteTaskRequest;
@@ -619,13 +644,13 @@ export namespace QueryResolvers {
     /** Returns a paginated array of courses according to the given page and search arguments. */
     getGroups?: GetGroupsResolver<GetGroupsResponse, TypeParent, Context>;
     /** Returns a single user by id, throws an error if it was not found. */
-    getUser?: GetUserResolver<User, TypeParent, Context>;
+    getUser?: GetUserResolver<GetUserResponse, TypeParent, Context>;
     /** Returns a single task by id, throws an error if it was not found. */
-    getTask?: GetTaskResolver<Task, TypeParent, Context>;
+    getTask?: GetTaskResolver<GetTaskResponse, TypeParent, Context>;
     /** Returns a single course by id, throws an error if it was not found. */
-    getCourse?: GetCourseResolver<Course, TypeParent, Context>;
+    getCourse?: GetCourseResolver<GetCourseResponse, TypeParent, Context>;
     /** Returns a single group by id, throws an error if it was not found. */
-    getGroup?: GetGroupResolver<Group, TypeParent, Context>;
+    getGroup?: GetGroupResolver<GetGroupResponse, TypeParent, Context>;
   }
 
   export type MeResolver<
@@ -661,7 +686,7 @@ export namespace QueryResolvers {
   }
 
   export type GetUserResolver<
-    R = User,
+    R = GetUserResponse,
     Parent = {},
     Context = ResolveContext
   > = Resolver<R, Parent, Context, GetUserArgs>;
@@ -670,7 +695,7 @@ export namespace QueryResolvers {
   }
 
   export type GetTaskResolver<
-    R = Task,
+    R = GetTaskResponse,
     Parent = {},
     Context = ResolveContext
   > = Resolver<R, Parent, Context, GetTaskArgs>;
@@ -679,7 +704,7 @@ export namespace QueryResolvers {
   }
 
   export type GetCourseResolver<
-    R = Course,
+    R = GetCourseResponse,
     Parent = {},
     Context = ResolveContext
   > = Resolver<R, Parent, Context, GetCourseArgs>;
@@ -688,7 +713,7 @@ export namespace QueryResolvers {
   }
 
   export type GetGroupResolver<
-    R = Group,
+    R = GetGroupResponse,
     Parent = {},
     Context = ResolveContext
   > = Resolver<R, Parent, Context, GetGroupArgs>;
@@ -773,7 +798,7 @@ export namespace GroupResolvers {
     name?: NameResolver<string, TypeParent, Context>;
     /** Date when this group was created */
     creationDate?: CreationDateResolver<Date, TypeParent, Context>;
-    /** Returns a paginated array of courses openned accessible by this group,according to the given page and search arguments. */
+    /** Returns a paginated array of courses accessible by this group,according to the given page and search arguments. */
     getCourses?: GetCoursesResolver<
       GetGroupCoursesResponse,
       TypeParent,
@@ -859,7 +884,7 @@ export namespace CourseResolvers {
     /** Date when this course was created on the server. */
     publicationDate?: PublicationDateResolver<Date, TypeParent, Context>;
     /** Returns a paginated array of tasks of this course according to the given page and search arguments. */
-    getTasks?: GetTasksResolver<GetTasksResponse, TypeParent, Context>;
+    getTasks?: GetTasksResolver<GetCourseTasksResponse, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -893,19 +918,19 @@ export namespace CourseResolvers {
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
   export type GetTasksResolver<
-    R = GetTasksResponse,
+    R = GetCourseTasksResponse,
     Parent = Course,
     Context = ResolveContext
   > = Resolver<R, Parent, Context, GetTasksArgs>;
   export interface GetTasksArgs {
-    req: GetTasksRequest;
+    req: GetCourseTasksRequest;
   }
 }
 
-export namespace GetTasksResponseResolvers {
+export namespace GetCourseTasksResponseResolvers {
   export interface Resolvers<
     Context = ResolveContext,
-    TypeParent = GetTasksResponse
+    TypeParent = GetCourseTasksResponse
   > {
     /** Page of tasks that satisfy input search filters. */
     data?: DataResolver<Task[], TypeParent, Context>;
@@ -915,12 +940,12 @@ export namespace GetTasksResponseResolvers {
 
   export type DataResolver<
     R = Task[],
-    Parent = GetTasksResponse,
+    Parent = GetCourseTasksResponse,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
   export type TotalResolver<
     R = number,
-    Parent = GetTasksResponse,
+    Parent = GetCourseTasksResponse,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1103,6 +1128,66 @@ export namespace GetGroupsResponseResolvers {
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
 }
+
+export namespace GetUserResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetUserResponse
+  > {
+    user?: UserResolver<User, TypeParent, Context>;
+  }
+
+  export type UserResolver<
+    R = User,
+    Parent = GetUserResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GetTaskResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetTaskResponse
+  > {
+    task?: TaskResolver<Task, TypeParent, Context>;
+  }
+
+  export type TaskResolver<
+    R = Task,
+    Parent = GetTaskResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GetCourseResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetCourseResponse
+  > {
+    course?: CourseResolver<Course, TypeParent, Context>;
+  }
+
+  export type CourseResolver<
+    R = Course,
+    Parent = GetCourseResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GetGroupResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetGroupResponse
+  > {
+    group?: GroupResolver<Group, TypeParent, Context>;
+  }
+
+  export type GroupResolver<
+    R = Group,
+    Parent = GetGroupResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
 /** Root mutations endpoint */
 export namespace MutationResolvers {
   export interface Resolvers<Context = ResolveContext, TypeParent = {}> {
@@ -1132,8 +1217,6 @@ export namespace MutationResolvers {
       TypeParent,
       Context
     >;
-    /** Deletes the user by id.Throws an error if the user was not found. */
-    deleteUser?: DeleteUserResolver<DeleteUserResponse, TypeParent, Context>;
     /** Deletes the task by id.Throws an error if the task was not found. */
     deleteTask?: DeleteTaskResolver<DeleteTaskResponse, TypeParent, Context>;
     /** Deletes the course by id.Throws an error if the course was not found. */
@@ -1223,15 +1306,6 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, Context, UpdateCourseArgs>;
   export interface UpdateCourseArgs {
     req: UpdateCourseRequest;
-  }
-
-  export type DeleteUserResolver<
-    R = DeleteUserResponse,
-    Parent = {},
-    Context = ResolveContext
-  > = Resolver<R, Parent, Context, DeleteUserArgs>;
-  export interface DeleteUserArgs {
-    req: DeleteUserRequest;
   }
 
   export type DeleteTaskResolver<
@@ -1396,22 +1470,6 @@ export namespace UpdateCourseResponseResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace DeleteUserResponseResolvers {
-  export interface Resolvers<
-    Context = ResolveContext,
-    TypeParent = DeleteUserResponse
-  > {
-    /** Deleted user. */
-    user?: UserResolver<User, TypeParent, Context>;
-  }
-
-  export type UserResolver<
-    R = User,
-    Parent = DeleteUserResponse,
-    Context = ResolveContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace DeleteTaskResponseResolvers {
   export interface Resolvers<
     Context = ResolveContext,
@@ -1440,6 +1498,22 @@ export namespace DeleteCourseResponseResolvers {
   export type CourseResolver<
     R = Course,
     Parent = DeleteCourseResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DeleteUserResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = DeleteUserResponse
+  > {
+    /** Deleted user. */
+    user?: UserResolver<User, TypeParent, Context>;
+  }
+
+  export type UserResolver<
+    R = User,
+    Parent = DeleteUserResponse,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
 }

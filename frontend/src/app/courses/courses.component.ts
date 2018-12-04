@@ -35,14 +35,17 @@ export class CoursesComponent extends Subscriber implements OnInit {
     }
 
     ngOnInit() {
-        this.pageHeader.title = 'Courses';
-        this.subscrs.usr = this.session.$user.subscribe(() => {
-            this.pageHeader.toolButtons = !this.rt.canAccess(this.rt.to.courseNew) ? [] : [{
+        this.pageHeader.setHeader({
+            title: 'Courses',
+            toolButtons: [{
                 iconName:   'add',
                 name:       'Add course',
-                routerLink: this.rt.to.courseNew()
-            }];
+                routerLink: {
+                    pathFn: this.rt.to.courseNew
+                }
+            }]
         });
+        
 
         this.subscrs.query = this
             .route
@@ -60,8 +63,8 @@ export class CoursesComponent extends Subscriber implements OnInit {
         this.backend.getCourses({ page, limit, search: { name: search } })
             .pipe(this.pageHeader.displayLoading())
             .subscribe(
-                api => {
-                    this.api        = api.data.getCourses;
+                ({ data: { getCourses }}) => {
+                    this.api        = getCourses;
                     this.pagination = { page, limit, search };
                 },
                 err => this.errHandler.handle(err)

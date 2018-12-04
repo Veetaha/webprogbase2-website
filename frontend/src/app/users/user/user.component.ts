@@ -17,7 +17,7 @@ import * as Gql from '@services/gql';
   styleUrls:  ['./user.component.scss']
 })
 export class UserComponent extends Subscriber implements OnInit {
-    user?: Gql.GetUser.GetUser;
+    user?: Gql.GetUser.User;
 
     constructor(
         public  session:    SessionService,
@@ -30,20 +30,21 @@ export class UserComponent extends Subscriber implements OnInit {
     ) { super(); }
   
     ngOnInit() {
-        this.pageHeader.title   = 'User profile';
-        this.pageHeader.loading = true;
+        this.pageHeader.setHeader({ title: 'User profile' });
         this.subscrs.sessionUser = this.session.$user.subscribe(
             () => this.updateEditToolButton()
         );
 
         this.subscrs.user = this.route.paramMap.subscribe(paramMap =>
-            this.backend.getUser({ id: paramMap.get('id')! }).subscribe(
-                res => {
-                    this.user = res.data.getUser;
-                    this.pageHeader.loading = false;
-                    this.updateEditToolButton();
-                },
-                err => this.errHandler.handle(err)
+            this.backend
+                .getUser({ id: paramMap.get('id')! })
+                .pipe(this.pageHeader.displayLoading())
+                .subscribe(
+                    ({ data: { getUser: { user } } }) => {
+                        this.user = user;
+                        this.updateEditToolButton();
+                    },
+                    err => this.errHandler.handle(err)
             )
         );
     }
@@ -64,7 +65,10 @@ export class UserComponent extends Subscriber implements OnInit {
         this.pageHeader.toolButtons = [{
             iconName: 'edit',
             name: 'Edit profile',
-            routerLink: this.rt.to.userEdit(this.user.id)
+            routerLink: {
+                pathFn: this.rt.to.userEdit,
+                args:  [this.user.id]
+            }
         }];
     }
 

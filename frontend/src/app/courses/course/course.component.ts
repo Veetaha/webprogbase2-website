@@ -6,7 +6,6 @@ import { PageHeaderService } from '@services/page-header';
 import { CoursesService    } from '@services/courses';
 import { Defaults          } from '@services/config';
 import { RoutingService    } from '@services/routing';
-import { SessionService    } from '@services/session';
 
 import * as Api             from '@public-api/v1';
 
@@ -29,8 +28,7 @@ export class CourseComponent extends Subscriber implements OnInit {
         private route:      ActivatedRoute,
         private backend:    CoursesService,
         private pageHeader: PageHeaderService,
-        public  rt:         RoutingService,
-        private session:    SessionService
+        public  rt:         RoutingService
     ) {
         super();
     }
@@ -42,12 +40,6 @@ export class CourseComponent extends Subscriber implements OnInit {
             .subscribe(queryParamMap => this.doSearchRequest(parsePagination(
                 queryParamMap, this.pagination
             )));
-
-        this.subscrs.usr = this.session.$user.subscribe(() => {
-            if (!this.rt.canAccess(this.rt.to.courseEdit)) {
-                this.pageHeader.toolButtons = [];
-            }
-        });
     }
 
     doSearchRequest({
@@ -55,26 +47,27 @@ export class CourseComponent extends Subscriber implements OnInit {
         limit  = this.pagination.limit,
         search = this.pagination.search
     } = this.pagination) {
-        this.pageHeader.loading = true;
         const newPagination = { page, limit, search };
         this.backend
             .getCourse(this.courseId, newPagination)
+            .pipe(this.pageHeader.displayLoading())
             .subscribe(
                 course => {
-                    this.course     = course;
-                    this.pagination = newPagination;
+                    this.course           = course;
+                    this.pagination       = newPagination;
                     this.pageHeader.setHeader({
-                        loading:     false,
-                        title:       this.course.name,
-                        toolButtons: !this.rt.canAccess(this.rt.to.courseEdit) ? [] : [{
+                        title: course.name,
+                        toolButtons: [{
                             name: 'Edit course',
                             iconName: 'edit',
-                            routerLink: this.rt.to.courseEdit(course.id)
+                            routerLink: {
+                                pathFn: this.rt.to.courseEdit,
+                                args: [course.id]
+                            }
                         }]
                     });
                 }
             );
     }
-
 
 }

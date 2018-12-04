@@ -25,16 +25,22 @@ export class TaskComponent extends Subscriber implements OnInit {
 
     ngOnInit() {
         this.subscrs.paramMap = this.route.paramMap.subscribe(params => {
-            this.pageHeader.loading = true;
-            this.backend.getTask(params.get('id')!).subscribe(task => {
-                this.pageHeader.loading = false;
-                this.task = task;
-                this.pageHeader.title = task.title;
-                this.pageHeader.toolButtons = !this.rt.canAccess(this.rt.to.taskEdit) ? [] : [{
-                    routerLink: this.rt.to.taskEdit(task.id),
-                    iconName: 'edit',
-                    name: 'Edit task'
-                }];
+            this.backend
+                .getTask(params.get('id')!)
+                .pipe(this.pageHeader.displayLoading())
+                .subscribe(task => {
+                    this.task = task;
+                    this.pageHeader.setHeader({
+                        title: task.title,
+                        toolButtons: [{
+                            iconName: 'edit',
+                            name: 'Edit task',
+                            routerLink: {
+                                pathFn: this.rt.to.taskEdit,
+                                args: [task.id]
+                            }
+                        }]
+                    });
             });
         });
     }

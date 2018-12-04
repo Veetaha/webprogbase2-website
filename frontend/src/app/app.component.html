@@ -6,7 +6,7 @@
     <div class="col-md">
         <nav class="btn-group-sm page-toolbuttons row">
             <ng-container *ngIf="session.user; else elseUnauthoried">
-                <ng-container *ngIf="pageHeader.toolButtons?.length">
+                <ng-container *ngIf="filteredToolButtons?.length">
                     <button mat-icon-button
                         [matMenuTriggerFor]="settingsMenu"
                         class="button-flat"
@@ -14,9 +14,9 @@
                         <mat-icon>settings</mat-icon>
                     </button>
                     <mat-menu #settingsMenu="matMenu">
-                        <button *ngFor="let toolButton of pageHeader.toolButtons"
+                        <button *ngFor="let toolButton of filteredToolButtons"
                             mat-menu-item
-                            [routerLink]="toolButton.routerLink"
+                            [routerLink]="toolButton.routerLink.pathFn(toolButton.routerLink.args)"
                             [ngStyle]=   "toolButton.styles || {}"
                             ngClass="{{toolButton.classList || ''}} button-flat"
                         ><mat-icon>{{toolButton.iconName}}</mat-icon>

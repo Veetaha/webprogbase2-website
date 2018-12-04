@@ -1,7 +1,6 @@
 import * as Express     from 'express';
 import * as _           from 'lodash';
 import * as Vts         from 'vee-type-safe';
-import * as Debug       from '@modules/debug';
 import * as Apollo      from 'apollo-server-express';
 import * as GqlV1       from '@declarations/gql-gen-v1';
 import * as GqlV1Params from '@declarations/gql-params-v1';
@@ -15,33 +14,29 @@ import { authenticate    } from '@modules/passport';
 import { User            } from '@models/user';
 import { Task            } from '@models/task';
 import { Course          } from '@models/course';
+import { Group           } from '@models/group';
 import {
-    tryDeleteById,
-    tryFindById,
-    tryUpdateById,
     AllowGuardDirective,
-    DenyGuardDirective,
-    filterNilProps
+    DenyGuardDirective
 } from '@modules/apollo-helpers';
 
 const QueryResolvers: GqlV1.QueryResolvers.Resolvers = {
-    me(_p, _args, { user }) {
-        Debug.assert(user);
-        if (!user) {
-            throw new Apollo.AuthenticationError('unauthorized');
-        }
-        return user;
-    },
-    getUser(_p, { req }, { user }) {
-        return user && user._id.equals(req.id) ? user : User.getUser(req);
-    },
-    getUsers:   (_p, { req }) => User.getUsers(req),
+    me: (_p, _args, { user }) => user!,
+    getUser: async (_p, { req }, { user }) => (
+        user && user._id.equals(req.id) ? { user } : User.getUser(req)
+    ),
+    getUsers:   (_p, { req }) => User.  getUsers(req),
     getCourses: (_p, { req }) => Course.getCourses(req),
-    getTask:    (_p, { req }) => Task.getTask(req),
-    getCourse:  (_p, { req }) => Course.getCourse(req)
+    getGroups:  (_p, { req }) => Group. getGroups(req),
+    
+    getTask:    (_p, { req }) => Task.  getTask(req),
+    getCourse:  (_p, { req }) => Course.getCourse(req),
+    getGroup:   (_p, { req }) => Group. getGroup(req),
+    
 };
 const UserResolvers: GqlV1.UserResolvers.Resolvers = {
-    avaUrl: user => user.avaUrl || Config.DefaultUserAvatarUrl
+    avaUrl: user => user.avaUrl || Config.DefaultUserAvatarUrl,
+    group:  user => user.group()
 };
 
 const TaskResolvers: GqlV1.TaskResolvers.Resolvers = {
@@ -53,43 +48,35 @@ const CourseResolvers: GqlV1.CourseResolvers.Resolvers = {
     getTasks: (course, { req }) => course.getTasks(req)
 };
 
+const GroupResolvers: GqlV1.GroupResolvers.Resolvers = {
+    getCourses: (group, { req }) => group.getCourses(req),
+    getMembers: (group, { req }) => group.getMembers(req)
+};
+
+
 const MutationResolvers: GqlV1.MutationResolvers.Resolvers = {
-    createCourse: async (_p, { req }, { user }) => {
-        Debug.assert(user);
-        return Course.create({authorId: user!._id, ...req})
-              .then(course => ({ course }));
-    },
-    createTask: async (_p, { req }, { user }) => {
-        Debug.assert(user);
-        return {
-            task: await Task.create({
-                ...req,
-                courseId: req.courseId,
-                authorId: user!._id
-            })
-        };
-    },
-    deleteCourse: (_p, { req }) => tryDeleteById(Course, req.id).then(course => ({ course })),
-    deleteTask:   (_p, { req }) => tryDeleteById(Task,   req.id).then(task   => ({ task   })),
-    deleteUser:   (_p, { req }) => tryDeleteById(User,   req.id).then(user   => ({ user   })),
-    updateCourse: (_p, { req }) => tryUpdateById(Course, req.id, filterNilProps(req.patch))
-                                    .then(course => ({ course })),
-    updateTask:   (_p, { req }) => tryUpdateById(Task,   req.id, filterNilProps(req.patch))
-                                    .then(task   => ({ task })),
-    updateUser:   (_p, { req }) => tryUpdateById(User,   req.id, filterNilProps(req.patch))
-                                    .then(user   => ({ user })),
+    createCourse: async (_p, { req }, { user }) => ({
+        course: await Course.create({ ...req, authorId: user!._id })
+    }),
+    createTask: async (_p, { req }, { user }) => ({
+        task: await Task.create({ ...req, authorId: user!._id })
+    }),
+    createGroup:  async (_p, { req }) => Group.createGroup(req),
     
-    updateMe: async (_p, { req }, { user }) => {
-        Debug.assert(user);
-        return {
-            me: await Object.assign(user, _.omitBy(req.patch, (val, key) => (
-                    key === 'avaUrl' ? val === undefined : _.isNil(val)
-            ))).save()
-        };
-    }
+    deleteCourse: (_p, { req }) => Course.deleteCourse(req),
+    deleteTask:   (_p, { req }) => Task.  deleteTask(req),
+    deleteGroup:  (_p, { req }) => Group. deleteGroup(req),
+    // deleteUser:   (_p, { req }) => User.  deleteUser(req),
+    updateCourse: (_p, { req }) => Course.updateCourse(req),
+    updateTask:   (_p, { req }) => Task.  updateTask(req),
+    updateUser:   (_p, { req }) => User.  updateUser(req),
+    updateGroup:  (_p, { req }) => Group. updateGroup(req),
+    
+    updateMe: (_p, { req }, { user }) => user!.updateMe(req)
 };
 
 export const apolloServer = new Apollo.ApolloServer({
+    playground: true,
     typeDefs: Apollo.gql(Config.GqlSchema),
     resolvers: {
         Mutation:    MutationResolvers as Apollo.IResolverObject,
@@ -97,10 +84,10 @@ export const apolloServer = new Apollo.ApolloServer({
         User:        UserResolvers     as Apollo.IResolverObject,
         Task:        TaskResolvers     as Apollo.IResolverObject,
         Course:      CourseResolvers   as Apollo.IResolverObject,
+        Group:       GroupResolvers    as Apollo.IResolverObject,
         BOID:        GqlBsonObjectId,
         Date:        GqlIsoDate.GraphQLDateTime
     },
-    playground: true,
     schemaDirectives: {
         deny:                 DenyGuardDirective,
         allow:                AllowGuardDirective,

@@ -30,7 +30,7 @@ export class UsersComponent extends Subscriber implements OnInit {
     }
 
     ngOnInit() {
-        this.pageHeader.title = 'Users';
+        this.pageHeader.setHeader({ title: 'Users' });
 
         this.subscrs.query = this
             .route
@@ -45,15 +45,15 @@ export class UsersComponent extends Subscriber implements OnInit {
         limit  = this.pagination.limit,
         search = this.pagination.search
     } = this.pagination) {
-        this.pageHeader.loading = true;
         const newPagination = { page, limit, search };
-        this.backend.getUsers(newPagination).subscribe(
-            api => {
-                this.api = api.data.getUsers;
-                this.pagination = newPagination;
-                this.pageHeader.loading = false;
-            },
-            err => this.errHandler.handle(err)
+        this.backend.getUsers(newPagination)
+            .pipe(this.pageHeader.displayLoading())
+            .subscribe(
+                api => {
+                    this.api = api.data.getUsers;
+                    this.pagination = newPagination;
+                },
+                err => this.errHandler.handle(err)
         );
     }
 

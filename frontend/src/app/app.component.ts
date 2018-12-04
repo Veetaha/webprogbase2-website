@@ -1,23 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { Router            } from '@angular/router';
 import { MatDialog         } from '@angular/material/dialog';
-import { ButtonLink        } from '@common/interfaces';
 import { PageHeaderService } from '@services/page-header';
 import { RoutingService    } from '@services/routing';
 import { SessionService    } from '@services/session';
 import { Subscriber        } from '@utils/subscriber';
+import { ButtonLink, ToolButton                 } from '@common/interfaces';
 import { MessageBoxComponent, MessageBoxOptions } from '@vee/components/message-box';
 
 import * as RxO from 'rxjs/operators';
 
 
 @Component({
-    selector: 'app-root',
+    selector:    'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+    styleUrls:  ['./app.component.scss']
 })
 export class AppComponent extends Subscriber implements OnInit {
     menuButtons: ButtonLink[] = [];
+    filteredToolButtons: ToolButton[] = [];
 
     constructor(
         public pageHeader: PageHeaderService,
@@ -27,7 +28,7 @@ export class AppComponent extends Subscriber implements OnInit {
         private router:    Router
     ) {
         super();
-        this.session.$user.subscribe(() => {
+        this.subscrs.usr = this.session.$user.subscribe(() => {
             this.menuButtons = [{
                 name: 'Home',
                 routerLink: rt.to.home()
@@ -47,8 +48,24 @@ export class AppComponent extends Subscriber implements OnInit {
                     routerLink: rt.to.users()
                 });
             }
+            if (rt.canAccess(rt.to.groups)) {
+                this.menuButtons.splice(1, 0, {
+                    name: 'Groups',
+                    routerLink: rt.to.groups()
+                });
+            }
+            this.filterToolButtons();
         });
+        this.subscrs.tb = this.pageHeader.$toolButtons.subscribe(() => (
+            this.filterToolButtons()
+        ));
+    }
 
+    filterToolButtons() {
+        this.filteredToolButtons = (this
+            .pageHeader
+            .toolButtons || [])
+            .filter(button => this.rt.canAccess(button.routerLink.pathFn));
     }
 
     ngOnInit() {

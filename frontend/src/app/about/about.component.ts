@@ -12,6 +12,6 @@ export class AboutComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.pageHeader.setHeader({ title: 'About' });
+        this.pageHeader.setHeader({ title: 'About'});
     }
 }

@@ -52,8 +52,14 @@ const Schema = new mongoose.Schema({
 Schema.virtual('id').get(get_id);
 
 Schema.statics = {
-    isTaskType: Vts.isInEnum(TaskType),
-    getTask: ({ id }) => Helpers.tryFindById(Task, id)
+    updateTask: async ({ id, patch }) => ({
+        task: await Helpers.tryUpdateById(Task, id, Helpers.filterNilProps(patch))
+    }),
+
+    deleteTask: async ({ id }) => ({ task: await Helpers.tryDeleteById(Task, id) }),
+    getTask:    async ({ id }) => ({ task: await Helpers.tryFindById(Task, id)   }),
+
+    isTaskType: Vts.isInEnum(TaskType)
 } as TaskModel;
 Schema.methods = {
     author: getPopulated<Task>('authorId'),
@@ -89,12 +95,16 @@ export const Task = mongoose.model<Task, TaskModel>('Task', Schema);
 export interface Task extends mongoose.Document, TaskData {
     author():          Promise<User>;
     course():          Promise<Course>;
+    
     toCoreJsonData():  ApiTask.CoreJson;
     toBasicJsonData(): Promise<ApiTask.BasicJson>;
     toJsonData():      Promise<ApiTask.Json>;
 }
 export interface TaskModel  extends mongoose.PaginateModel<Task, TaskData> {
+    updateTask(req: GqlV1.UpdateTaskRequest): Promise<GqlV1.UpdateTaskResponse>;
+    deleteTask(req: GqlV1.DeleteTaskRequest): Promise<GqlV1.DeleteTaskResponse>;
+    getTask(id: GqlV1.GetTaskRequest):        Promise<GqlV1.GetTaskResponse>;
+
     isTaskType(suspect: unknown): suspect is TaskType;
-    getTask(id: GqlV1.GetTaskRequest): Promise<Task>;
 }
 

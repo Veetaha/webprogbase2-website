@@ -8,6 +8,12 @@ import { RouteFn        } from '@routes/paths';
 export class CheckAccessDirective {
     private hasView = true;
 
+    constructor(
+        private templateRef:   TemplateRef<any>,
+        private viewContainer: ViewContainerRef,
+        private rt:            RoutingService
+    ) { }
+
     @Input() set appCheckAccess(access: RouteFn) {
         const canAccess = this.rt.canAccess(access);
         if (canAccess && !this.hasView) {
@@ -18,12 +24,6 @@ export class CheckAccessDirective {
             this.hasView = false;
         }
     }
-
-    constructor(
-        private templateRef: TemplateRef<any>,
-        private viewContainer: ViewContainerRef,
-        private rt: RoutingService
-    ) { }
 
 
 

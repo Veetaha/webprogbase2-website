@@ -1,5 +1,5 @@
 {
-    "schema": "public-api/v1.gql",
+    "schema": "public-api/v1/schema.gql",
     "overwrite": true,
     "generates": {
         "declarations/gql-gen-v1.ts": {
@@ -19,13 +19,13 @@
                 "contextType": "./gql-params-v1#ResolveContext"
             },
             "plugins": [
-                { "add":  "import * as Mongoose from 'mongoose';\nimport ObjectId = Mongoose.Types.ObjectId;" },
+                { "add":  "import { ObjectId } from './gql-params-v1';" },
                 "typescript-common",
                 "typescript-server",
                 "typescript-resolvers"
             ]
         },
-        "public-api/gql-v1.ts": {
+        "public-api/v1/gql.ts": {
             "config": {
                 "scalars": {
                     "Date": "Date",
@@ -34,8 +34,10 @@
                 "interfacePrefix": ""
             },
             "plugins": [
+                { "add": "export * from './gql-extras';" },
                 "typescript-common",
-                "typescript-server"
+                "typescript-server",
+                "server-build/role-access-codegen-plugin.js"
             ]
         }
     }

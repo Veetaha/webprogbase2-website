@@ -1,0 +1,66 @@
+<div class="col-md-10 mt-5 mx-auto">
+        <form #courseForm="ngForm"
+              (ngSubmit)="onFormSubmit()"  
+              class="col-md-10 mx-auto"
+        >
+            <mat-form-field class="col-12">
+                <input
+                    matInput
+                    type="text"
+                    name="name"
+                    placeholder="Group name"
+                    required
+                    [(ngModel)]="newGroup.name"
+                >
+            </mat-form-field>
+
+
+            <div
+                cdkDropList
+                #groupMembersListEl="cdkDropList"
+                [cdkDropListData]="newGroup.members"
+                [cdkDropListConnectedTo]="[freeStudentsListEl]"
+                (cdkDropListDropped)="onStudentDrop($event)">
+                <mat-card *ngFor="let item of newGroup.members" 
+                    cdkDrag
+                >
+                {{item}}
+                </mat-card>
+            </div>
+            </div>
+
+            <div class="example-container">
+            <h2>Done</h2>
+
+            <div
+                cdkDropList
+                #freeStudentsListEl="cdkDropList"
+                [cdkDropListData]="done"
+                [cdkDropListConnectedTo]="[groupMembersListEl]"
+                (cdkDropListDropped)="onStudentDrop($event)">
+                <mat-card *ngFor="let item of done" 
+                    cdkDrag
+                >
+                    {{item}}
+                </mat-card>
+            </div>
+
+
+
+
+
+            <br>
+            <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                class="col-3 btn btn-primary btn-lg mb-3"
+                [disabled]="courseForm.invalid"
+            >
+                <mat-icon>add</mat-icon>
+                <strong>Add group</strong>
+            </button>
+        </form>
+    </div>
+    
+    

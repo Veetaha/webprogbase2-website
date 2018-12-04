@@ -36,15 +36,15 @@ type Query {
     # Returns a paginated array of courses according to the given page and search arguments.
     getCourses(req: GetCoursesRequest!): GetCoursesResponse! 
     # Returns a paginated array of courses according to the given page and search arguments.
-    getGroups(req: GetGroupsRequest!): GetGroupsResponse! 
+    getGroups(req: GetGroupsRequest!): GetGroupsResponse!    @deny(roles: [guest])
     # Returns a single user by id, throws an error if it was not found.
-    getUser   (req: GetUserRequest!   ): User!               @deny(roles: [guest])
+    getUser   (req: GetUserRequest!   ): GetUserResponse!    @deny(roles: [guest])
     # Returns a single task by id, throws an error if it was not found.
-    getTask   (req: GetTaskRequest!   ): Task!               @deny(roles: [guest])
+    getTask   (req: GetTaskRequest!   ): GetTaskResponse!    @deny(roles: [guest])
     # Returns a single course by id, throws an error if it was not found.
-    getCourse (req: GetCourseRequest! ): Course!             
+    getCourse (req: GetCourseRequest! ): GetCourseResponse!             
     # Returns a single group by id, throws an error if it was not found.
-    getGroup  (req: GetGroupRequest!  ): Group!
+    getGroup  (req: GetGroupRequest!  ): GetGroupResponse!   @deny(roles: [guest])
 }
 
 # Root mutations endpoint
@@ -72,7 +72,8 @@ type Mutation {
 
     # Deletes the user by id.
     # Throws an error if the user was not found.
-    deleteUser  (req: DeleteUserRequest!  ): DeleteUserResponse!   @allow(roles: [admin])
+    # deleteUser  (req: DeleteUserRequest!  ): DeleteUserResponse!   @allow(roles: [admin])
+    
     # Deletes the task by id.
     # Throws an error if the task was not found.
     deleteTask  (req: DeleteTaskRequest!  ): DeleteTaskResponse!   @allow(roles: [teacher, admin])
@@ -81,7 +82,18 @@ type Mutation {
     deleteCourse(req: DeleteCourseRequest!): DeleteCourseResponse! @allow(roles: [teacher, admin])  
 }
 
-
+type GetTaskResponse {
+    task: Task!
+}
+type GetUserResponse {
+    user: User!
+}
+type GetCourseResponse {
+    course: Course!
+}
+type GetGroupResponse {
+    group: Group!
+}
 
 
 input GetUserRequest      { 
@@ -127,10 +139,21 @@ input GetUsersRequest {
     page:  Int!          @positiveInt
     # Search filters.
     search: UsersSearch
+    filter: UsersFilter
+}
+input UsersFilter {
+    include: UsersFilterData
+    exclude: UsersFilterData
+}
+input UsersFilterData {
+    # User's group id filter (exact match)
+    groupId: [BOID!]
+    # User's role
+    role:    [UserRole!]
 }
 input UsersSearch {
     # User's login filter (case and substring position insensitive)
-    login: String       
+    login:   String
 }
 # User role limits access for some resources.
 # See @deny and @access directives for each endpoint.
@@ -260,9 +283,9 @@ type Course {
     publicationDate: Date!
     # Returns a paginated array of tasks of this course 
     # according to the given page and search arguments.
-    getTasks(req: GetTasksRequest!): GetTasksResponse!
+    getTasks(req: GetCourseTasksRequest!): GetCourseTasksResponse!
 }
-input GetTasksRequest {
+input GetCourseTasksRequest {
     # 1-based page number.
     page:  Int! @positiveInt
     # Amount of tasks per page.
@@ -274,7 +297,7 @@ input TasksSearch {
     # Course's title filter (case and substring position insensitive)
     title: String
 }
-type GetTasksResponse {
+type GetCourseTasksResponse {
     # Page of tasks that satisfy input search filters.
     data: [Task!]!
     # Total amount of tasks that may be queried for the given search input.
@@ -358,7 +381,7 @@ type Group @deny(roles: [guest]) {
     name: String! @notEmpty
     # Date when this group was created
     creationDate: Date!
-    # Returns a paginated array of courses openned accessible by this group,
+    # Returns a paginated array of courses accessible by this group,
     # according to the given page and search arguments.
     getCourses(req: GetGroupCoursesRequest!): GetGroupCoursesResponse!
     getMembers(req: GetGroupMembersRequest!): GetGroupMembersResponse!
@@ -368,7 +391,7 @@ input GroupMembersSearch {
 }
 input GetGroupMembersRequest {
     # Amount of members per page.
-    limit: Int! @positiveInt
+    limit: Int! @zeroOrPositiveInt
     # 1-based page number.
     page:  Int! @positiveInt 
     # Search filters.

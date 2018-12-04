@@ -6,6 +6,7 @@ import * as GqlV1     from '@declarations/gql-gen-v1';
 import * as Config    from '@app/config';
 import * as ApiV1     from '@public-api/v1';
 import * as Helpers   from '@modules/apollo-helpers';
+import * as _         from 'lodash';
 
 import { get_id, getPopulated } from '@modules/common';
 import { Group } from '@models/group';
@@ -25,7 +26,7 @@ export interface UserData {
     registeredAt:  Date;
     avaUrl?:       string | null;
     isDisabled:    boolean;
-    groupId?:      ObjectId;
+    groupId?:      ObjectId | null;
 }
 
 export const Schema = new Mongoose.Schema({
@@ -33,37 +34,52 @@ export const Schema = new Mongoose.Schema({
     login:        { type: String,  required: true },
     password:     { type: String,  required: true },
     fullname:     { type: String,  required: true },
-    registeredAt: { type: Date,    default: Date.now },
+    registeredAt: { type: Date,    required: true, default: Date.now },
     avaUrl:       { type: String,  required: false   },
     isDisabled:   { type: Boolean, required: false, default: false },
     groupId: {
-        type: ObjectId,
+        type: Mongoose.SchemaTypes.ObjectId,
         ref: 'Group',
         required: false
     }
 });
 Schema.virtual('id').get(get_id);
 
-Schema.statics = {
-    getUser: ({ id }) => Helpers.tryFindById(User, id),
+function patchToMongoUpdate(patch: GqlV1.UpdateMePatch | GqlV1.UpdateUserPatch) {
+    return _.omitBy(patch, (key, value) => (
+        key === 'avaUrl' ? _.isUndefined(value) : _.isNil(value)
+    ));
+}
 
-    getUsers: ({ page, search, limit }) => Helpers.paginate<User, UserModel>(User, {
-        page, limit, search, sort: { login: 'asc' }
+Schema.statics = {
+    updateUser: async ({ id, patch }) => ({
+        user: await Helpers.tryUpdateById(User, id, patchToMongoUpdate(patch))
+    }),
+
+    deleteUser: async ({ id }) => ({ user: await Helpers.tryDeleteById(User, id) }),
+    getUser:    async ({ id }) => ({ user: await Helpers.tryFindById(User, id)   }),
+
+    getUsers: ({filter, ...req}) => Helpers.paginate<User, UserModel>(User, {
+        ...req,
+        sort: { login: 'asc' },
+        filter: Helpers.filterNilAtRequired(filter, Schema)
     }),
 
     unAssignGroup: (groupId, usersId) => User
-            .where('groupId').equals(groupId)
-            .where('_id').in(usersId)
-            .update({ groupId: null })
-            .exec(),
+        .update({ groupId, _id: { $in: usersId } },
+                { groupId: null },
+                { multi: true }
+        ).exec(),
 
     assignGroup: (groupId, usersId) => User
-        .where('_id').in(usersId)
-        .update({ groupId })
-        .exec(),
+        .update({ _id: { $in: usersId } },
+                { groupId },
+                { multi: true}
+        ).exec(),
         
-    findByLoginPassword: async (login, password) => User.findOne({
-        login, password: Config.encodePassword(password)
+    findByLoginPassword: (login, password) => User.findOne({
+        login,
+        password: Config.encodePassword(password)
     }).exec(),
 
     // deprecated
@@ -79,12 +95,16 @@ Schema.statics = {
 import PutUser = ApiV1.V1.User.Put;
 Schema.methods = {
     group: getPopulated<User>('groupId'),
+
+    async updateMe({ patch }) {
+        Object.assign(this, patchToMongoUpdate(patch));
+        return {
+            me: await this.save()
+        };
+    },
+
     canPutUser(putReq) {
-        const mismatch = Vts.mismatch(putReq, PutUser.RoleLimit[this.role]);
-        if (mismatch) {
-            return false;
-        }
-        return true;
+        return Vts.exactlyConforms(putReq, PutUser.RoleLimit[this.role]);
     },
     makeJwt() {
         const customPayload: ApiV1.Data.CustomJwtPayload = {
@@ -124,6 +144,7 @@ export const User = Mongoose.model<User, UserModel>('User', Schema);
 export interface User extends Mongoose.Document<UserData>, UserData {
     makeJwt(): string;
     group(): Promise<Group>;
+    updateMe(req: GqlV1.UpdateMeRequest): Promise<GqlV1.UpdateMeResponse>;
 
 
     // deprecated
@@ -132,8 +153,10 @@ export interface User extends Mongoose.Document<UserData>, UserData {
     toBasicJsonData(): ApiV1.Data.User.BasicJson;
 }
 export interface UserModel extends Mongoose.PaginateModel<User, UserData> {
-    getUser(req: GqlV1.GetUserRequest):   Promise<User>;
-    getUsers(req: GqlV1.GetUsersRequest): Promise<GqlV1.GetUsersResponse>;
+    updateUser(req: GqlV1.UpdateUserRequest): Promise<GqlV1.UpdateUserResponse>;
+    deleteUser(req: GqlV1.DeleteUserRequest): Promise<GqlV1.DeleteUserResponse>;
+    getUser(req: GqlV1.GetUserRequest):       Promise<GqlV1.GetUserResponse>;
+    getUsers(req: GqlV1.GetUsersRequest):     Promise<GqlV1.GetUsersResponse>;
     assignGroup  (groupId: ObjectId, usersId: ObjectId[]): Promise<number>;
     unAssignGroup(groupId: ObjectId, usersId: ObjectId[]): Promise<number>;
     findByLoginPassword(login: string, password: string): Promise<User | null>;

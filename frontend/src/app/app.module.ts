@@ -13,6 +13,7 @@ import { ForbiddenComponent } from '@app/error/forbidden/forbidden.component';
 import { AppRoutingModule   } from '@routes/app';
 import { UsersModule        } from '@app/users/users.module';
 import { CoursesModule      } from '@app/courses/courses.module';
+import { GroupsModule       } from '@app/groups/groups.module';
 import { ErrorComponent     } from '@app/error/error.component';
 import { AboutComponent     } from '@app/about/about.component';
 import { DeveloperComponent } from '@app/developer/developer.component';
@@ -35,6 +36,7 @@ import { HttpInterceptorProviders } from './_http-interceptors/index';
         // routing:
         CoursesModule,
         UsersModule,
+        GroupsModule,
         AppRoutingModule
     ],
     declarations: [

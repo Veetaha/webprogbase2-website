@@ -1,6 +1,6 @@
 import * as Vts from 'vee-type-safe';
 import * as HttpCodes from 'http-status-codes';
-import * as GqlGen from './gql-v1';
+import * as GqlGen from './gql';
 export interface Paginated<T = unknown> {
     total: number;
     data:  T[];

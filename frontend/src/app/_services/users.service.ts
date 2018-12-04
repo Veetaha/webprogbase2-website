@@ -5,7 +5,7 @@ import * as Vts from 'vee-type-safe';
 import * as Gql from '@services/gql';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class UsersService {
     constructor(

@@ -3,10 +3,12 @@ import * as Debug     from '@modules/debug';
 import * as Paginate  from 'mongoose-paginate';
 import * as GqlV1     from '@declarations/gql-gen-v1';
 import * as Helpers   from '@modules/apollo-helpers';
+// import * as Vts       from 'vee-type-safe';
 import * as _         from 'lodash';
 import { User, UserModel     } from '@models/user';
 import { Course, CourseModel } from '@models/course';
-import UniqueArrayPlugin = require('mongoose-unique-array');
+// import * as Apollo    from 'apollo-server-express';
+// import UniqueArrayPlugin = require('mongoose-unique-array');
 
 import ObjectId = Mongoose.Types.ObjectId;
 import MongoArray = Mongoose.Types.Array;
@@ -21,10 +23,9 @@ export interface GroupData {
 
 const Schema = new Mongoose.Schema({
     coursesId:  {
-        type: [ObjectId],
+        type: [Mongoose.SchemaTypes.ObjectId],
         ref:  'Course',
-        required: true,
-        unique: true // @TODO: wait for unique index to build
+        required: true
     },
     name:         { type: String,   required: true    },
     creationDate: { type: Date,     default: Date.now }
@@ -37,75 +38,99 @@ const Methods = {
         return Helpers.paginate<Course, CourseModel>(Course, {
             ...req,
             sort: { publicationDate: 'desc' },
-            searchFilter: {
+            filter: {
                 _id: { $in: this.coursesId }
             }
         });
     },
-    getMembers(req) {
+
+    async getMembers(req) {
         return Helpers.paginate<User, UserModel>(User, {
             ...req,
             sort: { login: 'asc' },
-            searchFilter: {
+            filter: {
                 groupId: this._id
             }
         });
     }
 } as Group;
 const Statics = {
+    getGroup: async ({ id }) => ({ group: await Helpers.tryFindById(Group, id) }),
+
     getGroups: req => Helpers.paginate<Group, GroupModel>(
         Group, { ...req, sort: { name: 'desc' } }
     ),
-    async createGroup(req) {
-        const newbie = await Group.create({
-            name:      req.name,
-            coursesId: req.courses || []
-        });
-        if (req.members && req.members.length) {
-            await User.assignGroup(newbie._id, req.members);
+    async createGroup({ name, courses, members }) {
+        if (!_.isEmpty(courses)) {
+            Course.ensureValidIds(courses!);
         }
-        return {
-           group: newbie
-        };
+         
+        const group = await Group.create({
+            name,
+            coursesId: courses || []
+        });
+
+        if (!_.isEmpty(members)) {
+            void await User.assignGroup(group._id, members!);
+        }
+        return { group };
     },
     async updateGroup({id, patch: { name, addMembers, removeMembers, addCourses, removeCourses }}) {
-        const target = await Helpers.tryFindById(Group, id) as Group;
-        target.name = name || target.name;
+        if (!_.isEmpty(addCourses)) {
+            Course.ensureValidIds(addCourses!);
+        }
+
+        const group = await Helpers.tryFindById(Group, id) as Group;
+        group.name = name || group.name;
         
-        if (removeCourses) {
-            const filtered = Helpers.filterObjectIds(target.coursesId, removeCourses);
-            debugger;
-            Debug.assert(filtered instanceof MongoArray);
-            console.log('OK, mongoarray after filter');
-            target.coursesId = filtered;
+        if (!_.isEmpty(removeCourses)) {
+            group.coursesId = Helpers.filterObjectIds(
+                group.coursesId, removeCourses!
+            ) as any;
         }
-        if (addCourses) {
-            target.coursesId.addToSet(addCourses);
+        if (!_.isEmpty(addCourses)) {
+            group.coursesId.addToSet(...addCourses!);
         }
-        if (removeMembers) {
-            User.unAssignGroup(target._id, removeMembers);
-        }
-        if (addMembers) {
-            User.assignGroup(target._id, addMembers);
-        }
-        return { group: await target.save() };
+        void await Promise.all<any>([
+            !_.isEmpty(removeMembers) && User.unAssignGroup(id, removeMembers!),
+            !_.isEmpty(addMembers)    && User.assignGroup  (id, addMembers!)
+        ]);
+        return { group: await group.save() };
     },
     deleteGroup: async ({ id }) => ({ group: await Helpers.tryDeleteById(Group, id) })
 } as GroupModel;
 Schema.methods = Methods;
 Schema.statics = Statics;
 
+Schema.pre('remove', async function(this: Course, next) {
+    try {
+        void await User.update(
+            { groupId: this._id },
+            { groupId: null     },
+            { multi: true }
+        ).exec();
+        return next();
+    } catch (err) {
+        Debug.error(`Failed to remove references to the deleted course`);
+        return next(err);
+    }
+});
+
+
 Schema.plugin(Paginate);
-Schema.plugin(UniqueArrayPlugin);
+// Schema.plugin(UniqueArrayPlugin);
 export const Group = Mongoose.model<Group, GroupModel>('Group', Schema);
 
 export interface GroupModel extends Mongoose.PaginateModel<Group, GroupData> {
     getGroups  (req: GqlV1.GetGroupsRequest):   Promise<GqlV1.GetGroupsResponse>;
+    getGroup   (req: GqlV1.GetGroupRequest):    Promise<GqlV1.GetGroupResponse>;
     createGroup(req: GqlV1.CreateGroupRequest): Promise<GqlV1.CreateGroupResponse>;
     updateGroup(req: GqlV1.UpdateGroupRequest): Promise<GqlV1.UpdateGroupResponse>;
     deleteGroup(req: GqlV1.DeleteGroupRequest): Promise<GqlV1.DeleteGroupResponse>;
 }
 export interface Group extends Mongoose.Document, GroupData  {
     getCourses(req: GqlV1.GetGroupCoursesRequest): Promise<GqlV1.GetGroupCoursesResponse>;
-    getMembers(req: GqlV1.GetGroupMembersRequest): Promise<GqlV1.GetGroupMembersResponse>;
+    getMembers(
+        req: GqlV1.GetGroupMembersRequest
+    ): Promise<GqlV1.GetGroupMembersResponse>;
 }

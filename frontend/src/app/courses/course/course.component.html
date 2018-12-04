@@ -1,7 +1,7 @@
 <div class="col-md-10 offset-md-1">
 <markdown *ngIf="course" [data]="course.description"></markdown>
 <vee-search-input
-    placeholder="Task name..."
+    placeholder="Task title"
     (searchDemand)="doSearchRequest({ page: 1, search: $event })"
 ></vee-search-input>
 <ng-container *ngIf="course?.tasks; else elseCourseNotLoaded">

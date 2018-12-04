@@ -59,13 +59,13 @@ export class DeveloperComponent implements OnInit {
 
     onTokenCopied() {
         this.snackBar.open('Your bearer token was copied to clipboard.',
-            '', // Action
+        '', // Action
         {
             duration: 1500 // ms
         });
     }
 
     ngOnInit() {
-        this.pageHeader.title = 'API reference';
+        this.pageHeader.setHeader({ title: 'API reference' });
     }
 }

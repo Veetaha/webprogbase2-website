@@ -1,0 +1,44 @@
+<div class="col-md-10 offset-md-1">
+<vee-search-input
+    placeholder="User name"
+    (searchDemand)="doSearchRequest({ page: 1, search: $event })"
+></vee-search-input>
+<ng-container *ngIf="group?.getMembers; else elseGroupNotLoaded">
+    <mat-paginator #paginator
+        [length]         ="group!.getMembers.total"
+        [pageSize]       ="pagination.limit"
+        [pageIndex]      ="pagination.page - 1"
+        [pageSizeOptions]="pageSizeOptions"
+        (page)="
+            doSearchRequest({
+                page:  $event.pageIndex + 1,
+                limit: $event.pageSize
+            });
+        "
+        color="primary"
+        showFirstLastButtons
+    ></mat-paginator>
+
+
+    <ul *ngIf="group!.getMembers.data.length; else elseNoMembers" 
+        class="pagination-list"
+    >
+        <li *ngFor="let member of group!.getMembers.data"><a
+            [routerLink]="rt.to.user(member.id)"
+        >{{member.login}}</a>
+        </li>
+    </ul>
+    <ng-template #elseNoMembers>
+        <p id="not-found" class="text-info">
+            Nothing was found
+        </p>
+    </ng-template>
+
+    <p *ngIf="pagination.search" id="search-info" class="text-muted">
+        Search results for "{{pagination.search}}"
+    </p>
+</ng-container>
+<ng-template #elseGroupNotLoaded>
+    <h2 class="text-center text-info">Loading...</h2>
+</ng-template>
+</div>

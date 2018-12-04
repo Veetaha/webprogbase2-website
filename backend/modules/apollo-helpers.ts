@@ -104,6 +104,7 @@ function nothingFoundForId(id: ObjectId | string) {
 }
 
 
+type PaginateFilterOptions<T> = { [Key in keyof T]?: T[Key] | T[Key][]};
 
 interface PaginateOptions<
     TDoc extends Mongoose.Document
@@ -112,7 +113,10 @@ interface PaginateOptions<
     limit:         number;
     search?:       { [P in keyof TDoc]?: TDoc[P] | null; } | null;
     sort:          Vts.BasicObject<'asc' | 'desc'>;
-    searchFilter?: { [Key in keyof TDoc]?: TDoc[Key] | { $in: ObjectId[] } };
+    filter?:       {
+        include: PaginateFilterOptions<TDoc>
+        exclude: PaginateFilterOptions<TDoc>
+    };
 }
 
 export async function paginate<
@@ -124,23 +128,22 @@ export async function paginate<
     limit,
     search,
     sort,
-    searchFilter
+    filter
 }: PaginateOptions<TDoc>
 ): Promise<ApiV1.Paginated<TDoc>> {
-    Vts.ensureDuckMatch({ page, limit }, {
+    Vts.ensureMatch({ page, limit }, {
         page: Vts.isPositiveInteger,
-        limit: Vts.isPositiveInteger
+        limit: Vts.isZeroOrPositiveInteger
     });
 
-
-    const mappedSearch = _.mapValues(search, value => (
+    const mappedSearch = !search ? {} : _.mapValues(search as object, value => (
         typeof value === 'string'
             ? new RegExp(escapeStringRegexp(value), 'i')
             : value
     ));
     const docsPage = await model.paginate(
         // tslint:disable-next-line:prefer-object-spread
-        Object.assign(mappedSearch || {}, searchFilter),
+        Object.assign(mappedSearch, filter),
         { page, limit, sort }
     );
 
@@ -186,6 +189,14 @@ export function filterNilProps(obj: Vts.BasicObject) {
     return _.omitBy(obj, _.isNil);
 }
 
-export function filterObjectIds<T extends ObjectId[]>(source: T, exclude: ObjectId[]): T {
-    return source.filter(srcId => !exclude.find(removeId => srcId.equals(removeId))) as T;
+export function filterObjectIds<T extends ObjectId[]>(source: T, exclude: ObjectId[]) {
+    return source.filter(srcId => !exclude.find(removeId => srcId.equals(removeId)));
+}
+
+export type Maybe<T> = T | null | undefined;
+
+export function filterNilAtRequired(source: Maybe<Vts.BasicObject>, schema: Mongoose.Schema) {
+    return _.pickBy(source, (value, key) => (
+        !schema.obj[key].required || !_.isNil(value))
+    );
 }

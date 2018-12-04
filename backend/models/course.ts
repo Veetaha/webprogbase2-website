@@ -1,11 +1,13 @@
 import * as Mongoose        from 'mongoose';
 import * as Paginate        from 'mongoose-paginate';
-// import * as Vts             from 'vee-type-safe';
+// import * as Vts             from 'vee-type-safe
+import * as Apollo          from 'apollo-server-express';
 import * as Debug           from '@modules/debug';
 import * as GqlV1           from '@declarations/gql-gen-v1';
 import * as ApiV1           from '@public-api/v1';
 import { Task, TaskModel }  from '@models/task';
-import { User }             from '@models/user';
+import { User  }            from '@models/user';
+import { Group }            from '@models/group';
 import * as Helpers         from '@modules/apollo-helpers';
 import { paginate, get_id, getPopulated } from '@modules/common';
 
@@ -19,11 +21,9 @@ export interface CourseData {
     authorId:         ObjectId;
 }
 
-
-
 const Schema = new Mongoose.Schema({
     authorId: {
-        type: Mongoose.Schema.Types.ObjectId,
+        type: Mongoose.SchemaTypes.ObjectId,
         ref: 'User',
         required: true
     },
@@ -34,13 +34,26 @@ const Schema = new Mongoose.Schema({
 Schema.virtual('id').get(get_id);
 
 Schema.statics = {
-    getCourse: ({ id }) => Helpers.tryFindById(Course, id),
+    updateCourse: async ({ id, patch }) => ({
+        course: await Helpers.tryUpdateById(Course, id, Helpers.filterNilProps(patch))
+    }),
+    
+    deleteCourse: async ({ id }) => ({ course: await Helpers.tryDeleteById(Course, id) }),
+    getCourse:    async ({ id }) => ({ course: await Helpers.tryFindById(Course, id) }),
 
-    getCourses: ({ page, limit, search }) => Helpers.paginate<Course, CourseModel>(Course, {
-        page, limit, search, sort: { name: 'desc' }
+    getCourses: req => Helpers.paginate<Course, CourseModel>(Course, {
+        ...req, sort: { name: 'desc' }
     }),
 
-
+    areValidIds: async suspect => (
+        (await Course.where('_id').in(suspect).count().exec()) === suspect.length
+    ),
+    
+    async ensureValidIds(suspect) {
+        if (!await Course.areValidIds(suspect)) {
+            throw new Apollo.ValidationError('bad courses id array');
+        }
+    },
     
     getPageRest: pageArgs => paginate<Course, CourseModel, ApiCourse.CoreJson>(Course, {
         pageArgs,
@@ -58,10 +71,10 @@ Schema.statics = {
 
 Schema.methods = {
     author: getPopulated<Course>('authorId'),
-    getTasks({ page, limit, search }) {
+    getTasks(req) {
         return Helpers.paginate<Task, TaskModel>(Task, {
-            page, limit, search,
-            searchFilter: { courseId: this._id },
+            ...req,
+            filter: { courseId: this._id },
             sort: { publicationDate: 'desc' }
         });
     },
@@ -98,12 +111,13 @@ Schema.methods = {
 
 Schema.pre('remove', async function(this: Course, next) {
     try {
-        void await Task.deleteMany({
-            courseId: this._id
-        }).exec();
+        void await Promise.all([
+            Task. where('courseId').     equals(this._id).remove().exec(),
+            Group.where('coursesId._id').equals(this._id).remove().exec()
+        ]);
         return next();
     } catch (err) {
-        Debug.error(`Failed to remove tasks from deleted course`);
+        Debug.error(`Failed to remove references to the deleted course`);
         return next(err);
     }
 });
@@ -113,15 +127,20 @@ export const Course = Mongoose.model<Course, CourseModel>('Course', Schema);
 
 
 export interface CourseModel extends Mongoose.PaginateModel<Course, CourseData> {
-    getCourses(req: GqlV1.GetCoursesRequest): Promise<GqlV1.GetCoursesResponse>;
-    getCourse(req: GqlV1.GetCourseRequest): Promise<Course>;
+    updateCourse(req: GqlV1.UpdateCourseRequest): Promise<GqlV1.UpdateCourseResponse>;
+    deleteCourse(req: GqlV1.DeleteCourseRequest): Promise<GqlV1.DeleteCourseResponse>;
+    getCourses  (req: GqlV1.GetCoursesRequest):   Promise<GqlV1.GetCoursesResponse>;
+    getCourse   (req: GqlV1.GetCourseRequest):    Promise<GqlV1.GetCourseResponse>;
+    areValidIds   (suspect: ObjectId[]): Promise<boolean>;
+    ensureValidIds(suspect: ObjectId[]): Promise<void>;
+
     getPageRest(
         pagination: ApiV1.PaginationArgs
     ): Promise<ApiV1.Paginated<ApiCourse.CoreJson>>;
 }
 export interface Course extends Mongoose.Document, CourseData {
     author(): Promise<User>;
-    getTasks(req: GqlV1.GetTasksRequest): Promise<GqlV1.GetTasksResponse>;
+    getTasks(req: GqlV1.GetCourseTasksRequest): Promise<GqlV1.GetCourseTasksResponse>;
 
     toCoreJsonData():  ApiCourse.CoreJson;
     toBasicJsonData(): Promise<ApiCourse.BasicJson>;

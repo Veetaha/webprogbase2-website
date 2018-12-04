@@ -10,7 +10,7 @@ import { Subscriber             } from '@utils/subscriber';
 import * as Vts    from 'vee-type-safe';
 import * as Api    from '@public-api/v1';
 import * as Gql    from '@services/gql';
-import * as GqlApi from '@public-api/gql-v1';
+import * as GqlApi from '@public-api/v1/gql';
 
 @Component({
   selector:    'app-user-edit',
@@ -18,7 +18,7 @@ import * as GqlApi from '@public-api/gql-v1';
   styleUrls:  ['./user-edit.component.scss']
 })
 export class UserEditComponent extends Subscriber implements OnInit {
-    user?: Gql.GetUser.GetUser;
+    user?: Gql.GetUser.User;
     input: Gql.UpdateUserPatch = {};
     // { [Key in keyof Gql.UpdateUserPatch]: Exclude<Gql.UpdateUserPatch[Key], null> } = {};
     Api = Api.Data.User;
@@ -43,7 +43,7 @@ export class UserEditComponent extends Subscriber implements OnInit {
     ) { super(); }
     
     ngOnInit() {
-        this.pageHeader.title   = 'Edit profile';
+        this.pageHeader.setHeader({ title: 'Edit profile' });
         this.subscrs.sessionUser = this.session.$user.subscribe(
             () => this.onUserChange()
         );
@@ -53,24 +53,22 @@ export class UserEditComponent extends Subscriber implements OnInit {
             if (this.session.user && this.session.user.id === userId) {
                 return this.setUser(this.session.user);
             }
-            this.pageHeader.loading = true;
-            this.backend.getUser({ id: userId }).subscribe(
-                res => {
-                    this.setUser(res.data.getUser);
-                    this.pageHeader.loading = false;
-                },
-                err => this.errHandler.handle(err)
-            );
+            this.backend.getUser({ id: userId })
+                .pipe(this.pageHeader.displayLoading())
+                .subscribe(
+                    res => this.setUser(res.data.getUser.user),
+                    err => this.errHandler.handle(err)
+                );
         });
     }
 
-    setUser(user: Gql.GetUser.GetUser) {
+    setUser(user: Gql.GetUser.User) {
         this.user  = user;
-        this.input = Vts.take(user,
-            this.session.userRole === GqlApi.UserRole.Admin ?
-            GqlApi.UserPatchFields   :
-            GqlApi.UserPatchPublicFields as any
-        );
+        this.input = Vts.take(user, (
+            this.session.userRole === GqlApi.UserRole.Admin
+                ? GqlApi.UpdateUserPatchFields
+                : GqlApi.UpdateMePatchFields
+        ) as (keyof Gql.GetUser.User)[]);
         this.onUserChange();
     }
 

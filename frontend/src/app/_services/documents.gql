@@ -1,4 +1,80 @@
-# import * from "./../../../../backend/public-api/v1.gql"
+# import * from "./../../../../backend/public-api/v1/schema.gql"
+
+mutation createGroup($req: CreateGroupRequest!) {
+    createGroup(req: $req) {
+        group {
+            id
+        }
+    }
+}
+
+mutation deleteGroup($req: DeleteGroupRequest!) {
+    deleteGroup(req: $req) {
+        group {
+            id
+        }
+    }
+}
+
+mutation updateGroup($req: UpdateGroupRequest!) {
+    updateGroup(req: $req) {
+        group {
+            id
+        }
+    }
+}
+
+query getGroup($groupReq: GetGroupRequest!, $membersReq: GetGroupMembersRequest!) {
+    getGroup(req: $groupReq) {
+        group {
+            name
+            creationDate
+            getMembers(req: $membersReq) {
+                total
+                data {
+                    id
+                    login
+                    fullname
+                    role
+                    avaUrl
+                }
+            }
+        }
+    }
+}
+
+query getGroups($req: GetGroupsRequest!) {
+    getGroups(req: $req) {
+        total
+        data {
+            id
+            name
+            getMembers(req: { limit: 0, page: 1 }) {
+                total
+            }
+        }
+    }
+}
+
+
+query getCourse($courseReq: GetCourseRequest!, $tasksReq: GetCourseTasksRequest!) {
+    getCourse(req: $courseReq) {
+        course {
+            description
+            name
+            publicationDate
+            getTasks(req: $tasksReq) {
+                total
+                data {
+                    id
+                    taskType
+                    title
+                    maxMark
+                }
+            }
+        }
+    }
+}
 
 query getCourses($req: GetCoursesRequest!) {
     getCourses(req: $req) {
@@ -26,13 +102,15 @@ query getUsers($req: GetUsersRequest!) {
 
 query getUser($req: GetUserRequest!) {
     getUser(req: $req) {
-        id
-        login
-        role
-        fullname
-        registeredAt
-        avaUrl
-        isDisabled
+        user {
+            id
+            login
+            role
+            fullname
+            registeredAt
+            avaUrl
+            isDisabled
+        }
     }
 }
 

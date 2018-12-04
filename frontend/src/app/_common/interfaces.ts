@@ -1,4 +1,5 @@
 import { NgStyle, NgClass } from '@angular/common';
+import { RouteFn } from '@routes/paths';
 
 export interface ButtonLink {
     routerLink: string;
@@ -6,8 +7,16 @@ export interface ButtonLink {
     classList?: string;
 }
 
-export interface ToolButton {
-    routerLink: string;
+export interface ToolButtonRouterLink<
+    TArgs extends string[] = [],
+    TPathFn extends RouteFn<TArgs> = RouteFn<TArgs>
+> {
+    pathFn: TPathFn;
+    args?:   TArgs;
+}
+
+export interface ToolButton<TArgs extends string[] = string[]> {
+    routerLink: ToolButtonRouterLink<TArgs>;
     iconName:   string;
     classList?: NgClass['ngClass'];
     styles?:    NgStyle['ngStyle'];
