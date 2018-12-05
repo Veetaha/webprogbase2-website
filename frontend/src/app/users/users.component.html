@@ -58,12 +58,15 @@
     </table>
     </ng-container>
     <ng-template #elseNoUsersFound>
-        <p
-            class="text-info"
-        >No users were found</p>
+        <p class="text-info">
+            No users were found
+        </p>
     </ng-template>
     <ng-template #elseNoApi>
-        <h2 class="text-center text-info">Loading...</h2>
+        <mat-progress-spinner
+            color="accent"
+            mode="indeterminate"
+        ></mat-progress-spinner>
     </ng-template>
     
     <p *ngIf="pagination.search" 

@@ -1,6 +1,23 @@
 import { NgStyle, NgClass } from '@angular/common';
 import { RouteFn } from '@routes/paths';
 
+
+export interface Pagination {
+    page: number;
+    limit: number;
+    search?: string;
+}
+
+export interface Identifiable {
+    id: string;
+}
+
+export interface Paginated<T> {
+    data: T[];
+    total: number;
+}
+
+
 export interface ButtonLink {
     routerLink: string;
     name:       string;
@@ -34,3 +51,5 @@ export namespace MatrixRouteParams {
         status: string;
     }
 }
+
+export type Maybe<T> = T | null | undefined;

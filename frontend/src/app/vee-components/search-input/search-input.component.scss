@@ -1,3 +1,9 @@
 #searchField {
     margin-top: -10px;
 }
+
+#search-button {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}

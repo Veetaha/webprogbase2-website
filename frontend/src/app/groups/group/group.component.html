@@ -19,15 +19,18 @@
         showFirstLastButtons
     ></mat-paginator>
 
-
-    <ul *ngIf="group!.getMembers.data.length; else elseNoMembers" 
-        class="pagination-list"
-    >
-        <li *ngFor="let member of group!.getMembers.data"><a
-            [routerLink]="rt.to.user(member.id)"
-        >{{member.login}}</a>
-        </li>
-    </ul>
+    <mat-card>
+    <mat-list *ngIf="group!.getMembers.data.length; else elseNoMembers">
+        <mat-list-item *ngFor="let member of group!.getMembers.data">
+            <a [routerLink]="rt.to.user(member.id)">
+            <app-user-item 
+                [user]="member"
+                class="list-item"
+            ></app-user-item>
+            </a>
+        </mat-list-item>
+    </mat-list>
+    </mat-card>
     <ng-template #elseNoMembers>
         <p id="not-found" class="text-info">
             Nothing was found

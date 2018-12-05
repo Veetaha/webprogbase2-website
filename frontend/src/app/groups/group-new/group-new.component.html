@@ -1,66 +1,182 @@
 <div class="col-md-10 mt-5 mx-auto">
-        <form #courseForm="ngForm"
-              (ngSubmit)="onFormSubmit()"  
-              class="col-md-10 mx-auto"
-        >
-            <mat-form-field class="col-12">
-                <input
-                    matInput
+<form #groupForm="ngForm"
+      (ngSubmit)="onFormSubmit()"  
+      class="col-md-10 mx-auto"
+>
+    <mat-vertical-stepper>
+        <mat-step label="Name">
+        <mat-card>
+            <mat-form-field>
+                <input matInput
+                    [(ngModel)]="newGroup.name"
                     type="text"
                     name="name"
                     placeholder="Group name"
                     required
-                    [(ngModel)]="newGroup.name"
                 >
-            </mat-form-field>
-
-
-            <div
-                cdkDropList
-                #groupMembersListEl="cdkDropList"
-                [cdkDropListData]="newGroup.members"
-                [cdkDropListConnectedTo]="[freeStudentsListEl]"
-                (cdkDropListDropped)="onStudentDrop($event)">
-                <mat-card *ngFor="let item of newGroup.members" 
-                    cdkDrag
-                >
-                {{item}}
-                </mat-card>
+            </mat-form-field>        
+        </mat-card>
+        </mat-step>
+        <mat-step label="Members">
+        <mat-card>
+            <div class="row">
+                <div class="col-md">
+                    <h3 class="text-center text-primary">Assigned</h3>
+                    <mat-selection-list *ngIf="stLists.chosen.length; else elseNoStudentsChosen"
+                        (selectionChange)="stLists.onChosenSelectionListChange($event)"
+                        class="mt-2"
+                    >
+                        <mat-list-option *ngFor="let student of stLists.chosen; trackBy: trackById"
+                            [value]="student"
+                            selected
+                            checkboxPosition="before"
+                        >
+                            <app-user-item [user]="student"></app-user-item>
+                        </mat-list-option>
+                    </mat-selection-list>
+                    <ng-template #elseNoStudentsChosen>
+                        <p class="text-muted text-center">Choose users to form a new group</p> 
+                    </ng-template>
+                </div>
+                <div class="col-md">
+                    <h3 class="text-center text-primary">Unassigned</h3>
+                    <ng-container *ngIf="stLists.free; else elseFreeStudentsNotLoaded">
+                        <vee-search-input
+                            (searchDemand)="stLists.doSearchRequest({ 
+                                page: 1, search: $event 
+                            })"
+                            placeholder="Search students"
+                            class="mt-2"
+                        >  
+                        </vee-search-input>
+                        <mat-paginator #paginator
+                            [length]         ="stLists.free.total"
+                            [pageSize]       ="stLists.pagination.limit"
+                            [pageIndex]      ="stLists.pagination.page - 1"
+                            [pageSizeOptions]="pageSizeOptions"
+                            (page)="
+                                stLists.doSearchRequest({
+                                    page:  $event.pageIndex + 1,
+                                    limit: $event.pageSize
+                                });
+                            "
+                            color="primary"
+                        ></mat-paginator>
+                        <mat-selection-list
+                            (selectionChange)="stLists.onFreeSelectionListChange($event)"
+                            class="mt-2"
+                        >
+                            <mat-list-option *ngFor="let student of stLists.free.data; trackBy: trackById"
+                                [value]="student"
+                                [selected]="stLists.isSelected(student)"
+                                checkboxPosition="before"
+                            >
+                                <app-user-item [user]="student"></app-user-item>
+                            </mat-list-option>
+                        </mat-selection-list>
+                        <p *ngIf="!stLists.free.data.length"
+                            class="text-muted text-center"
+                        >
+                            No free students were found
+                        </p>
+                    </ng-container>
+                    <ng-template #elseFreeStudentsNotLoaded>
+                        <mat-progress-spinner
+                            color="accent"
+                            mode="indeterminate"
+                            class="centered-block"
+                        ></mat-progress-spinner>
+                    </ng-template>
+                </div>
             </div>
+        </mat-card>  
+        </mat-step>
+        <mat-step label="Courses">
+        <mat-card>
+            <div class="row">
+                <div class="col-md">
+                    <h3 class="text-center text-primary">Assigned</h3>
+                    <mat-selection-list *ngIf="crLists.chosen.length; else elseNoCoursesChosen"
+                        (selectionChange)="crLists.onChosenSelectionListChange($event)"
+                        class="mt-2"
+                    >
+                        <mat-list-option *ngFor="let course of crLists.chosen; trackBy: trackById"
+                            [value]="course"
+                            selected
+                            checkboxPosition="before"
+                        >
+                            <app-course-item [course]="course"></app-course-item>
+                        </mat-list-option>
+                    </mat-selection-list>
+                    <ng-template #elseNoCoursesChosen>
+                        <p class="text-muted text-center">Choose courses to be openned for a new group</p> 
+                    </ng-template>
+                </div>
+                <div class="col-md">
+                    <h3 class="text-center text-primary">Unassigned</h3>
+                    <ng-container *ngIf="crLists.free; else elseCoursesNotLoaded">
+                        <vee-search-input
+                            (searchDemand)="crLists.doSearchRequest({ 
+                                page: 1, search: $event 
+                            })"
+                            placeholder="Search students"
+                            class="mt-2"
+                        >  
+                        </vee-search-input>
+                        <mat-paginator #paginator
+                            [length]         ="crLists.free.total"
+                            [pageSize]       ="crLists.pagination.limit"
+                            [pageIndex]      ="crLists.pagination.page - 1"
+                            [pageSizeOptions]="pageSizeOptions"
+                            (page)="
+                                crLists.doSearchRequest({
+                                    page:  $event.pageIndex + 1,
+                                    limit: $event.pageSize
+                                });
+                            "
+                            color="primary"
+                        ></mat-paginator>
+                        <mat-selection-list
+                            (selectionChange)="crLists.onFreeSelectionListChange($event)"
+                            class="mt-2"
+                        >
+                            <mat-list-option *ngFor="let course of crLists.free.data; trackBy: trackById"
+                                [value]="course"
+                                [selected]="crLists.isSelected(course)"
+                                checkboxPosition="before"
+                            >
+                                <app-course-item [course]="course"></app-course-item>
+                            </mat-list-option>
+                        </mat-selection-list>
+                        <p *ngIf="!crLists.free.data.length"
+                            class="text-muted text-center"
+                        >
+                            No courses were found
+                        </p>
+                    </ng-container>
+                    <ng-template #elseCoursesNotLoaded>
+                        <mat-progress-spinner
+                            color="accent"
+                            mode="indeterminate"
+                            class="centered-block"
+                        ></mat-progress-spinner>
+                    </ng-template>
+                </div>
             </div>
-
-            <div class="example-container">
-            <h2>Done</h2>
-
-            <div
-                cdkDropList
-                #freeStudentsListEl="cdkDropList"
-                [cdkDropListData]="done"
-                [cdkDropListConnectedTo]="[groupMembersListEl]"
-                (cdkDropListDropped)="onStudentDrop($event)">
-                <mat-card *ngFor="let item of done" 
-                    cdkDrag
-                >
-                    {{item}}
-                </mat-card>
-            </div>
-
-
-
-
-
-            <br>
-            <button
-                mat-raised-button
-                color="primary"
-                type="submit"
-                class="col-3 btn btn-primary btn-lg mb-3"
-                [disabled]="courseForm.invalid"
-            >
-                <mat-icon>add</mat-icon>
-                <strong>Add group</strong>
-            </button>
-        </form>
-    </div>
+        </mat-card>
+        </mat-step>
+    </mat-vertical-stepper>
+    <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        class="col-3 mb-3"
+        [disabled]="groupForm.invalid"
+    >
+        <mat-icon>add</mat-icon>
+        <strong>Add group</strong>
+    </button>
+</form>
+</div>
     
     

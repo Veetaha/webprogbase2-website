@@ -1,19 +1,120 @@
-import { Component, OnInit    } from '@angular/core';
-import { Router               } from '@angular/router';
-import { Subscriber           } from '@utils/subscriber';
-import { PageHeaderService    } from '@services/page-header';
-import { RoutingService       } from '@services/routing';
-import { ErrorHandlingService } from '@services/error-handling';
-import { Defaults             } from '@services/config';
-import { GroupsService        } from '@services/groups';
-import { CoursesService       } from '@services/courses';
-import { UsersService         } from '@services/users';
+import { Component, OnInit      } from '@angular/core';
+import { Router                 } from '@angular/router';
+import { MatSelectionListChange } from '@angular/material/list';
+import { Subscriber             } from '@utils/subscriber';
+import { byId                   } from '@utils/helpers';
+import { PageHeaderService      } from '@services/page-header';
+import { RoutingService         } from '@services/routing';
+import { ErrorHandlingService   } from '@services/error-handling';
+import { Defaults               } from '@services/config';
+import { GroupsService          } from '@services/groups';
+import { CoursesService         } from '@services/courses';
+import { UsersService           } from '@services/users';
+import { Maybe, Paginated, Identifiable, Pagination } from '@common/interfaces';
 
-import * as CdkDD from '@angular/cdk/drag-drop';
 import * as Gql   from '@services/gql';
+import * as Rx    from 'rxjs';
+import * as RxO   from 'rxjs/operators';
 
 import User   = Gql.GetUsers.Data;
 import Course = Gql.GetCourses.Data;
+
+
+
+abstract class SlectionManager<TData extends Identifiable> {
+    chosen: TData[] = [];
+    free:   Maybe<Paginated<TData>>;
+    pagination = { ...Defaults.Pagination };
+
+    constructor(private errHandler: ErrorHandlingService) {}
+    init() {
+        this.doSearchRequest({ page: 1 });
+    }
+
+    protected abstract fetchPage(
+        pagination: Pagination
+    ): Rx.Observable<Paginated<TData>>;
+
+    doSearchRequest({
+        page   = this.pagination.page,
+        limit  = this.pagination.limit,
+        search = this.pagination.search
+    }: Partial<Pagination> = this.pagination) {
+        this.fetchPage({page, limit, search}).subscribe(
+            data => this.free = data,
+            err  => this.errHandler.handle(err)
+        );
+    }
+    
+
+    onFreeSelectionListChange(
+        { option: { value, selected }}: MatSelectionListChange
+    ) {
+        const changedItem = value as TData;
+        if (selected) {
+            this.chosen.push(changedItem);
+        } else {
+            this.removeChosen(changedItem);
+        }
+    }
+
+    onChosenSelectionListChange({ option: { value }}: MatSelectionListChange) {
+        this.removeChosen(value);
+
+    }
+
+    private removeChosen({ id }: TData) {
+        this.chosen.splice(this.chosen.findIndex(byId(id)), 1);
+    }
+
+    isSelected({ id }: TData) {
+        return !!this.chosen.find(byId(id));
+    }
+
+}
+
+class StudentsSelectionManager extends SlectionManager<User> {
+    constructor(
+        errHandler: ErrorHandlingService,
+        private backend: UsersService
+    ) { 
+        super(errHandler);
+    }
+
+    protected fetchPage(
+        { page, limit, search }: Pagination
+    ): Rx.Observable<Paginated<User>> {
+        return this.backend.getUsers({
+            page, limit, 
+            search: {
+                login: search
+            },
+            filter: {
+                include: {
+                    groupId: null,
+                    role: [Gql.UserRole.Student]
+                }
+            }
+        }).pipe(
+            RxO.map(({data: { getUsers }}) => getUsers)
+        );
+    }
+}
+
+class CoursesSelectionManager extends SlectionManager<Course> {
+    constructor(
+        errHandler: ErrorHandlingService,
+        private backend: CoursesService
+    ) { super(errHandler); }
+
+    protected fetchPage(
+        { page, limit, search }: Pagination
+    ): Rx.Observable<Paginated<Course>> {
+        return this.backend
+            .getCourses({ page, limit, search: { name: search }})
+            .pipe(RxO.map(({data: { getCourses }}) => getCourses));
+    }
+}
 
 @Component({
     selector:    'app-group-new',
@@ -22,32 +123,36 @@ import Course = Gql.GetCourses.Data;
 })
 export class GroupNewComponent extends Subscriber implements OnInit {
     newGroup = {
-        name: '',
-        courses: [] as Course[],
-        members: [] as User[]
+        name: ''
     };
 
-    freeStudents?: Gql.GetUsers.GetUsers;
-    freeCourses?:  Gql.GetCourses.GetCourses;
+    stLists: StudentsSelectionManager;
+    crLists: CoursesSelectionManager;
 
     readonly pageSizeOptions = Defaults.PaginationPageSizeOptions;
-    coursesPagination = { ...Defaults.Pagination };
-    usersPagination = { ...Defaults.Pagination };
-   
+    coursesPg  = { ...Defaults.Pagination, search: { name: ''  }};
+    
+    trackById(_index: number, suspect: Identifiable) {
+        return suspect.id;
+    }   
 
     constructor(
         private pageHeader:     PageHeaderService,
         private groupsService:  GroupsService,
-        private coursesService: CoursesService,
-        private usersService:   UsersService,
         private router:         Router,
         private errHandler:     ErrorHandlingService,
-        public  rt:             RoutingService
+        public  rt:             RoutingService,
+        coursesService:         CoursesService,
+        usersService:           UsersService
     ) {
         super();
+        this.stLists = new StudentsSelectionManager(errHandler, usersService);
+        this.crLists = new CoursesSelectionManager(errHandler, coursesService);
     }
 
     ngOnInit() {
+        this.stLists.init();
+        this.crLists.init();
         this.pageHeader.setHeader({ title: 'New group' });
     }
 
@@ -55,51 +160,18 @@ export class GroupNewComponent extends Subscriber implements OnInit {
         this.groupsService
             .createGroup({
                 name:    this.newGroup.name,
-                members: this.newGroup.members.map(member => member.id),
-                courses: this.newGroup.courses.map(course => course.id)
+                members: this.stLists.chosen.map(member => member.id),
+                courses: []
             })
             .pipe(this.pageHeader.displayLoading())
             .subscribe(
-                ({ data: { group }}) => this.router.navigateByUrl(this.rt.to.group(group.id)),
+                ({ data }) => this.router.navigateByUrl(this.rt.to.group(
+                    data!.createGroup.group.id
+                )),
                 err => this.errHandler.handle(err)
             );
     }
 
-    doCoursesSearchRequest({
-        page   = this.coursesPagination.page,
-        limit  = this.coursesPagination.limit,
-        search = this.coursesPagination.search
-    } = this.coursesPagination) {
-        this.coursesService.getCourses({ page, limit, search: { name: search } })
-            .pipe(this.pageHeader.displayLoading())
-            .subscribe(
-                ({ data: { getCourses }}) => {
-                    this.freeCourses       = getCourses;
-                    this.coursesPagination = { page, limit, search };
-                },
-                err => this.errHandler.handle(err)
-            );
-    }
+    
 
-    onStudentDrop({
-        previousContainer,
-        container,
-        previousIndex,
-        currentIndex
-    }: CdkDD.CdkDragDrop<User[]>) {
-        if (previousContainer === container) {
-            CdkDD.moveItemInArray(
-                container.data,
-                previousIndex,
-                currentIndex
-            );
-        } else {
-            CdkDD.transferArrayItem(
-                previousContainer.data,
-                container.data,
-                previousIndex,
-                currentIndex
-            );
-        }
-    }
 }

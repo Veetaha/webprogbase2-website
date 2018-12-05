@@ -1,7 +1,16 @@
 import * as Api from '@public-api/v1';
 import * as Types from 'vee-type-safe';
 import { ParamMap } from '@angular/router';
+import { Identifiable } from '@common/interfaces';
 
+
+export function byId(id: string) {
+    return (suspect: Identifiable) => suspect.id === id;
+}
+
+export function clamp(value: number, min: number, max: number) {
+    return value > max ? max : (value < min ? min : value);
+}
 
 // Taken from https://stackoverflow.com/a/6969486/9259330
 export function escapeStringRegExp(string: string) {

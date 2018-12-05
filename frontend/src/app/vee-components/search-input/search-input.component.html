@@ -1,19 +1,20 @@
 <div class="form-group row">
     <button 
         mat-raised-button
-        class="form-control col-sm-2 btn"
         (click)="searchDemand.emit(searchInput.value)"
+        type="button"
+        class="form-control col-sm-2"
+        id="search-button"
     >
         <mat-icon>search</mat-icon>
         <strong>Search</strong>
     </button>
     <mat-form-field class="col-sm-10" id="searchField">
-        <input 
-            matInput
+        <input #searchInput
             (keyup.enter)="searchDemand.emit(searchInput.value)"
-            #searchInput
-            type="search"
             [placeholder]="placeholder"
+            matInput
+            type="search"
         >
     </mat-form-field>
 </div>

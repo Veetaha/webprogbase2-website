@@ -46,11 +46,27 @@ export interface GetUsersRequest {
     page: number;
     /** Search filters. */
     search?: UsersSearch | null;
+
+    filter?: UsersFilter | null;
 }
 
 export interface UsersSearch {
     /** User's login filter (case and substring position insensitive) */
     login?: string | null;
+}
+
+export interface UsersFilter {
+    include?: UsersFilterData | null;
+
+    exclude?: UsersFilterData | null;
+}
+
+export interface UsersFilterData {
+    id?: string[] | null;
+
+    groupId?: string[] | null;
+
+    role?: UserRole[] | null;
 }
 
 export interface GetCoursesRequest {
@@ -60,6 +76,18 @@ export interface GetCoursesRequest {
     page: number;
     /** Search filters. */
     search?: CoursesSearch | null;
+
+    filter?: CoursesFilter | null;
+}
+
+export interface CoursesFilter {
+    include?: CoursesFilterData | null;
+
+    exclude?: CoursesFilterData | null;
+}
+
+export interface CoursesFilterData {
+    id?: string[] | null;
 }
 
 export interface GetGroupsRequest {

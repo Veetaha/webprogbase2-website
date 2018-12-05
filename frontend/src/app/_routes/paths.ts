@@ -51,8 +51,8 @@ function route<TRouteFnArgs extends string[]>(
 ): RouteFn<TRouteFnArgs> {
     const routeFn = pathFn as RouteFn<TRouteFnArgs>;
     routeFn.access = access || Api.FreeAccess;
-    routeFn.rel = function (...args: any[]) {
-        return (pathFn.apply(this, args) as string).slice(1);
+    routeFn.rel = function (...args: TRouteFnArgs) {
+        return (pathFn.apply(this, args)).slice(1);
     };
     return routeFn;
 }

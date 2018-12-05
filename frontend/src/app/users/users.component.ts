@@ -45,13 +45,12 @@ export class UsersComponent extends Subscriber implements OnInit {
         limit  = this.pagination.limit,
         search = this.pagination.search
     } = this.pagination) {
-        const newPagination = { page, limit, search };
-        this.backend.getUsers(newPagination)
+        this.backend.getUsers({ page, limit, search: { login: search }})
             .pipe(this.pageHeader.displayLoading())
             .subscribe(
                 api => {
                     this.api = api.data.getUsers;
-                    this.pagination = newPagination;
+                    this.pagination = { page, limit, search };
                 },
                 err => this.errHandler.handle(err)
         );

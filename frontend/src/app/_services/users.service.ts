@@ -18,17 +18,8 @@ export class UsersService {
 
     private options = { fetchPolicy: 'no-cache' } as { fetchPolicy: 'no-cache' };
 
-    getUsers({ page, limit, search }: Api.PaginationArgs) {
-        return this.getUsersGql.fetch({ req: {
-            page, limit, search: {
-                login: search
-            },
-        }}, this.options);
-        // return this.http.get<Api.V1.Users.Get.Response>(
-        //     Api.V1.Users.Get._, {
-        //         params: Api.mapPageArgsToNgParams(pageArgs)
-        //     }
-        // );
+    getUsers(req: Gql.GetUsersRequest) {
+        return this.getUsersGql.fetch({ req }, this.options);
     }
 
     getUser(req: Gql.GetUserRequest) {
