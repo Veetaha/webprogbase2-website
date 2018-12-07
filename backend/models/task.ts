@@ -1,4 +1,4 @@
-import * as mongoose  from 'mongoose';
+import * as Mongoose  from 'mongoose';
 import * as Paginate  from 'mongoose-paginate';
 import * as Vts       from 'vee-type-safe';
 
@@ -7,12 +7,12 @@ import * as GqlV1   from '@declarations/gql-gen-v1';
 import * as ApiV1   from '@public-api/v1';
 import { User }     from '@models/user';
 import { Course }   from '@models/course';
-import { getPopulated, get_id } from '@modules/common';
+import { getPopulated, get_id, set_id } from '@modules/common';
 
 import ApiTask = ApiV1.Data.Task;
-export import TaskType = ApiTask.Type;
+export import TaskType = GqlV1.TaskType;
 
-import ObjectId = mongoose.Types.ObjectId;
+import ObjectId = Mongoose.Types.ObjectId;
 
 export interface TaskData {
     id:                ObjectId;
@@ -26,14 +26,20 @@ export interface TaskData {
     attachedFileUrl?:  string | null;
 }
 
-const Schema = new mongoose.Schema({
+const Schema = new Mongoose.Schema({
+    [Helpers.paginate.metaSymbol]: {
+        id: {
+            aliasFor: '_id',
+            required: true
+        }
+    } as Helpers.PaginateMetadata,
     authorId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
     courseId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Mongoose.Schema.Types.ObjectId,
         ref: 'Course',
         required: true
     },
@@ -45,11 +51,11 @@ const Schema = new mongoose.Schema({
     title:            { type: String, required: true },
     body:             { type: String, required: true },
     maxMark:          { type: Number, required: true, min: 0 },
-    publicationDate:  { type: Date,   default: Date.now  },
+    publicationDate:  { type: Date,   required: true, default: Date.now  },
     attachedFileUrl:  { type: String, required: false }
 });
 
-Schema.virtual('id').get(get_id);
+Schema.virtual('id').get(get_id).set(set_id);
 
 Schema.statics = {
     updateTask: async ({ id, patch }) => ({
@@ -90,9 +96,9 @@ Schema.methods = {
 } as Task;
 
 Schema.plugin(Paginate);
-export const Task = mongoose.model<Task, TaskModel>('Task', Schema);
+export const Task = Mongoose.model<Task, TaskModel>('Task', Schema);
 
-export interface Task extends mongoose.Document, TaskData {
+export interface Task extends Mongoose.Document, TaskData {
     author():          Promise<User>;
     course():          Promise<Course>;
     
@@ -100,7 +106,7 @@ export interface Task extends mongoose.Document, TaskData {
     toBasicJsonData(): Promise<ApiTask.BasicJson>;
     toJsonData():      Promise<ApiTask.Json>;
 }
-export interface TaskModel  extends mongoose.PaginateModel<Task, TaskData> {
+export interface TaskModel  extends Mongoose.PaginateModel<Task, TaskData> {
     updateTask(req: GqlV1.UpdateTaskRequest): Promise<GqlV1.UpdateTaskResponse>;
     deleteTask(req: GqlV1.DeleteTaskRequest): Promise<GqlV1.DeleteTaskResponse>;
     getTask(id: GqlV1.GetTaskRequest):        Promise<GqlV1.GetTaskResponse>;

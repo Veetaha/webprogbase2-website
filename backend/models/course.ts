@@ -9,7 +9,7 @@ import { Task, TaskModel }  from '@models/task';
 import { User  }            from '@models/user';
 import { Group }            from '@models/group';
 import * as Helpers         from '@modules/apollo-helpers';
-import { paginate, get_id, getPopulated } from '@modules/common';
+import { paginate, get_id, getPopulated, set_id } from '@modules/common';
 
 import ObjectId  = Mongoose.Types.ObjectId;
 import ApiCourse = ApiV1.Data.Course;
@@ -22,6 +22,12 @@ export interface CourseData {
 }
 
 const Schema = new Mongoose.Schema({
+    [Helpers.paginate.metaSymbol]: {
+        id: {
+            aliasFor: '_id',
+            required: true
+        }
+    } as Helpers.PaginateMetadata,
     authorId: {
         type: Mongoose.SchemaTypes.ObjectId,
         ref: 'User',
@@ -29,9 +35,9 @@ const Schema = new Mongoose.Schema({
     },
     description:     { type: String, required: true },
     name:            { type: String, required: true },
-    publicationDate: { type: Date,   default: Date.now }
+    publicationDate: { type: Date,   required: true, default: Date.now }
 });
-Schema.virtual('id').get(get_id);
+Schema.virtual('id').get(get_id).set(set_id);
 
 Schema.statics = {
     updateCourse: async ({ id, patch }) => ({
@@ -41,8 +47,10 @@ Schema.statics = {
     deleteCourse: async ({ id }) => ({ course: await Helpers.tryDeleteById(Course, id) }),
     getCourse:    async ({ id }) => ({ course: await Helpers.tryFindById(Course, id) }),
 
-    getCourses: req => Helpers.paginate<Course, CourseModel>(Course, {
-        ...req, sort: { name: 'desc' }
+    getCourses: req => Helpers.paginate<Course, CourseModel>({
+        ...req,
+        model: Course,
+        sort: { name: 'desc' }
     }),
 
     areValidIds: async suspect => (
@@ -72,12 +80,16 @@ Schema.statics = {
 Schema.methods = {
     author: getPopulated<Course>('authorId'),
     getTasks(req) {
-        return Helpers.paginate<Task, TaskModel>(Task, {
+        return Helpers.paginate<Task, TaskModel>({
             ...req,
-            filter: { courseId: this._id },
-            sort: { publicationDate: 'desc' }
+            model: Task,
+            filter: { include: { courseId: this._id }},
+            sort:   { publicationDate: 'desc' }
         });
     },
+
+
+    
     toCoreJsonData() {
         return {
             id:              String(this._id),

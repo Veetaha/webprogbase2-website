@@ -1,13 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute    } from '@angular/router';
-import { Subscriber        } from '@utils/subscriber';
-import { parsePagination   } from '@utils/helpers';
-import { PageHeaderService } from '@services/page-header';
-import { GroupsService    } from '@services/groups';
-import { Defaults          } from '@services/config';
-import { RoutingService    } from '@services/routing';
+import { Component, OnInit    } from '@angular/core';
+import { ActivatedRoute       } from '@angular/router';
+import { Subscriber           } from '@utils/subscriber';
+import { PageHeaderService    } from '@services/page-header';
+import { ErrorHandlingService } from '@services/error-handling';
+import { trackById            } from '@utils/helpers';
+import { GroupsService        } from '@services/groups';
+import { RoutingService       } from '@services/routing';
+import { Pagination           } from '@common/interfaces';
+import { PageFetcher          } from '@vee/components/pagination';
 
-import * as Gql             from '@services/gql';
+import * as RxO from 'rxjs/operators';
+import * as Gql from '@services/gql';
+import Group  = Gql.GetGroup.Group;
+import User   = Gql.GetGroupMembers.Data;
+import Course = Gql.GetGroupCourses.Data; 
 
 @Component({
     selector:    'app-group',
@@ -15,61 +21,75 @@ import * as Gql             from '@services/gql';
     styleUrls:  ['./group.component.scss']
 })
 export class GroupComponent extends Subscriber implements OnInit {
-    group!: Gql.GetGroup.Group;
+    
+    trackById = trackById;
+    group?: Group;
 
-    pageSizeOptions = Defaults.PaginationPageSizeOptions;
-    pagination = { ...Defaults.Pagination };
+    // refetchOnGroupChange = new Rx.Subject<Partial<Pagination>>();
 
-    private get groupId() {
+    get coursesPageFetcher(): PageFetcher<Course> {
+        return pagination => this.fetchCoursesPage(pagination);
+    }
+    get usersPageFetcher(): PageFetcher<User> {
+        return pagination => this.fetchMembersPage(pagination);
+    }
+    get groupId() {
         return this.route.snapshot.paramMap.get('id')!;
     }
 
     constructor(
-        private route:      ActivatedRoute,
         private backend:    GroupsService,
         private pageHeader: PageHeaderService,
-        public  rt:         RoutingService
-    ) {
-        super();
+        private errHandler: ErrorHandlingService,
+        private route:      ActivatedRoute,
+        private rt:         RoutingService
+    ) { super(); }
+
+
+    fetchGroup(id: string) {
+        this.backend.getGroup({ id }).subscribe(
+            res => {
+                this.group = res.data.getGroup.group;
+                this.pageHeader.setHeader({
+                    title:       this.group.name,
+                    toolButtons: [{
+                        name: 'Edit group',
+                        iconName: 'edit',
+                        routerLink: {
+                            pathFn: this.rt.to.groupEdit,
+                            args:  [this.groupId]
+                        }
+                    }]
+                });
+                // this.refetchOnGroupChange.next({ page: 1 });
+            },
+            err => this.errHandler.handle(err)
+        );
     }
 
     ngOnInit() {
-        this.subscrs.query = this
-            .route
-            .queryParamMap
-            .subscribe(queryParamMap => this.doSearchRequest(parsePagination(
-                queryParamMap, this.pagination
-            )));
+        this.route.paramMap.subscribe(paramMap => {
+            this.fetchGroup(paramMap.get('id')!);
+        });
     }
 
-    doSearchRequest({
-        page   = this.pagination.page,
-        limit  = this.pagination.limit,
-        search = this.pagination.search
-    } = this.pagination) {
-        this.pageHeader.loading = true;
-        const newPagination = { page, limit, search };
-        this.backend
-            .getGroup({ id: this.groupId }, { limit, page, search: { login: search }})
-            .subscribe(
-                ({ data: { getGroup: { group }}}) => {
-                    this.group      = group;
-                    this.pagination = newPagination;
-                    this.pageHeader.setHeader({
-                        loading:     false,
-                        title:       this.group.name,
-                        toolButtons: [{
-                            name: 'Edit group',
-                            iconName: 'edit',
-                            routerLink: {
-                                pathFn: this.rt.to.groupEdit,
-                                args: [this.groupId]
-                            }
-                        }]
-                    });
-                }
-            );
+    fetchCoursesPage({ page, limit, search }: Pagination) {
+        return this.backend.getGroupCourses(
+            { id: this.groupId }, 
+            { page, limit, search: { name: search }}
+        ).pipe(RxO.map(
+            res => res.data.getGroup.group.getCourses        
+        ));
     }
 
+
+    fetchMembersPage({ page, limit, search }: Pagination) {
+        return this.backend.getGroupMembers(
+            { id: this.groupId }, 
+            { page, limit, search: { login: search }}
+        ).pipe(RxO.map(
+            res => res.data.getGroup.group.getMembers
+        ));
+    }
 
 }

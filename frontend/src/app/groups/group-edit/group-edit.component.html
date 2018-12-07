@@ -1,1 +1,53 @@
-Group edit works!
+<div class="col-md-10 mx-auto">
+<form #groupForm="ngForm"
+	(ngSubmit)="onFormSubmit()"  
+	class="col-md-10 mx-auto"
+>
+<mat-form-field>
+    <input matInput
+        [(ngModel)]="newGroup.name"
+        type="text"
+        name="name"
+        placeholder="Group name"
+        required
+    >
+</mat-form-field>
+<mat-tab-group dynamicHeight>
+	<mat-tab label="Members">
+	<div class="mt-4">
+		<vee-list-selector #usersSelectorEl
+			[pageFetcher]="usersPageFetcher"
+			searchInputPlaceholder="Search group members"
+		>
+			<app-user-item *veeChosenItem="let user"
+                [user]="user">
+            </app-user-item>
+		
+		</vee-list-selector>
+	</div>
+	</mat-tab>
+	<mat-tab label="Courses">
+	<div class="mt-4">
+		<vee-list-selector #coursesSelectorEl
+            [pageFetcher]="coursesPageFetcher"
+            searchInputPlaceholder="Search available courses"
+        >
+            <app-course-item *veeChosenItem="let course"
+                [course]="course"
+            ></app-course-item>
+        </vee-list-selector>
+	</div>
+	</mat-tab>
+	<button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        class="col-3 mb-3"
+        [disabled]="groupForm.invalid"
+    >
+        <mat-icon>save</mat-icon>
+        <strong>Submit</strong>
+    </button>
+</mat-tab-group>
+</form>
+</div>

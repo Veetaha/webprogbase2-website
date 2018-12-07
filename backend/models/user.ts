@@ -8,7 +8,7 @@ import * as ApiV1     from '@public-api/v1';
 import * as Helpers   from '@modules/apollo-helpers';
 import * as _         from 'lodash';
 
-import { get_id, getPopulated } from '@modules/common';
+import { get_id, getPopulated, set_id } from '@modules/common';
 import { Group } from '@models/group';
 
 export import UserRole = GqlV1.UserRole;
@@ -30,6 +30,12 @@ export interface UserData {
 }
 
 export const Schema = new Mongoose.Schema({
+    [Helpers.paginate.metaSymbol]: {
+        id: {
+            aliasFor: '_id',
+            required: true
+        }
+    } as Helpers.PaginateMetadata,
     role:         { type: String,  required: true,  enum: Object.values(UserRole) },
     login:        { type: String,  required: true },
     password:     { type: String,  required: true },
@@ -43,7 +49,7 @@ export const Schema = new Mongoose.Schema({
         required: false
     }
 });
-Schema.virtual('id').get(get_id);
+Schema.virtual('id').get(get_id).set(set_id);
 
 function patchToMongoUpdate(patch: GqlV1.UpdateMePatch | GqlV1.UpdateUserPatch) {
     return _.omitBy(patch, (key, value) => (
@@ -59,10 +65,10 @@ Schema.statics = {
     deleteUser: async ({ id }) => ({ user: await Helpers.tryDeleteById(User, id) }),
     getUser:    async ({ id }) => ({ user: await Helpers.tryFindById(User, id)   }),
 
-    getUsers: ({filter, ...req}) => Helpers.paginate<User, UserModel>(User, {
+    getUsers: req => Helpers.paginate<User, UserModel>({
         ...req,
+        model: User,
         sort: { login: 'asc' },
-        filter: Helpers.filterNilAtRequired(filter, Schema)
     }),
 
     unAssignGroup: (groupId, usersId) => User

@@ -2,7 +2,22 @@ import * as Api from '@public-api/v1';
 import * as Types from 'vee-type-safe';
 import { ParamMap } from '@angular/router';
 import { Identifiable } from '@common/interfaces';
+import { PaginationComponent } from '@vee/components/pagination';
 
+
+
+
+export function updatePagination<T>(pagination: PaginationComponent<T>) {
+    return (paramMap: ParamMap) => pagination.doSearchRequest(parsePagination(
+        paramMap, pagination.pagination
+    ));
+}
+
+
+
+export function trackById(_index: number, { id }: Identifiable) {
+    return id;
+}
 
 export function byId(id: string) {
     return (suspect: Identifiable) => suspect.id === id;

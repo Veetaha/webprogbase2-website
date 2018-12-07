@@ -348,10 +348,11 @@ export namespace UpdateGroup {
     };
 }
 
-export namespace GetGroup {
+export namespace GetFullGroup {
     export type Variables = {
         groupReq: GetGroupRequest;
         membersReq: GetGroupMembersRequest;
+        coursesReq: GetGroupCoursesRequest;
     };
 
     export type Query = {
@@ -372,6 +373,112 @@ export namespace GetGroup {
         name: string;
 
         creationDate: string;
+
+        getMembers: GetMembers;
+
+        getCourses: GetCourses;
+    };
+
+    export type GetMembers = {
+        __typename?: "GetGroupMembersResponse";
+
+        total: number;
+
+        data: Data[];
+    };
+
+    export type Data = {
+        __typename?: "User";
+
+        id: string;
+
+        login: string;
+
+        fullname: string;
+
+        role: UserRole;
+
+        avaUrl: string;
+    };
+
+    export type GetCourses = {
+        __typename?: "GetGroupCoursesResponse";
+
+        total: number;
+
+        data: _Data[];
+    };
+
+    export type _Data = {
+        __typename?: "Course";
+
+        id: string;
+
+        name: string;
+    };
+}
+
+export namespace GetGroupCourses {
+    export type Variables = {
+        groupReq: GetGroupRequest;
+        coursesReq: GetGroupCoursesRequest;
+    };
+
+    export type Query = {
+        __typename?: "Query";
+
+        getGroup: GetGroup;
+    };
+
+    export type GetGroup = {
+        __typename?: "GetGroupResponse";
+
+        group: Group;
+    };
+
+    export type Group = {
+        __typename?: "Group";
+
+        getCourses: GetCourses;
+    };
+
+    export type GetCourses = {
+        __typename?: "GetGroupCoursesResponse";
+
+        total: number;
+
+        data: Data[];
+    };
+
+    export type Data = {
+        __typename?: "Course";
+
+        id: string;
+
+        name: string;
+    };
+}
+
+export namespace GetGroupMembers {
+    export type Variables = {
+        groupReq: GetGroupRequest;
+        membersReq: GetGroupMembersRequest;
+    };
+
+    export type Query = {
+        __typename?: "Query";
+
+        getGroup: GetGroup;
+    };
+
+    export type GetGroup = {
+        __typename?: "GetGroupResponse";
+
+        group: Group;
+    };
+
+    export type Group = {
+        __typename?: "Group";
 
         getMembers: GetMembers;
     };
@@ -396,6 +503,32 @@ export namespace GetGroup {
         role: UserRole;
 
         avaUrl: string;
+    };
+}
+
+export namespace GetGroup {
+    export type Variables = {
+        req: GetGroupRequest;
+    };
+
+    export type Query = {
+        __typename?: "Query";
+
+        getGroup: GetGroup;
+    };
+
+    export type GetGroup = {
+        __typename?: "GetGroupResponse";
+
+        group: Group;
+    };
+
+    export type Group = {
+        __typename?: "Group";
+
+        name: string;
+
+        creationDate: string;
     };
 }
 
@@ -701,14 +834,15 @@ export class UpdateGroupGQL extends Apollo.Mutation<
 @Injectable({
     providedIn: "root"
 })
-export class GetGroupGQL extends Apollo.Query<
-    GetGroup.Query,
-    GetGroup.Variables
+export class GetFullGroupGQL extends Apollo.Query<
+    GetFullGroup.Query,
+    GetFullGroup.Variables
 > {
     document: any = gql`
-        query getGroup(
+        query getFullGroup(
             $groupReq: GetGroupRequest!
             $membersReq: GetGroupMembersRequest!
+            $coursesReq: GetGroupCoursesRequest!
         ) {
             getGroup(req: $groupReq) {
                 group {
@@ -724,6 +858,86 @@ export class GetGroupGQL extends Apollo.Query<
                             avaUrl
                         }
                     }
+                    getCourses(req: $coursesReq) {
+                        total
+                        data {
+                            id
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
+export class GetGroupCoursesGQL extends Apollo.Query<
+    GetGroupCourses.Query,
+    GetGroupCourses.Variables
+> {
+    document: any = gql`
+        query getGroupCourses(
+            $groupReq: GetGroupRequest!
+            $coursesReq: GetGroupCoursesRequest!
+        ) {
+            getGroup(req: $groupReq) {
+                group {
+                    getCourses(req: $coursesReq) {
+                        total
+                        data {
+                            id
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
+export class GetGroupMembersGQL extends Apollo.Query<
+    GetGroupMembers.Query,
+    GetGroupMembers.Variables
+> {
+    document: any = gql`
+        query getGroupMembers(
+            $groupReq: GetGroupRequest!
+            $membersReq: GetGroupMembersRequest!
+        ) {
+            getGroup(req: $groupReq) {
+                group {
+                    getMembers(req: $membersReq) {
+                        total
+                        data {
+                            id
+                            login
+                            fullname
+                            role
+                            avaUrl
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
+export class GetGroupGQL extends Apollo.Query<
+    GetGroup.Query,
+    GetGroup.Variables
+> {
+    document: any = gql`
+        query getGroup($req: GetGroupRequest!) {
+            getGroup(req: $req) {
+                group {
+                    name
+                    creationDate
                 }
             }
         }

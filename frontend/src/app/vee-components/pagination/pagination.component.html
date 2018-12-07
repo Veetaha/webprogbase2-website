@@ -1,0 +1,40 @@
+<ng-container *ngIf="dataPage; else elseDataNotLoaded">
+    <vee-search-input
+        (searchDemand)="doSearchRequest({ page: 1, search: $event })"
+        [placeholder]="searchInputPlaceholder"
+    >  
+    </vee-search-input>
+    <mat-paginator #paginator
+        [length]         ="dataPage.total"
+        [pageSize]       ="pagination.limit"
+        [pageIndex]      ="pagination.page - 1"
+        [pageSizeOptions]="pageSizeOptions"
+        (page)="
+            doSearchRequest({
+                page:  $event.pageIndex + 1,
+                limit: $event.pageSize
+            });
+        "
+        color="primary"
+        showFirstLastButtons="showFirstLastButtons"
+    ></mat-paginator>
+    <ng-template 
+        [ngTemplateOutlet]="templateRef" 
+        [ngTemplateOutletContext]="{ $implicit: dataPage.data }"
+    ></ng-template>
+    <p *ngIf="!dataPage.data.length"
+        class="text-muted text-center"
+    >
+        {{nothingWasFoundMessage}}
+    </p>
+    <p *ngIf="pagination.search" class="text-muted">
+        Search results for "{{pagination.search}}"
+    </p>
+</ng-container>
+<ng-template #elseDataNotLoaded>
+    <mat-progress-spinner
+        color="accent"
+        mode="indeterminate"
+        class="centered-block"
+    ></mat-progress-spinner>
+</ng-template>

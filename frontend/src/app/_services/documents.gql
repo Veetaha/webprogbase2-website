@@ -24,7 +24,11 @@ mutation updateGroup($req: UpdateGroupRequest!) {
     }
 }
 
-query getGroup($groupReq: GetGroupRequest!, $membersReq: GetGroupMembersRequest!) {
+query getFullGroup(
+    $groupReq: GetGroupRequest!, 
+    $membersReq: GetGroupMembersRequest!,
+    $coursesReq: GetGroupCoursesRequest!
+) {
     getGroup(req: $groupReq) {
         group {
             name
@@ -39,6 +43,60 @@ query getGroup($groupReq: GetGroupRequest!, $membersReq: GetGroupMembersRequest!
                     avaUrl
                 }
             }
+            getCourses(req: $coursesReq) {
+                total
+                data {
+                    id
+                    name   
+                }
+            }
+        }
+    }
+ }
+
+
+query getGroupCourses(
+    $groupReq: GetGroupRequest!, 
+    $coursesReq: GetGroupCoursesRequest!
+) {
+    getGroup(req: $groupReq) {
+        group {
+            getCourses(req: $coursesReq) {
+                total
+                data {
+                    id
+                    name   
+                }
+            }
+        }
+    }
+}
+
+query getGroupMembers(
+    $groupReq: GetGroupRequest!, 
+    $membersReq: GetGroupMembersRequest!
+) {
+    getGroup(req: $groupReq) {
+        group {
+            getMembers(req: $membersReq) {
+                total
+                data {
+                    id
+                    login
+                    fullname
+                    role
+                    avaUrl
+                }
+            }
+        }
+    }
+}
+
+query getGroup($req: GetGroupRequest!) {
+    getGroup(req: $req) {
+        group {
+            name
+            creationDate
         }
     }
 }

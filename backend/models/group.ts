@@ -12,7 +12,7 @@ import { Course, CourseModel } from '@models/course';
 
 import ObjectId = Mongoose.Types.ObjectId;
 import MongoArray = Mongoose.Types.Array;
-import { get_id } from '@modules/common';
+import { get_id, set_id } from '@modules/common';
 type MongoIdArray = MongoArray<ObjectId>;
 
 export interface GroupData {
@@ -22,44 +22,50 @@ export interface GroupData {
 }
 
 const Schema = new Mongoose.Schema({
+    [Helpers.paginate.metaSymbol]: {
+        id: {
+            aliasFor: '_id',
+            required: true
+        }
+    } as Helpers.PaginateMetadata,
     coursesId:  {
         type: [Mongoose.SchemaTypes.ObjectId],
         ref:  'Course',
         required: true
     },
     name:         { type: String,   required: true    },
-    creationDate: { type: Date,     default: Date.now }
+    creationDate: { type: Date,     required: true, default: Date.now }
 });
 
-Schema.virtual('id').get(get_id);
+Schema.virtual('id').get(get_id).set(set_id);
 
 const Methods = {
     getCourses(req) {
-        return Helpers.paginate<Course, CourseModel>(Course, {
+        return Helpers.paginate<Course, CourseModel>({
             ...req,
-            sort: { publicationDate: 'desc' },
-            filter: {
-                _id: { $in: this.coursesId }
-            }
+            model: Course,
+            sort:   { publicationDate: 'desc' },
+            filter: { include: { id: this.coursesId }}
         });
     },
 
     async getMembers(req) {
-        return Helpers.paginate<User, UserModel>(User, {
+        return Helpers.paginate<User, UserModel>({
             ...req,
-            sort: { login: 'asc' },
-            filter: {
-                groupId: this._id
-            }
+            model: User,
+            sort:   { login: 'asc' },
+            filter: { include: { groupId: this._id }}
         });
     }
 } as Group;
 const Statics = {
     getGroup: async ({ id }) => ({ group: await Helpers.tryFindById(Group, id) }),
 
-    getGroups: req => Helpers.paginate<Group, GroupModel>(
-        Group, { ...req, sort: { name: 'desc' } }
-    ),
+    getGroups: req => Helpers.paginate<Group, GroupModel>({
+        ...req,
+        model: Group,
+        sort: { name: 'desc' }
+    }),
     async createGroup({ name, courses, members }) {
         if (!_.isEmpty(courses)) {
             Course.ensureValidIds(courses!);

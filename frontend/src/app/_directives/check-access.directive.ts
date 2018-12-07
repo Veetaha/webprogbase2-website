@@ -6,10 +6,10 @@ import { RouteFn        } from '@routes/paths';
     selector: '[appCheckAccess]'
 })
 export class CheckAccessDirective {
-    private hasView = true;
+    private hasView = false;
 
     constructor(
-        private templateRef:   TemplateRef<any>,
+        private templateRef:   TemplateRef<unknown>,
         private viewContainer: ViewContainerRef,
         private rt:            RoutingService
     ) { }

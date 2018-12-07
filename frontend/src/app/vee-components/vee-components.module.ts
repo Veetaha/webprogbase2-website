@@ -8,20 +8,34 @@ import { SearchInputComponent     } from './search-input';
 import { SlideMenuComponent       } from './slide-menu';
 import { MessageBoxComponent      } from './message-box';
 import { ConfirmDialogComponent   } from './confirm-dialog';
+import { 
+    PaginationComponent, 
+    PaginatedDirective      
+} from './pagination';
+import { 
+    ListSelectorComponent,
+    FreeItemDirective,
+    ChosenItemDirective
+} from './list-selector';
 
 
-
-const Components = [
+const Directives = [
     HamburgerButtonComponent,
     SearchInputComponent,
     SlideMenuComponent,
     MessageBoxComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    PaginationComponent,
+    ListSelectorComponent,
+
+    PaginatedDirective,
+    FreeItemDirective,
+    ChosenItemDirective
 ];
 @NgModule({
-    declarations: Components,
+    declarations: Directives,
+    exports: Directives,
     imports: [ CommonModule, RouterModule, MaterialCommonModule ],
-    exports: Components,
     entryComponents: [
         MessageBoxComponent,
         ConfirmDialogComponent

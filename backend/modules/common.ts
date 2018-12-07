@@ -1,4 +1,4 @@
-import * as mongoose  from 'mongoose';
+import * as Mongoose  from 'mongoose';
 import * as express   from 'express';
 import * as Vts       from 'vee-type-safe';
 import * as VtsEx     from 'vee-type-safe/express';
@@ -8,7 +8,7 @@ import * as ApiV1 from '@public-api/v1';
 import escapeStringRegexp = require('escape-string-regexp');
 
 interface PaginateOptions<
-    TDoc extends mongoose.Document,
+    TDoc extends Mongoose.Document,
     TSelect extends keyof TDoc,
     TMapped extends { [Key in TSelect]?: any }
 > {
@@ -22,8 +22,8 @@ interface PaginateOptions<
 }
 
 export async function paginate<
-    TDoc extends mongoose.Document,
-    TModel extends mongoose.PaginateModel<TDoc>,
+    TDoc extends Mongoose.Document,
+    TModel extends Mongoose.PaginateModel<TDoc>,
     TMapped extends { [Key in keyof TDoc]?: any }
 >(
     model: TModel, {
@@ -59,21 +59,21 @@ export async function paginate<
 
 
 export function ensureValidId(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!Mongoose.Types.ObjectId.isValid(id)) {
         throw badRequest(`invalid id '${id}'`);
     }
 }
 
-export function tryMakeFindByIdQuery<TDoc extends mongoose.Document>(
-    model: mongoose.Model<TDoc>,
+export function tryMakeFindByIdQuery<TDoc extends Mongoose.Document>(
+    model: Mongoose.Model<TDoc>,
     id: string
 ) {
     ensureValidId(id);
     return model.findById(id);
 }
 
-export async function tryFindById<TDoc extends mongoose.Document>(
-    model: mongoose.Model<TDoc>,
+export async function tryFindById<TDoc extends Mongoose.Document>(
+    model: Mongoose.Model<TDoc>,
     id: string
 ) {
     return tryMakeFindByIdQuery(model, id).exec();
@@ -105,7 +105,7 @@ export function getPagination(
     next();
 }
 
-export function getPopulated<TDoc extends mongoose.Document>(
+export function getPopulated<TDoc extends Mongoose.Document>(
     propName: Extract<keyof TDoc, string>
 ) {
     return async function(this: TDoc) {
@@ -114,7 +114,14 @@ export function getPopulated<TDoc extends mongoose.Document>(
         return doc;
     };
 }
-export function get_id<TDoc extends mongoose.Document = mongoose.Document>(this: TDoc) {
+
+export function set_id<TDoc extends Mongoose.Document = Mongoose.Document>(
+    this: TDoc, id: Mongoose.Types.ObjectId
+) {
+    return this._id = id;
+}
+
+export function get_id<TDoc extends Mongoose.Document = Mongoose.Document>(this: TDoc) {
     return this._id;
 }
 

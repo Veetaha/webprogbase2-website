@@ -31,6 +31,7 @@ type Query {
     # Returns user data assigned to the request issuer, according to the given
     # bearer token in http 'Authorization' header.
     me: User!                                                @deny(roles: [guest])
+
     # Returns a paginated array of users according to the given page and search arguments.
     getUsers  (req: GetUsersRequest!  ): GetUsersResponse!   @deny(roles: [guest])
     # Returns a paginated array of courses according to the given page and search arguments.
@@ -146,10 +147,10 @@ input UsersFilter {
     exclude: UsersFilterData
 }
 input UsersFilterData {
-    # User's group id filter (exact match)
+    id:      [BOID!]
     groupId: [BOID!]
-    # User's role
     role:    [UserRole!]
+    
 }
 input UsersSearch {
     # User's login filter (case and substring position insensitive)
@@ -229,6 +230,14 @@ input GetCoursesRequest {
     page:  Int! @positiveInt 
     # Search filters.
     search: CoursesSearch
+    filter: CoursesFilter
+}
+input CoursesFilterData {
+    id: [BOID!]
+}
+input CoursesFilter {
+    include: CoursesFilterData
+    exclude: CoursesFilterData
 }
 input CoursesSearch {
     # Course's name filter (case and substring position insensitive)

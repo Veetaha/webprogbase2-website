@@ -1,47 +1,44 @@
-<div class="col-md-10 offset-md-1">
-<vee-search-input
-    placeholder="User name"
-    (searchDemand)="doSearchRequest({ page: 1, search: $event })"
-></vee-search-input>
-<ng-container *ngIf="group?.getMembers; else elseGroupNotLoaded">
-    <mat-paginator #paginator
-        [length]         ="group!.getMembers.total"
-        [pageSize]       ="pagination.limit"
-        [pageIndex]      ="pagination.page - 1"
-        [pageSizeOptions]="pageSizeOptions"
-        (page)="
-            doSearchRequest({
-                page:  $event.pageIndex + 1,
-                limit: $event.pageSize
-            });
-        "
-        color="primary"
-        showFirstLastButtons
-    ></mat-paginator>
-
-    <mat-card>
-    <mat-list *ngIf="group!.getMembers.data.length; else elseNoMembers">
-        <mat-list-item *ngFor="let member of group!.getMembers.data">
-            <a [routerLink]="rt.to.user(member.id)">
-            <app-user-item 
-                [user]="member"
-                class="list-item"
-            ></app-user-item>
-            </a>
-        </mat-list-item>
-    </mat-list>
-    </mat-card>
-    <ng-template #elseNoMembers>
-        <p id="not-found" class="text-info">
-            Nothing was found
-        </p>
-    </ng-template>
-
-    <p *ngIf="pagination.search" id="search-info" class="text-muted">
-        Search results for "{{pagination.search}}"
-    </p>
-</ng-container>
-<ng-template #elseGroupNotLoaded>
-    <h2 class="text-center text-info">Loading...</h2>
-</ng-template>
+<div class="col-md-10 mx-auto">
+    <mat-tab-group dynamicHeight>
+        <mat-tab label="Members">
+        <div class="mt-4">
+        <vee-pagination
+            [pageFetcher]="usersPageFetcher"
+            refetchOnChange="group"
+            searchInputPlaceholder="Search group members"
+            noInitFetch
+        >
+            <mat-list *veePaginated="let users">
+                <mat-list-item *ngFor="let user of users; trackBy: trackById">
+                    <a *appCheckAccess="rt.to.user"
+                        [routerLink]="rt.to.user(user.id)"
+                    >
+                        <app-user-item [user]="user"></app-user-item>
+                    </a>
+                </mat-list-item>
+            </mat-list>
+        </vee-pagination>
+        </div>
+        </mat-tab>
+        <mat-tab label="Courses">
+        <div class="mt-4">
+        <vee-pagination
+            [pageFetcher]="coursesPageFetcher"
+            refetchOnChange="group"
+            searchInputPlaceholder="Search available courses"
+            noInitFetch
+        >
+            <mat-list *veePaginated="let courses">
+                <mat-list-item *ngFor="let course of courses; trackBy: trackById">
+                    <a *appCheckAccess="rt.to.course"
+                        [routerLink]="rt.to.course(course.id)"
+                    >
+                        <app-course-item [course]="course"></app-course-item>
+                    </a>
+                </mat-list-item>
+            </mat-list>
+        </vee-pagination>
+        </div>
+        </mat-tab>
+</mat-tab-group>
 </div>

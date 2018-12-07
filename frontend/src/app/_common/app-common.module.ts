@@ -27,6 +27,7 @@ import { GraphQLModule        } from './graphql.module';
         })
     ],
     exports: [
+        CheckAccessDirective,
         MaterialCommonModule,
         
         UcWidgetModule,
