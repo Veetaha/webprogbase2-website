@@ -6,21 +6,25 @@
                 alt="User avatar"
                 class="user-avatar"
             >
-            <mat-card-title>{{user!.login}}</mat-card-title>
-            <mat-card-subtitle>{{user!.fullname}}</mat-card-subtitle>
+            <mat-card-title>{{user.login}}</mat-card-title>
+            <mat-card-subtitle>{{user.fullname}}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-            <p><strong>Role:</strong>       {{user!.role }}</p>
+            <p><strong>Role:</strong>       {{user.role }}</p>
             <mat-divider></mat-divider>
-            <p><strong>Registered:</strong> {{user!.registeredAt | date }}</p>
+            <p><strong>Registered:</strong> {{user.registeredAt | date }}</p>
             <mat-divider></mat-divider>
-            <p><strong>Disabled:</strong>   {{user!.isDisabled}}</p>
+            <p><strong>Disabled:</strong>   {{user.isDisabled}}</p>
             <ng-container *ngIf="user!.group">
                 <mat-divider></mat-divider>
-                <p><strong>Group:</strong> {{user!.group}}</p>
+                <p><strong>Group:</strong>
+                    <a [routerLink]="rt.to.group(user.group.id)">
+                        {{user.group.name}}
+                    </a>
+                </p>
             </ng-container>
         </mat-card-content>
-        <mat-card-actions *ngIf="user!.id === session.user?.id">
+        <mat-card-actions *ngIf="userId === session.user?.id">
             <button mat-raised-button
                 (click)="onLogout()"
                 color="warn"
@@ -28,6 +32,10 @@
         </mat-card-actions>
     </mat-card>
     <ng-template #elseUserNotLoaded>
-        <h2 class="text-info">Loading...</h2>
+        <mat-progress-spinner
+            color="accent"
+            mode="indeterminate"
+            class="centered-block"
+        ></mat-progress-spinner>
     </ng-template>
 </div>

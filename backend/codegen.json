@@ -10,10 +10,11 @@
                     "TypeMatchedScalar": "never"
                 },
                 "mappers": {
-                    "Task":   "./gql-params-v1#Task",
-                    "Course": "./gql-params-v1#Course",
-                    "Group":  "./gql-params-v1#Group",
-                    "User":   "./gql-params-v1#User"
+                    "Task":       "./gql-params-v1#Task",
+                    "Course":     "./gql-params-v1#Course",
+                    "Group":      "./gql-params-v1#Group",
+                    "User":       "./gql-params-v1#User",
+                    "TaskResult": "./gql-params-v1#TaskResult"
                 },
                 "interfacePrefix": "",
                 "contextType": "./gql-params-v1#ResolveContext"

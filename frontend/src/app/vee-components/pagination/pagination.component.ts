@@ -72,7 +72,10 @@ export class PaginationComponent<TData> implements OnInit {
           .fetchPage({ page, limit, search })
           .pipe(this.pageHeader.displayLoading())
   		  .subscribe(
-              data => this.dataPage = data,
+              data => { 
+                this.pagination = { page, limit, search };
+                this.dataPage = data;
+              },
               err  => this.errHandler.handle(err)
           );
   	}

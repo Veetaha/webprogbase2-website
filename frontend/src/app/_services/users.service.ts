@@ -9,17 +9,22 @@ import * as Gql from '@services/gql';
 })
 export class UsersService {
     constructor(
-        private http:          HttpClient,
-        private getUsersGql:   Gql.GetUsersGQL,
-        private getUserGql:    Gql.GetUserGQL,
-        private updateUserGql: Gql.UpdateUserGQL,
-        private updateMeGql:   Gql.UpdateMeGQL
+        private http:              HttpClient,
+        private getUsersGql:       Gql.GetUsersGQL,
+        private getUserGql:        Gql.GetUserGQL,
+        private getUserForEditGql: Gql.GetUserForEditGQL,
+        private updateUserGql:     Gql.UpdateUserGQL,
+        private updateMeGql:       Gql.UpdateMeGQL
     ) { }
 
     private options = { fetchPolicy: 'no-cache' } as { fetchPolicy: 'no-cache' };
 
     getUsers(req: Gql.GetUsersRequest) {
         return this.getUsersGql.fetch({ req }, this.options);
+    }
+
+    getUserForEdit(req: Gql.GetUserRequest) {
+        return this.getUserGql.fetch({ req }, this.options);
     }
 
     getUser(req: Gql.GetUserRequest) {
@@ -40,6 +45,7 @@ export class UsersService {
             Vts.takeFromKeys(req, Api.V1.User.Put.RequestTD)
         );
     }
+
 
     deleteUser(userId: string) {
         return this.http.delete<void>(

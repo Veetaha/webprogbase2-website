@@ -1,16 +1,15 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router       } from '@angular/router';
-import { ErrorHandlingService         } from '@services/error-handling';
-import { PageHeaderService            } from '@services/page-header';
-import { GroupsService                } from '@services/groups';
-import { UsersService                 } from '@services/users';
-import { CoursesService               } from '@services/courses';
-import { RoutingService               } from '@services/routing';
-import { Pagination                   } from '@common/interfaces';
-import { Subscriber 	              } from '@utils/subscriber';
-import { PageFetcher	              } from '@vee/components/pagination';
-import { ListSelectorComponent        } from '@vee/components/list-selector';
-import { trackById 		              } from '@utils/helpers';
+import { Component, OnInit        } from '@angular/core';
+import { ActivatedRoute, Router   } from '@angular/router';
+import { ErrorHandlingService     } from '@services/error-handling';
+import { PageHeaderService        } from '@services/page-header';
+import { GroupsService            } from '@services/groups';
+import { UsersService             } from '@services/users';
+import { CoursesService           } from '@services/courses';
+import { RoutingService           } from '@services/routing';
+import { Pagination, Identifiable } from '@common/interfaces';
+import { Subscriber 	          } from '@utils/subscriber';
+import { PageFetcher	          } from '@vee/components/pagination';
+import { trackById, getId         } from '@utils/helpers';
 
 import * as Gql from '@services/gql';
 import * as RxO from 'rxjs/operators';
@@ -26,20 +25,17 @@ import Course = Gql.GetGroupCourses.Data;
     styleUrls:  ['./group-edit.component.scss']
 })
 export class GroupEditComponent extends Subscriber implements OnInit {
-
-    @ViewChild('usersSelectorEl')   usersEl!:   ListSelectorComponent<User>;
-    @ViewChild('coursesSelectorEl') coursesEl!: ListSelectorComponent<Course>;
-
-
-
     trackById = trackById;
-    originalGroup?: Gql.GetFullGroup.Group & {
-        members: User[],
-        courses: Course[]
-    }
+    srcGroup?: Gql.GetFullGroup.Group;
 
     newGroup = {
-    	name: ''
+    	name: '',
+        getCourses: {
+            data: [] as Course[]
+        },
+        getMembers: {
+            data: [] as User[]
+        }
     }
     refetchOnGroupChange = new Rx.Subject<Partial<Pagination>>();
 
@@ -72,11 +68,10 @@ export class GroupEditComponent extends Subscriber implements OnInit {
                 { limit: 100, page: 1 },
                 { limit: 100, page: 1 }
     	))).subscribe(
-    		res => this.originalGroup = { 
-                get members() { return this.getMembers.data; },
-                get courses() { return this.getCourses.data; },
-                ...res.data.getGroup.group
-    		},
+    		res => {
+                this.srcGroup = res.data.getGroup.group;
+                this.newGroup = _.cloneDeep(this.srcGroup);
+            },
     		err => this.errHandler.handle(err)
     	);
     }
@@ -97,7 +92,8 @@ export class GroupEditComponent extends Subscriber implements OnInit {
             search: { login: search },
             filter: {
                 include: {
-                    role: [Gql.UserRole.Student]
+                    role: [Gql.UserRole.Student],
+                    groupId: [null, this.groupId]
                 }
             }
 		}).pipe(RxO.map(
@@ -105,17 +101,64 @@ export class GroupEditComponent extends Subscriber implements OnInit {
 		));
 	}
 
+    onDeleteGroup() {
+        this.pageHeader.openConfirmDialog({
+            titleHtml: 'Sanity check',
+            contentHtml: 'Are you sure you want to delete this group?'
+        }).subscribe(confirmed => { 
+            const deletedGroupName = this.srcGroup!.name;
+            if (!confirmed) {
+                return;
+            }
+            this.groupsService.deleteGroup({ id: this.groupId })
+                .pipe(this.pageHeader.displayLoading())
+                .subscribe(
+                    () => {
+                        this.pageHeader.flashSnackBar(
+                            `Successfully deleted group "${deletedGroupName}"`
+                        );
+                        this.router.navigateByUrl(this.rt.to.groups());
+                    },
+                    err => this.errHandler.handle(err)
+                );
+        });
+    }
+
     onFormSubmit() {
+        function diff(rel: Identifiable[], target: Identifiable[]) {
+            return _(rel).differenceBy(target, getId).map(getId).value();
+        }
+
         this.groupsService.updateGroup({ 
             id: this.groupId,
             patch: {
-                name: this.newGroup.name,
-                // @TODO: addCourses, removeCourse, addMembers, removeMembers
+                name: this.newGroup.name,    
+                addMembers: diff(
+                    this.newGroup.getMembers.data,
+                    this.srcGroup!.getMembers.data
+                ),
+                removeMembers: diff(
+                    this.srcGroup!.getMembers.data,
+                    this.newGroup.getMembers.data
+                ),
+                addCourses: diff(
+                    this.newGroup.getCourses.data,
+                    this.srcGroup!.getCourses.data
+                ),
+                removeCourses: diff(
+                    this.srcGroup!.getCourses.data,
+                    this.newGroup.getCourses.data
+                )
             }
-        }).subscribe(
-            () => this.router.navigateByUrl(
-                this.rt.to.group(this.groupId)
-            ),
+        })
+        .pipe(this.pageHeader.displayLoading())
+        .subscribe(
+            () => { 
+                this.pageHeader.flashSnackBar(
+                    `Group "${this.srcGroup!.name}" was successfully updated.`
+                );
+                this.router.navigateByUrl(this.rt.to.group(this.groupId));
+            },
             err => this.errHandler.handle(err)
         )
     }

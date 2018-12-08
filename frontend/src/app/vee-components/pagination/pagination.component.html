@@ -23,13 +23,15 @@
         [ngTemplateOutletContext]="{ $implicit: dataPage.data }"
     ></ng-template>
     <p *ngIf="!dataPage.data.length"
-        class="text-muted text-center"
+        class="text-muted"
     >
-        {{nothingWasFoundMessage}}
+        <strong>{{nothingWasFoundMessage}}</strong>
     </p>
-    <p *ngIf="pagination.search" class="text-muted">
+    
+    <small *ngIf="pagination.search" class="text-muted">
         Search results for "{{pagination.search}}"
-    </p>
+    </small>
+
 </ng-container>
 <ng-template #elseDataNotLoaded>
     <mat-progress-spinner

@@ -64,7 +64,7 @@ export interface UsersFilter {
 export interface UsersFilterData {
     id?: string[] | null;
 
-    groupId?: string[] | null;
+    groupId?: (string | null)[] | null;
 
     role?: UserRole[] | null;
 }
@@ -201,6 +201,8 @@ export interface UpdateUserPatch {
     avaUrl?: string | null;
 
     isDisabled?: boolean | null;
+
+    groupId?: string | null;
 }
 
 export interface UpdateTaskRequest {
@@ -680,6 +682,54 @@ export namespace GetUsers {
         fullname: string;
 
         avaUrl: string;
+
+        group: Group | null;
+    };
+
+    export type Group = {
+        __typename?: "Group";
+
+        id: string;
+
+        name: string;
+    };
+}
+
+export namespace GetUserForEdit {
+    export type Variables = {
+        req: GetUserRequest;
+    };
+
+    export type Query = {
+        __typename?: "Query";
+
+        getUser: GetUser;
+    };
+
+    export type GetUser = {
+        __typename?: "GetUserResponse";
+
+        user: User;
+    };
+
+    export type User = {
+        __typename?: "User";
+
+        id: string;
+
+        login: string;
+
+        role: UserRole;
+
+        fullname: string;
+
+        registeredAt: string;
+
+        avaUrl: string;
+
+        isDisabled: boolean;
+
+        groupId: string | null;
     };
 }
 
@@ -716,6 +766,16 @@ export namespace GetUser {
         avaUrl: string;
 
         isDisabled: boolean;
+
+        group: Group | null;
+    };
+
+    export type Group = {
+        __typename?: "Group";
+
+        id: string;
+
+        name: string;
     };
 }
 
@@ -1033,6 +1093,34 @@ export class GetUsersGQL extends Apollo.Query<
                     login
                     fullname
                     avaUrl
+                    group {
+                        id
+                        name
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
+export class GetUserForEditGQL extends Apollo.Query<
+    GetUserForEdit.Query,
+    GetUserForEdit.Variables
+> {
+    document: any = gql`
+        query getUserForEdit($req: GetUserRequest!) {
+            getUser(req: $req) {
+                user {
+                    id
+                    login
+                    role
+                    fullname
+                    registeredAt
+                    avaUrl
+                    isDisabled
+                    groupId
                 }
             }
         }
@@ -1053,6 +1141,10 @@ export class GetUserGQL extends Apollo.Query<GetUser.Query, GetUser.Variables> {
                     registeredAt
                     avaUrl
                     isDisabled
+                    group {
+                        id
+                        name
+                    }
                 }
             }
         }

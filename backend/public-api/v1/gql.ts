@@ -40,6 +40,29 @@ export interface GetGroupMembersRequest {
 export interface GroupMembersSearch {
   login?: string | null;
 }
+/** Get paginated array of task results. */
+export interface GetTaskResultsRequest {
+  /** Amount of task results per page. */
+  limit: number;
+  /** 1-based page number. */
+  page: number;
+  /** Search filters. */
+  search?: TaskResultsSearch | null;
+}
+
+export interface TaskResultsSearch {
+  taskTitle?: string | null;
+}
+/** Get task result by id. */
+export interface GetTaskResultRequest {
+  id: string;
+}
+/** ReadGet task result by its author and taks ids. */
+export interface GetUserTaskResultRequest {
+  authorId: string;
+
+  taskId: string;
+}
 
 export interface GetUsersRequest {
   /** Amount of users per page. */
@@ -64,10 +87,11 @@ export interface UsersFilter {
 }
 
 export interface UsersFilterData {
-  /** User's group id filter (exact match) */
-  groupId?: string | null;
-  /** User's role */
-  role?: UserRole | null;
+  id?: string[] | null;
+
+  groupId?: (string | null)[] | null;
+
+  role?: UserRole[] | null;
 }
 
 export interface GetCoursesRequest {
@@ -77,6 +101,18 @@ export interface GetCoursesRequest {
   page: number;
   /** Search filters. */
   search?: CoursesSearch | null;
+
+  filter?: CoursesFilter | null;
+}
+
+export interface CoursesFilter {
+  include?: CoursesFilterData | null;
+
+  exclude?: CoursesFilterData | null;
+}
+
+export interface CoursesFilterData {
+  id?: string[] | null;
 }
 
 export interface GetGroupsRequest {
@@ -190,6 +226,8 @@ export interface UpdateUserPatch {
   avaUrl?: string | null;
 
   isDisabled?: boolean | null;
+
+  groupId?: string | null;
 }
 
 export interface UpdateTaskRequest {
@@ -233,6 +271,57 @@ export interface DeleteCourseRequest {
   /** Target course id. */
   id: string;
 }
+/** Create */
+export interface CreateTaskResultRequest {
+  taskId: string;
+
+  body?: string | null;
+
+  fileUrl?: string | null;
+}
+/** Update */
+export interface UpdateTaskResultRequest {
+  id: string;
+
+  patch: UpdateTaskResultPatch;
+}
+
+export interface UpdateTaskResultPatch {
+  taskId?: string | null;
+
+  body?: string | null;
+
+  fileUrl?: string | null;
+}
+/** Delete */
+export interface DeleteTaskResultRequest {
+  id: string;
+}
+/** ##TaskResultCheckCreate */
+export interface CreateTaskResultCheckRequest {
+  taskResultId: string;
+
+  payload: CreateTaskResultCheckRequestPayload;
+}
+
+export interface CreateTaskResultCheckRequestPayload {
+  comment?: string | null;
+
+  score: number;
+}
+/** Update */
+export interface UpdateTaskResultCheckRequest {
+  /** Task result id */
+  id: string;
+
+  patch: UpdateTaskResultCheckPatch;
+}
+
+export interface UpdateTaskResultCheckPatch {
+  comment?: string | null;
+
+  score?: number | null;
+}
 
 export interface DeleteUserRequest {
   /** Target user id. */
@@ -272,6 +361,12 @@ export type TypeMatchedScalar = any;
 export interface Query {
   /** Returns user data assigned to the request issuer, according to the givenbearer token in http 'Authorization' header. */
   me: User;
+
+  getTaskResults: GetTaskResultsResponse;
+
+  getTaskResult: GetTaskResultResponse;
+
+  getUserTaskResult: GetUserTaskResultResponse;
   /** Returns a paginated array of users according to the given page and search arguments. */
   getUsers: GetUsersResponse;
   /** Returns a paginated array of courses according to the given page and search arguments. */
@@ -385,6 +480,53 @@ export interface GetGroupMembersResponse {
   total: number;
 }
 
+export interface GetTaskResultsResponse {
+  /** Page of task results that satisfy input search filters. */
+  data: TaskResult[];
+  /** Total amount of task results that may be queried for the given search input. */
+  total: number;
+}
+
+/** Task fulfilment result */
+export interface TaskResult {
+  authorId: string;
+
+  taskId: string;
+
+  author: User;
+
+  task: Task;
+
+  lastUpdate: Date;
+
+  body?: string | null;
+
+  fileUrl?: string | null;
+
+  check?: TaskResultCheck | null;
+}
+
+/** Examined task result info */
+export interface TaskResultCheck {
+  authorId: string;
+
+  author: User;
+
+  lastUpdate: Date;
+
+  comment?: string | null;
+
+  score: number;
+}
+
+export interface GetTaskResultResponse {
+  taskResult: TaskResult;
+}
+
+export interface GetUserTaskResultResponse {
+  taskResult: TaskResult;
+}
+
 export interface GetUsersResponse {
   /** Page of users that satisfy input search filters. */
   data: User[];
@@ -446,6 +588,18 @@ export interface Mutation {
   deleteTask: DeleteTaskResponse;
   /** Deletes the course by id.Throws an error if the course was not found. */
   deleteCourse: DeleteCourseResponse;
+
+  createTaskResult: CreateTaskResultResponse;
+
+  updateTaskResult: UpdateTaskResultResponse;
+
+  deleteTaskResult: DeleteTaskResultResponse;
+
+  createTaskResultCheck: CreateTaskResultCheckResponse;
+
+  updateTaskResultCheck: UpdateTaskResultCheckResponse;
+
+  deleteTaskResultCheck: DeleteTaskResultCheckResponse;
 }
 
 export interface CreateTaskResponse {
@@ -502,6 +656,35 @@ export interface DeleteCourseResponse {
   course: Course;
 }
 
+export interface CreateTaskResultResponse {
+  taskResult: TaskResult;
+}
+
+export interface UpdateTaskResultResponse {
+  taskResult: TaskResult;
+}
+
+export interface DeleteTaskResultResponse {
+  taskResult: TaskResult;
+}
+
+export interface CreateTaskResultCheckResponse {
+  taskResult: TaskResult;
+}
+
+export interface UpdateTaskResultCheckResponse {
+  taskResult: TaskResult;
+}
+
+export interface DeleteTaskResultCheckRequest {
+  /** Task result id */
+  id: string;
+}
+
+export interface DeleteTaskResultCheckResponse {
+  taskResult: TaskResult;
+}
+
 export interface DeleteUserResponse {
   /** Deleted user. */
   user: User;
@@ -511,6 +694,15 @@ export interface DeleteUserResponse {
 // Arguments
 // ====================================================
 
+export interface GetTaskResultsQueryArgs {
+  req: GetTaskResultsRequest;
+}
+export interface GetTaskResultQueryArgs {
+  req: GetTaskResultRequest;
+}
+export interface GetUserTaskResultQueryArgs {
+  req: GetUserTaskResultRequest;
+}
 export interface GetUsersQueryArgs {
   req: GetUsersRequest;
 }
@@ -574,11 +766,40 @@ export interface DeleteTaskMutationArgs {
 export interface DeleteCourseMutationArgs {
   req: DeleteCourseRequest;
 }
+export interface CreateTaskResultMutationArgs {
+  req: CreateTaskResultRequest;
+}
+export interface UpdateTaskResultMutationArgs {
+  req: UpdateTaskResultRequest;
+}
+export interface DeleteTaskResultMutationArgs {
+  req: DeleteTaskResultRequest;
+}
+export interface CreateTaskResultCheckMutationArgs {
+  req: CreateTaskResultCheckRequest;
+}
+export interface UpdateTaskResultCheckMutationArgs {
+  req: UpdateTaskResultCheckRequest;
+}
+export interface DeleteTaskResultCheckMutationArgs {
+  req: DeleteTaskResultCheckRequest;
+}
 
 export namespace Access {
   // tslint:disable:no-shadowed-variable
   export const Query = {
     me: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
+    getTaskResults: new Set([UserRole.Teacher, UserRole.Admin]),
+    getTaskResult: new Set([
+      UserRole.Student,
+      UserRole.Teacher,
+      UserRole.Admin
+    ]),
+    getUserTaskResult: new Set([
+      UserRole.Student,
+      UserRole.Teacher,
+      UserRole.Admin
+    ]),
     getUsers: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
     getGroups: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
     getUser: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
@@ -599,7 +820,13 @@ export namespace Access {
     updateTask: new Set([UserRole.Teacher, UserRole.Admin]),
     updateCourse: new Set([UserRole.Teacher, UserRole.Admin]),
     deleteTask: new Set([UserRole.Teacher, UserRole.Admin]),
-    deleteCourse: new Set([UserRole.Teacher, UserRole.Admin])
+    deleteCourse: new Set([UserRole.Teacher, UserRole.Admin]),
+    createTaskResult: new Set([UserRole.Student, UserRole.Admin]),
+    updateTaskResult: new Set([UserRole.Student, UserRole.Admin]),
+    deleteTaskResult: new Set([UserRole.Admin]),
+    createTaskResultCheck: new Set([UserRole.Teacher, UserRole.Admin]),
+    updateTaskResultCheck: new Set([UserRole.Teacher, UserRole.Admin]),
+    deleteTaskResultCheck: new Set([UserRole.Teacher, UserRole.Admin])
   };
   // tslint:enable:no-shadowed-variable
 }

@@ -4,16 +4,15 @@ import { ParamMap } from '@angular/router';
 import { Identifiable } from '@common/interfaces';
 import { PaginationComponent } from '@vee/components/pagination';
 
-
-
-
 export function updatePagination<T>(pagination: PaginationComponent<T>) {
     return (paramMap: ParamMap) => pagination.doSearchRequest(parsePagination(
         paramMap, pagination.pagination
     ));
 }
 
-
+export function getId({ id }: Identifiable) {
+    return id;
+}
 
 export function trackById(_index: number, { id }: Identifiable) {
     return id;

@@ -7,6 +7,8 @@ import { UsersService           } from '@services/users';
 import { RoutingService         } from '@services/routing';
 import { Subscriber             } from '@utils/subscriber';
 
+import * as _      from 'lodash';
+import * as RxO    from 'rxjs/operators';
 import * as Vts    from 'vee-type-safe';
 import * as Api    from '@public-api/v1';
 import * as Gql    from '@services/gql';
@@ -20,14 +22,16 @@ import * as GqlApi from '@public-api/v1/gql';
 export class UserEditComponent extends Subscriber implements OnInit {
     user?: Gql.GetUser.User;
     input: Gql.UpdateUserPatch = {};
-    // { [Key in keyof Gql.UpdateUserPatch]: Exclude<Gql.UpdateUserPatch[Key], null> } = {};
+ 
     Api = Api.Data.User;
     RoleLimit = Api.V1.User.Put.RoleLimit;
 
+    get userId() {
+        return this.user ? this.user.id : this.route.snapshot.paramMap.get('id')!
+    }
+
     get canDeleteUser() {
-        
-        return Api.RouteAccess.DELETE[Api.V1.User.Delete._(':id')]
-                  .has(this.session.userRole);
+        return false;
     }
 
     userRoles = Object.values(Api.UserRole).filter(role => role !== Api.UserRole.Guest);
@@ -48,22 +52,21 @@ export class UserEditComponent extends Subscriber implements OnInit {
             () => this.onUserChange()
         );
 
-        this.subscrs.user = this.route.paramMap.subscribe(paramMap => {
-            const userId = paramMap.get('id')!;
-            if (this.session.user && this.session.user.id === userId) {
-                return this.setUser(this.session.user);
-            }
-            this.backend.getUser({ id: userId })
-                .pipe(this.pageHeader.displayLoading())
-                .subscribe(
-                    res => this.setUser(res.data.getUser.user),
-                    err => this.errHandler.handle(err)
-                );
-        });
+        this.subscrs.user = this.route.paramMap
+            .pipe(
+                RxO.map(
+                    paramMap => this.backend.getUserForEdit({ id: paramMap.get('id')! })
+                ),
+                this.pageHeader.displayLoading(),
+                RxO.flatMap(val => val)
+            ).subscribe(
+                res => this.setUser(res.data.getUser.user),
+                err => this.errHandler.handle(err)
+            );
     }
 
     setUser(user: Gql.GetUser.User) {
-        this.user  = user;
+        this.user  = _.cloneDeep(user);
         this.input = Vts.take(user, (
             this.session.userRole === GqlApi.UserRole.Admin
                 ? GqlApi.UpdateUserPatchFields
@@ -73,32 +76,46 @@ export class UserEditComponent extends Subscriber implements OnInit {
     }
 
     onFormSubmit() {
-        const submittedUserId = this.user!.id;
-        if (this.session.user && this.session.user.id === submittedUserId) {
+        const submittedUserId = this.userId;
+        if (this.session.userRole !== Gql.UserRole.Admin) {
             const newMe = { ...this.session.user, ...this.input };
-            return this.backend.updateMe({ patch: this.input }).subscribe(() => {
-                this.session.user = newMe as Api.Data.User.Json;
-                this.router.navigateByUrl(this.rt.to.user(submittedUserId));
-            });
+            return this.backend
+                .updateMe({ patch: this.input })
+                .pipe(this.pageHeader.displayLoading())
+                .subscribe(() => {
+                    this.session.user = newMe as Api.Data.User.Json;
+                    this.router.navigateByUrl(this.rt.to.user(submittedUserId));
+                });
         }
-        return this.backend.updateUser({ id: submittedUserId, patch: this.input }).subscribe(
-            ()  => this.router.navigateByUrl(this.rt.to.user(submittedUserId)),
-            err => this.errHandler.handle(err)
-        );
+        const groupId = this.input!.group.I
+        return this.backend.updateUser({ 
+            id: submittedUserId, 
+            patch: this.input
+        })  .pipe(this.pageHeader.displayLoading())
+            .subscribe(
+                ()  => this.router.navigateByUrl(this.rt.to.user(submittedUserId)),
+                err => this.errHandler.handle(err)
+            );
     }
 
-    onDeleteDemand() {
-        const deletedUser = this.user!;
-        this.backend.deleteUser(deletedUser.id).subscribe(
-            () => {
-                if (this.session.user && this.session.user.id === deletedUser.id) {
-                    this.session.logout();
-                    this.router.navigateByUrl(this.rt.to.login());
-                }
-            },
-            err => this.errHandler.handle(err)
-        );
-    }
+    // onDeleteDemand() {
+    //     const deletedUser = this.user!;
+    //     this.backend
+    //         .deleteUser(deletedUser.id)
+    //         .pipe(this.pageHeader.displayLoading())
+    //         .subscribe(
+    //         () => {
+    //             if (this.session.user && this.session.user.id === deletedUser.id) {
+    //                 this.session.logout();
+    //                 this.pageHeader.flashSnackBar(
+    //                     `Successfully deleted your account`
+    //                 );
+    //                 this.router.navigateByUrl(this.rt.to.login());
+    //             }
+    //         },
+    //         err => this.errHandler.handle(err)
+    //     );
+    // }
 
     onUserChange() {
         if (this.user && this.session.user &&        (

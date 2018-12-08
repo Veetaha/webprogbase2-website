@@ -39,25 +39,6 @@ const Schema = new Mongoose.Schema({
 
 Schema.virtual('id').get(get_id).set(set_id);
 
-const Methods = {
-    getCourses(req) {
-        return Helpers.paginate<Course, CourseModel>({
-            ...req,
-            model: Course,
-            sort:   { publicationDate: 'desc' },
-            filter: { include: { id: this.coursesId }}
-        });
-    },
-
-    async getMembers(req) {
-        return Helpers.paginate<User, UserModel>({
-            ...req,
-            model: User,
-            sort:   { login: 'asc' },
-            filter: { include: { groupId: this._id }}
-        });
-    }
-} as Group;
 const Statics = {
     getGroup: async ({ id }) => ({ group: await Helpers.tryFindById(Group, id) }),
 
@@ -105,6 +86,27 @@ const Statics = {
     },
     deleteGroup: async ({ id }) => ({ group: await Helpers.tryDeleteById(Group, id) })
 } as GroupModel;
+
+const Methods = {
+    getCourses(req) {
+        return Helpers.paginate<Course, CourseModel>({
+            ...req,
+            model: Course,
+            sort:   { publicationDate: 'desc' },
+            filter: { include: { id: this.coursesId }}
+        });
+    },
+
+    async getMembers(req) {
+        return Helpers.paginate<User, UserModel>({
+            ...req,
+            model: User,
+            sort:   { login: 'asc' },
+            filter: { include: { groupId: this._id }}
+        });
+    }
+} as Group;
+
 Schema.methods = Methods;
 Schema.statics = Statics;
 

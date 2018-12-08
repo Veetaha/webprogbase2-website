@@ -1,25 +1,10 @@
 <div class="col-md-10 mx-auto">
-    <vee-search-input
-        placeholder="User name"
-        (searchDemand)="doSearchRequest({ page: 1, search: $event })"
-    ></vee-search-input>
-
-    <ng-container *ngIf="api; else elseNoApi">
-    <mat-paginator #paginator
-        [length]         ="api!.total"
-        [pageSize]       ="pagination.limit"
-        [pageIndex]      ="pagination.page - 1"
-        [pageSizeOptions]="[5, 10, 20, 50, 100]"
-        (page)="
-            pagination.page  = $event.pageIndex + 1;
-            pagination.limit = $event.pageSize;
-            doSearchRequest();
-        "
-        color="primary"
-        showFirstLastButtons
-    ></mat-paginator>
-    <table mat-table *ngIf="api!.data.length; else elseNoUsersFound"
-        [dataSource]="api!.data" 
+    <vee-pagination
+        [pageFetcher]="usersPageFetcher"
+        searchInputPlaceholder="User login"
+    >
+    <table mat-table *veePaginated="let users"
+        [dataSource]="users" 
         class=       "mat-elevation-z8"
         id=          "users-table"
     >
@@ -48,30 +33,26 @@
             <th mat-header-cell *matHeaderCellDef>Role</th>
             <td mat-cell *matCellDef="let user">{{user.role}}</td>
         </ng-container>
+        <ng-container matColumnDef="group">
+            <th mat-header-cell *matHeaderCellDef>Group</th>
+            <td mat-cell *matCellDef="let user">
+                <a *ngIf="user.group; else elseNoGroup"
+                    [routerLink]="rt.to.group(user.group.id)"
+                >
+                    {{user.group.name}}
+                </a>
+                <ng-template #elseNoGroup>
+                    <mat-icon>block</mat-icon>
+                </ng-template>
+            </td>
+        </ng-container>
 
         <tr mat-header-row 
-            *matHeaderRowDef="['login', 'fullname', 'role']"
+            *matHeaderRowDef="['login', 'fullname', 'role', 'group']"
         ></tr>
         <tr mat-row 
-            *matRowDef="let row; columns: ['login', 'fullname', 'role'];"
+            *matRowDef="let row; columns: ['login', 'fullname', 'role', 'group'];"
         ></tr>
     </table>
-    </ng-container>
-    <ng-template #elseNoUsersFound>
-        <p class="text-info">
-            No users were found
-        </p>
-    </ng-template>
-    <ng-template #elseNoApi>
-        <mat-progress-spinner
-            color="accent"
-            mode="indeterminate"
-        ></mat-progress-spinner>
-    </ng-template>
-    
-    <p *ngIf="pagination.search" 
-        class="text-muted mt-1"
-    >Search results for "{{pagination.search}}"
-    </p>
-
+    </vee-pagination>
 </div>

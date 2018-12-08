@@ -11,6 +11,8 @@ directive @deny(
 directive @allow(
     roles: [UserRole]
 ) on OBJECT | FIELD_DEFINITION
+
+
 # Requires a string to contain at least one non-whitespace character.
 directive @notEmpty             on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 # Requires an integer within the range [1, +Infinity)
@@ -26,11 +28,16 @@ directive @password             on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 # Requires a specific user fullname string format, wich is /^\S{3,32}$/
 directive @userFullname         on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
+
 # Root queries endpoint.
 type Query {
     # Returns user data assigned to the request issuer, according to the given
     # bearer token in http 'Authorization' header.
     me: User!                                                @deny(roles: [guest])
+
+    getTaskResults   (req: GetTaskResultsRequest!   ): GetTaskResultsResponse!    @allow(roles: [teacher, admin])
+    getTaskResult    (req: GetTaskResultRequest!    ): GetTaskResultResponse!     @deny (roles: [guest])
+    getUserTaskResult(req: GetUserTaskResultRequest!): GetUserTaskResultResponse! @deny (roles: [guest])
 
     # Returns a paginated array of users according to the given page and search arguments.
     getUsers  (req: GetUsersRequest!  ): GetUsersResponse!   @deny(roles: [guest])
@@ -81,6 +88,13 @@ type Mutation {
     # Deletes the course by id.
     # Throws an error if the course was not found.
     deleteCourse(req: DeleteCourseRequest!): DeleteCourseResponse! @allow(roles: [teacher, admin])  
+
+    createTaskResult (req: CreateTaskResultRequest! ): CreateTaskResultResponse!  @allow(roles: [student, admin])
+    updateTaskResult (req: UpdateTaskResultRequest! ): UpdateTaskResultResponse!  @allow(roles: [student, admin])
+    deleteTaskResult (req: DeleteTaskResultRequest! ): DeleteTaskResultResponse!  @allow(roles: [admin])
+    createTaskResultCheck(req: CreateTaskResultCheckRequest!): CreateTaskResultCheckResponse! @allow(roles: [teacher, admin])
+    updateTaskResultCheck(req: UpdateTaskResultCheckRequest!): UpdateTaskResultCheckResponse! @allow(roles: [teacher, admin])
+    deleteTaskResultCheck(req: DeleteTaskResultCheckRequest!): DeleteTaskResultCheckResponse! @allow(roles: [teacher, admin])
 }
 
 type GetTaskResponse {
@@ -148,7 +162,7 @@ input UsersFilter {
 }
 input UsersFilterData {
     id:      [BOID!]
-    groupId: [BOID!]
+    groupId: [BOID]
     role:    [UserRole!]
     
 }
@@ -194,6 +208,7 @@ input UpdateUserPatch {
     fullname:      String    @userFullname
     avaUrl:        String
     isDisabled:    Boolean
+    groupId:       BOID
 }
 type UpdateUserResponse {
     # Updated user.
@@ -480,3 +495,124 @@ type DeleteGroupResponse {
     group: Group!
 }
 
+# Examined task result info
+type TaskResultCheck {        
+    authorId:   BOID!
+    author:     User!
+    lastUpdate: Date!
+    comment:    String
+    score:      Float!
+}
+# Task fulfilment result
+type TaskResult {
+    authorId:    BOID!
+    taskId:      BOID!
+    author:      User!
+    task:        Task!
+    lastUpdate:  Date!
+    body:        String
+    fileUrl:     String
+    check:       TaskResultCheck
+}
+
+#Read
+# Get task result by its author and taks ids.
+input GetUserTaskResultRequest {
+    authorId: BOID!
+    taskId:   BOID!
+}
+type GetUserTaskResultResponse {
+    taskResult: TaskResult!
+}
+# Get task result by id.
+input GetTaskResultRequest {
+    id: BOID!
+}
+type GetTaskResultResponse {
+    taskResult: TaskResult!
+}
+# Get paginated array of task results.
+input GetTaskResultsRequest {
+    # Amount of task results per page.
+    limit: Int! @positiveInt
+    # 1-based page number.
+    page:  Int! @positiveInt 
+    # Search filters.
+    search: TaskResultsSearch
+}
+input TaskResultsSearch {
+    taskTitle: String
+}
+type GetTaskResultsResponse {
+    # Page of task results that satisfy input search filters.
+    data: [TaskResult!]!
+    # Total amount of task results that may be queried for the given search input.
+    total: Int! @zeroOrPositiveInt
+}
+
+#Create
+input CreateTaskResultRequest {
+    taskId:  BOID!
+    body:    String
+    fileUrl: String
+}
+type CreateTaskResultResponse {
+    taskResult: TaskResult!
+}
+
+#Update
+input UpdateTaskResultRequest {
+    id:    BOID!
+    patch: UpdateTaskResultPatch!
+}
+input UpdateTaskResultPatch {
+    taskId:  BOID
+    body:    String
+    fileUrl: String
+}
+type UpdateTaskResultResponse {
+    taskResult: TaskResult!
+}
+
+#Delete
+input DeleteTaskResultRequest {
+    id: BOID!
+}
+type DeleteTaskResultResponse {
+    taskResult: TaskResult!
+}
+###TaskResultCheck
+#Create
+input CreateTaskResultCheckRequest {
+    id:      BOID!
+    payload: CreateTaskResultCheckRequestPayload!
+}
+input CreateTaskResultCheckRequestPayload {
+    comment: String
+    score:   Float!
+}
+type CreateTaskResultCheckResponse {
+    taskResult: TaskResult!
+}
+
+#Update
+input UpdateTaskResultCheckRequest {
+    # Task result id
+    id:    BOID!
+    patch: UpdateTaskResultCheckPatch!
+}
+input UpdateTaskResultCheckPatch {
+    comment: String
+    score:   Float
+}
+type UpdateTaskResultCheckResponse {
+    taskResult: TaskResult!
+}
+
+type DeleteTaskResultCheckRequest {
+    # Task result id
+    id: BOID!
+}
+type DeleteTaskResultCheckResponse {
+    taskResult: TaskResult!
+}

@@ -1,7 +1,6 @@
 import { Component, OnInit      } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog              } from '@angular/material/dialog';
-import { MatSnackBar            } from '@angular/material/snack-bar';
 import { EditorOption           } from 'angular-markdown-editor';
 import { Defaults               } from '@services/config';
 import { ConfigService          } from '@services/config';
@@ -43,7 +42,6 @@ export class CourseEditComponent extends Subscriber implements OnInit {
     }
 
     constructor(
-        private snackBar:       MatSnackBar,
         private dialog:         MatDialog,
         private pageHeader:     PageHeaderService,
         private serverApi:      CoursesService,
@@ -67,11 +65,8 @@ export class CourseEditComponent extends Subscriber implements OnInit {
                 this.serverApi.deleteTask(task.id)
                 .subscribe(() => {
                     this.pageHeader.loading = false;
-                    this.snackBar.open(
-                        `Task '${deletedTaskTitle}' was successfully deleted.`,
-                        '', {
-                            duration: 1500 // ms
-                        }
+                    this.pageHeader.flashSnackBar(
+                        `Task '${deletedTaskTitle}' was successfully deleted.`
                     );
                     this.doSearchRequest();
                 });
@@ -93,11 +88,8 @@ export class CourseEditComponent extends Subscriber implements OnInit {
                 const deletedCourseName = this.course!.name;
                 this.serverApi.deleteCourse(this.courseId).subscribe(
                     () =>  {
-                        this.snackBar.open(
-                            `Course '${deletedCourseName}' was successfully deleted.`,
-                            '', {
-                                duration: 1500 // ms
-                            }
+                        this.pageHeader.flashSnackBar(
+                            `Course '${deletedCourseName}' was successfully deleted.`
                         );
                         this.router.navigateByUrl(this.rt.to.courses());
                     }
@@ -135,11 +127,8 @@ export class CourseEditComponent extends Subscriber implements OnInit {
         const updatedCourseName = this.course!.name;
         this.serverApi.putCourse(this.courseId, this.userInput).subscribe(
             () => {
-                this.snackBar.open(
-                    `Course '${updatedCourseName}' was successfully updated.`,
-                    '', {
-                        duration: 1500 // ms
-                    }
+                this.pageHeader.flashSnackBar(
+                    `Course '${updatedCourseName}' was successfully updated.`
                 );
                 this.router.navigateByUrl(this.rt.to.course(this.courseId));
             }

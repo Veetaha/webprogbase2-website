@@ -40,8 +40,8 @@ export class UserComponent extends Subscriber implements OnInit {
                 .getUser({ id: paramMap.get('id')! })
                 .pipe(this.pageHeader.displayLoading())
                 .subscribe(
-                    ({ data: { getUser: { user } } }) => {
-                        this.user = user;
+                    res => {
+                        this.user = res.data.getUser.user;
                         this.updateEditToolButton();
                     },
                     err => this.errHandler.handle(err)
@@ -51,6 +51,7 @@ export class UserComponent extends Subscriber implements OnInit {
 
     onLogout() {
         this.session.logout();
+        this.pageHeader.flashSnackBar('You are now logged out')
         this.router.navigateByUrl(this.rt.to.login());
     }
 

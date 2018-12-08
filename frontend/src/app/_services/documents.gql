@@ -154,6 +154,25 @@ query getUsers($req: GetUsersRequest!) {
             login
             fullname
             avaUrl
+            group {
+                id
+                name
+            }
+        }
+    }
+}
+
+query getUserForEdit($req: GetUserRequest!) {
+    getUser(req: $req) {
+        user {
+            id
+            login
+            role
+            fullname
+            registeredAt
+            avaUrl
+            isDisabled
+            groupId
         }
     }
 }
@@ -168,6 +187,10 @@ query getUser($req: GetUserRequest!) {
             registeredAt
             avaUrl
             isDisabled
+            group {
+                id
+                name
+            }
         }
     }
 }

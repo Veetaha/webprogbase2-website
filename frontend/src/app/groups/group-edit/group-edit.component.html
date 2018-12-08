@@ -17,6 +17,7 @@
 	<div class="mt-4">
 		<vee-list-selector #usersSelectorEl
 			[pageFetcher]="usersPageFetcher"
+            [chosenItems]="newGroup.getMembers.data"
 			searchInputPlaceholder="Search group members"
 		>
 			<app-user-item *veeChosenItem="let user"
@@ -30,6 +31,7 @@
 	<div class="mt-4">
 		<vee-list-selector #coursesSelectorEl
             [pageFetcher]="coursesPageFetcher"
+            [chosenItems]="newGroup.getCourses.data"
             searchInputPlaceholder="Search available courses"
         >
             <app-course-item *veeChosenItem="let course"
@@ -38,16 +40,26 @@
         </vee-list-selector>
 	</div>
 	</mat-tab>
-	<button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        class="col-3 mb-3"
-        [disabled]="groupForm.invalid"
-    >
-        <mat-icon>save</mat-icon>
-        <strong>Submit</strong>
-    </button>
 </mat-tab-group>
+<button
+    mat-raised-button
+    color="primary"
+    type="submit"
+    class="col-3 mb-3"
+    [disabled]="groupForm.invalid"
+>
+    <mat-icon>save</mat-icon>
+    <strong>Submit</strong>
+</button>
+<button
+    mat-raised-button
+    color="warn"
+    type="button"
+    class="col-3 ml-2"
+    (click)="onDeleteGroup()"
+>
+    <mat-icon>delete</mat-icon>
+    <strong>Delete group</strong>
+</button>
 </form>
 </div>

@@ -15,6 +15,7 @@ import { User            } from '@models/user';
 import { Task            } from '@models/task';
 import { Course          } from '@models/course';
 import { Group           } from '@models/group';
+import { TaskResult      } from '@models/task-result';
 import {
     AllowGuardDirective,
     DenyGuardDirective
@@ -53,8 +54,20 @@ const GroupResolvers: GqlV1.GroupResolvers.Resolvers = {
     getMembers: (group, { req }) => group.getMembers(req)
 };
 
+const TaskResultResolvers: GqlV1.TaskResultResolvers.Resolvers = {
+    author: taskResult => taskResult.author(),
+    task:   taskResult => taskResult.task(),
+    createCheck: (taskResult, { req }, { user }) => (
+        taskResult.createCheck(req, user!.id)
+    ),
+    updateCheck: (taskResult, { req }) => taskResult.updateCheck(req),
+    deleteCheck: taskResult => taskResult.deleteCheck()
+};
 
 const MutationResolvers: GqlV1.MutationResolvers.Resolvers = {
+    createTaskResult: async(_p, { req }, { user }) => (
+        TaskResult.createTaskResult(req, user!.id)
+    ),
     createCourse: async (_p, { req }, { user }) => ({
         course: await Course.create({ ...req, authorId: user!._id })
     }),
@@ -79,12 +92,13 @@ export const apolloServer = new Apollo.ApolloServer({
     playground: true,
     typeDefs: Apollo.gql(Config.GqlSchema),
     resolvers: {
-        Mutation:    MutationResolvers as Apollo.IResolverObject,
-        Query:       QueryResolvers    as Apollo.IResolverObject,
-        User:        UserResolvers     as Apollo.IResolverObject,
-        Task:        TaskResolvers     as Apollo.IResolverObject,
-        Course:      CourseResolvers   as Apollo.IResolverObject,
-        Group:       GroupResolvers    as Apollo.IResolverObject,
+        Mutation:    MutationResolvers   as Apollo.IResolverObject,
+        Query:       QueryResolvers      as Apollo.IResolverObject,
+        User:        UserResolvers       as Apollo.IResolverObject,
+        Task:        TaskResolvers       as Apollo.IResolverObject,
+        Course:      CourseResolvers     as Apollo.IResolverObject,
+        Group:       GroupResolvers      as Apollo.IResolverObject,
+        TaskResult:  TaskResultResolvers as Apollo.IResolverObject,
         BOID:        GqlBsonObjectId,
         Date:        GqlIsoDate.GraphQLDateTime
     },

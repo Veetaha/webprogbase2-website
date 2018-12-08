@@ -40,6 +40,29 @@ export interface GetGroupMembersRequest {
 export interface GroupMembersSearch {
   login?: string | null;
 }
+/** Get paginated array of task results. */
+export interface GetTaskResultsRequest {
+  /** Amount of task results per page. */
+  limit: number;
+  /** 1-based page number. */
+  page: number;
+  /** Search filters. */
+  search?: TaskResultsSearch | null;
+}
+
+export interface TaskResultsSearch {
+  taskTitle?: string | null;
+}
+/** Get task result by id. */
+export interface GetTaskResultRequest {
+  id: ObjectId;
+}
+/** ReadGet task result by its author and taks ids. */
+export interface GetUserTaskResultRequest {
+  authorId: ObjectId;
+
+  taskId: ObjectId;
+}
 
 export interface GetUsersRequest {
   /** Amount of users per page. */
@@ -64,10 +87,11 @@ export interface UsersFilter {
 }
 
 export interface UsersFilterData {
-  /** User's group id filter (exact match) */
-  groupId?: ObjectId | null;
-  /** User's role */
-  role?: UserRole | null;
+  id?: ObjectId[] | null;
+
+  groupId?: (ObjectId | null)[] | null;
+
+  role?: UserRole[] | null;
 }
 
 export interface GetCoursesRequest {
@@ -77,6 +101,18 @@ export interface GetCoursesRequest {
   page: number;
   /** Search filters. */
   search?: CoursesSearch | null;
+
+  filter?: CoursesFilter | null;
+}
+
+export interface CoursesFilter {
+  include?: CoursesFilterData | null;
+
+  exclude?: CoursesFilterData | null;
+}
+
+export interface CoursesFilterData {
+  id?: ObjectId[] | null;
 }
 
 export interface GetGroupsRequest {
@@ -190,6 +226,8 @@ export interface UpdateUserPatch {
   avaUrl?: string | null;
 
   isDisabled?: boolean | null;
+
+  groupId?: ObjectId | null;
 }
 
 export interface UpdateTaskRequest {
@@ -233,6 +271,57 @@ export interface DeleteCourseRequest {
   /** Target course id. */
   id: ObjectId;
 }
+/** Create */
+export interface CreateTaskResultRequest {
+  taskId: ObjectId;
+
+  body?: string | null;
+
+  fileUrl?: string | null;
+}
+/** Update */
+export interface UpdateTaskResultRequest {
+  id: ObjectId;
+
+  patch: UpdateTaskResultPatch;
+}
+
+export interface UpdateTaskResultPatch {
+  taskId?: ObjectId | null;
+
+  body?: string | null;
+
+  fileUrl?: string | null;
+}
+/** Delete */
+export interface DeleteTaskResultRequest {
+  id: ObjectId;
+}
+/** ##TaskResultCheckCreate */
+export interface CreateTaskResultCheckRequest {
+  taskResultId: ObjectId;
+
+  payload: CreateTaskResultCheckRequestPayload;
+}
+
+export interface CreateTaskResultCheckRequestPayload {
+  comment?: string | null;
+
+  score: number;
+}
+/** Update */
+export interface UpdateTaskResultCheckRequest {
+  /** Task result id */
+  id: ObjectId;
+
+  patch: UpdateTaskResultCheckPatch;
+}
+
+export interface UpdateTaskResultCheckPatch {
+  comment?: string | null;
+
+  score?: number | null;
+}
 
 export interface DeleteUserRequest {
   /** Target user id. */
@@ -272,6 +361,12 @@ export type TypeMatchedScalar = never;
 export interface Query {
   /** Returns user data assigned to the request issuer, according to the givenbearer token in http 'Authorization' header. */
   me: User;
+
+  getTaskResults: GetTaskResultsResponse;
+
+  getTaskResult: GetTaskResultResponse;
+
+  getUserTaskResult: GetUserTaskResultResponse;
   /** Returns a paginated array of users according to the given page and search arguments. */
   getUsers: GetUsersResponse;
   /** Returns a paginated array of courses according to the given page and search arguments. */
@@ -385,6 +480,53 @@ export interface GetGroupMembersResponse {
   total: number;
 }
 
+export interface GetTaskResultsResponse {
+  /** Page of task results that satisfy input search filters. */
+  data: TaskResult[];
+  /** Total amount of task results that may be queried for the given search input. */
+  total: number;
+}
+
+/** Task fulfilment result */
+export interface TaskResult {
+  authorId: ObjectId;
+
+  taskId: ObjectId;
+
+  author: User;
+
+  task: Task;
+
+  lastUpdate: Date;
+
+  body?: string | null;
+
+  fileUrl?: string | null;
+
+  check?: TaskResultCheck | null;
+}
+
+/** Examined task result info */
+export interface TaskResultCheck {
+  authorId: ObjectId;
+
+  author: User;
+
+  lastUpdate: Date;
+
+  comment?: string | null;
+
+  score: number;
+}
+
+export interface GetTaskResultResponse {
+  taskResult: TaskResult;
+}
+
+export interface GetUserTaskResultResponse {
+  taskResult: TaskResult;
+}
+
 export interface GetUsersResponse {
   /** Page of users that satisfy input search filters. */
   data: User[];
@@ -446,6 +588,18 @@ export interface Mutation {
   deleteTask: DeleteTaskResponse;
   /** Deletes the course by id.Throws an error if the course was not found. */
   deleteCourse: DeleteCourseResponse;
+
+  createTaskResult: CreateTaskResultResponse;
+
+  updateTaskResult: UpdateTaskResultResponse;
+
+  deleteTaskResult: DeleteTaskResultResponse;
+
+  createTaskResultCheck: CreateTaskResultCheckResponse;
+
+  updateTaskResultCheck: UpdateTaskResultCheckResponse;
+
+  deleteTaskResultCheck: DeleteTaskResultCheckResponse;
 }
 
 export interface CreateTaskResponse {
@@ -502,6 +656,35 @@ export interface DeleteCourseResponse {
   course: Course;
 }
 
+export interface CreateTaskResultResponse {
+  taskResult: TaskResult;
+}
+
+export interface UpdateTaskResultResponse {
+  taskResult: TaskResult;
+}
+
+export interface DeleteTaskResultResponse {
+  taskResult: TaskResult;
+}
+
+export interface CreateTaskResultCheckResponse {
+  taskResult: TaskResult;
+}
+
+export interface UpdateTaskResultCheckResponse {
+  taskResult: TaskResult;
+}
+
+export interface DeleteTaskResultCheckRequest {
+  /** Task result id */
+  id: ObjectId;
+}
+
+export interface DeleteTaskResultCheckResponse {
+  taskResult: TaskResult;
+}
+
 export interface DeleteUserResponse {
   /** Deleted user. */
   user: User;
@@ -511,6 +694,15 @@ export interface DeleteUserResponse {
 // Arguments
 // ====================================================
 
+export interface GetTaskResultsQueryArgs {
+  req: GetTaskResultsRequest;
+}
+export interface GetTaskResultQueryArgs {
+  req: GetTaskResultRequest;
+}
+export interface GetUserTaskResultQueryArgs {
+  req: GetUserTaskResultRequest;
+}
 export interface GetUsersQueryArgs {
   req: GetUsersRequest;
 }
@@ -574,10 +766,28 @@ export interface DeleteTaskMutationArgs {
 export interface DeleteCourseMutationArgs {
   req: DeleteCourseRequest;
 }
+export interface CreateTaskResultMutationArgs {
+  req: CreateTaskResultRequest;
+}
+export interface UpdateTaskResultMutationArgs {
+  req: UpdateTaskResultRequest;
+}
+export interface DeleteTaskResultMutationArgs {
+  req: DeleteTaskResultRequest;
+}
+export interface CreateTaskResultCheckMutationArgs {
+  req: CreateTaskResultCheckRequest;
+}
+export interface UpdateTaskResultCheckMutationArgs {
+  req: UpdateTaskResultCheckRequest;
+}
+export interface DeleteTaskResultCheckMutationArgs {
+  req: DeleteTaskResultCheckRequest;
+}
 
 import { GraphQLResolveInfo, GraphQLScalarTypeConfig } from "graphql";
 
-import { Task, Course, Group, User } from "./gql-params-v1";
+import { Task, Course, Group, User, TaskResult } from "./gql-params-v1";
 
 import { ResolveContext } from "./gql-params-v1";
 
@@ -637,6 +847,24 @@ export namespace QueryResolvers {
   export interface Resolvers<Context = ResolveContext, TypeParent = {}> {
     /** Returns user data assigned to the request issuer, according to the givenbearer token in http 'Authorization' header. */
     me?: MeResolver<User, TypeParent, Context>;
+
+    getTaskResults?: GetTaskResultsResolver<
+      GetTaskResultsResponse,
+      TypeParent,
+      Context
+    >;
+
+    getTaskResult?: GetTaskResultResolver<
+      GetTaskResultResponse,
+      TypeParent,
+      Context
+    >;
+
+    getUserTaskResult?: GetUserTaskResultResolver<
+      GetUserTaskResultResponse,
+      TypeParent,
+      Context
+    >;
     /** Returns a paginated array of users according to the given page and search arguments. */
     getUsers?: GetUsersResolver<GetUsersResponse, TypeParent, Context>;
     /** Returns a paginated array of courses according to the given page and search arguments. */
@@ -658,6 +886,33 @@ export namespace QueryResolvers {
     Parent = {},
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
+  export type GetTaskResultsResolver<
+    R = GetTaskResultsResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, GetTaskResultsArgs>;
+  export interface GetTaskResultsArgs {
+    req: GetTaskResultsRequest;
+  }
+
+  export type GetTaskResultResolver<
+    R = GetTaskResultResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, GetTaskResultArgs>;
+  export interface GetTaskResultArgs {
+    req: GetTaskResultRequest;
+  }
+
+  export type GetUserTaskResultResolver<
+    R = GetUserTaskResultResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, GetUserTaskResultArgs>;
+  export interface GetUserTaskResultArgs {
+    req: GetUserTaskResultRequest;
+  }
+
   export type GetUsersResolver<
     R = GetUsersResponse,
     Parent = {},
@@ -1060,6 +1315,166 @@ export namespace GetGroupMembersResponseResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace GetTaskResultsResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetTaskResultsResponse
+  > {
+    /** Page of task results that satisfy input search filters. */
+    data?: DataResolver<TaskResult[], TypeParent, Context>;
+    /** Total amount of task results that may be queried for the given search input. */
+    total?: TotalResolver<number, TypeParent, Context>;
+  }
+
+  export type DataResolver<
+    R = TaskResult[],
+    Parent = GetTaskResultsResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalResolver<
+    R = number,
+    Parent = GetTaskResultsResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+/** Task fulfilment result */
+export namespace TaskResultResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = TaskResult
+  > {
+    authorId?: AuthorIdResolver<ObjectId, TypeParent, Context>;
+
+    taskId?: TaskIdResolver<ObjectId, TypeParent, Context>;
+
+    author?: AuthorResolver<User, TypeParent, Context>;
+
+    task?: TaskResolver<Task, TypeParent, Context>;
+
+    lastUpdate?: LastUpdateResolver<Date, TypeParent, Context>;
+
+    body?: BodyResolver<string | null, TypeParent, Context>;
+
+    fileUrl?: FileUrlResolver<string | null, TypeParent, Context>;
+
+    check?: CheckResolver<TaskResultCheck | null, TypeParent, Context>;
+  }
+
+  export type AuthorIdResolver<
+    R = ObjectId,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type TaskIdResolver<
+    R = ObjectId,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthorResolver<
+    R = User,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type TaskResolver<
+    R = Task,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type LastUpdateResolver<
+    R = Date,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type BodyResolver<
+    R = string | null,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type FileUrlResolver<
+    R = string | null,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type CheckResolver<
+    R = TaskResultCheck | null,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+/** Examined task result info */
+export namespace TaskResultCheckResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = TaskResultCheck
+  > {
+    authorId?: AuthorIdResolver<ObjectId, TypeParent, Context>;
+
+    author?: AuthorResolver<User, TypeParent, Context>;
+
+    lastUpdate?: LastUpdateResolver<Date, TypeParent, Context>;
+
+    comment?: CommentResolver<string | null, TypeParent, Context>;
+
+    score?: ScoreResolver<number, TypeParent, Context>;
+  }
+
+  export type AuthorIdResolver<
+    R = ObjectId,
+    Parent = TaskResultCheck,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthorResolver<
+    R = User,
+    Parent = TaskResultCheck,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type LastUpdateResolver<
+    R = Date,
+    Parent = TaskResultCheck,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type CommentResolver<
+    R = string | null,
+    Parent = TaskResultCheck,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type ScoreResolver<
+    R = number,
+    Parent = TaskResultCheck,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GetTaskResultResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetTaskResultResponse
+  > {
+    taskResult?: TaskResultResolver<TaskResult, TypeParent, Context>;
+  }
+
+  export type TaskResultResolver<
+    R = TaskResult,
+    Parent = GetTaskResultResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GetUserTaskResultResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetUserTaskResultResponse
+  > {
+    taskResult?: TaskResultResolver<TaskResult, TypeParent, Context>;
+  }
+
+  export type TaskResultResolver<
+    R = TaskResult,
+    Parent = GetUserTaskResultResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace GetUsersResponseResolvers {
   export interface Resolvers<
     Context = ResolveContext,
@@ -1225,6 +1640,42 @@ export namespace MutationResolvers {
       TypeParent,
       Context
     >;
+
+    createTaskResult?: CreateTaskResultResolver<
+      CreateTaskResultResponse,
+      TypeParent,
+      Context
+    >;
+
+    updateTaskResult?: UpdateTaskResultResolver<
+      UpdateTaskResultResponse,
+      TypeParent,
+      Context
+    >;
+
+    deleteTaskResult?: DeleteTaskResultResolver<
+      DeleteTaskResultResponse,
+      TypeParent,
+      Context
+    >;
+
+    createTaskResultCheck?: CreateTaskResultCheckResolver<
+      CreateTaskResultCheckResponse,
+      TypeParent,
+      Context
+    >;
+
+    updateTaskResultCheck?: UpdateTaskResultCheckResolver<
+      UpdateTaskResultCheckResponse,
+      TypeParent,
+      Context
+    >;
+
+    deleteTaskResultCheck?: DeleteTaskResultCheckResolver<
+      DeleteTaskResultCheckResponse,
+      TypeParent,
+      Context
+    >;
   }
 
   export type CreateTaskResolver<
@@ -1324,6 +1775,60 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, Context, DeleteCourseArgs>;
   export interface DeleteCourseArgs {
     req: DeleteCourseRequest;
+  }
+
+  export type CreateTaskResultResolver<
+    R = CreateTaskResultResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, CreateTaskResultArgs>;
+  export interface CreateTaskResultArgs {
+    req: CreateTaskResultRequest;
+  }
+
+  export type UpdateTaskResultResolver<
+    R = UpdateTaskResultResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, UpdateTaskResultArgs>;
+  export interface UpdateTaskResultArgs {
+    req: UpdateTaskResultRequest;
+  }
+
+  export type DeleteTaskResultResolver<
+    R = DeleteTaskResultResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, DeleteTaskResultArgs>;
+  export interface DeleteTaskResultArgs {
+    req: DeleteTaskResultRequest;
+  }
+
+  export type CreateTaskResultCheckResolver<
+    R = CreateTaskResultCheckResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, CreateTaskResultCheckArgs>;
+  export interface CreateTaskResultCheckArgs {
+    req: CreateTaskResultCheckRequest;
+  }
+
+  export type UpdateTaskResultCheckResolver<
+    R = UpdateTaskResultCheckResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, UpdateTaskResultCheckArgs>;
+  export interface UpdateTaskResultCheckArgs {
+    req: UpdateTaskResultCheckRequest;
+  }
+
+  export type DeleteTaskResultCheckResolver<
+    R = DeleteTaskResultCheckResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, DeleteTaskResultCheckArgs>;
+  export interface DeleteTaskResultCheckArgs {
+    req: DeleteTaskResultCheckRequest;
   }
 }
 
@@ -1498,6 +2003,112 @@ export namespace DeleteCourseResponseResolvers {
   export type CourseResolver<
     R = Course,
     Parent = DeleteCourseResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace CreateTaskResultResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = CreateTaskResultResponse
+  > {
+    taskResult?: TaskResultResolver<TaskResult, TypeParent, Context>;
+  }
+
+  export type TaskResultResolver<
+    R = TaskResult,
+    Parent = CreateTaskResultResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UpdateTaskResultResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = UpdateTaskResultResponse
+  > {
+    taskResult?: TaskResultResolver<TaskResult, TypeParent, Context>;
+  }
+
+  export type TaskResultResolver<
+    R = TaskResult,
+    Parent = UpdateTaskResultResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DeleteTaskResultResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = DeleteTaskResultResponse
+  > {
+    taskResult?: TaskResultResolver<TaskResult, TypeParent, Context>;
+  }
+
+  export type TaskResultResolver<
+    R = TaskResult,
+    Parent = DeleteTaskResultResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace CreateTaskResultCheckResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = CreateTaskResultCheckResponse
+  > {
+    taskResult?: TaskResultResolver<TaskResult, TypeParent, Context>;
+  }
+
+  export type TaskResultResolver<
+    R = TaskResult,
+    Parent = CreateTaskResultCheckResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UpdateTaskResultCheckResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = UpdateTaskResultCheckResponse
+  > {
+    taskResult?: TaskResultResolver<TaskResult, TypeParent, Context>;
+  }
+
+  export type TaskResultResolver<
+    R = TaskResult,
+    Parent = UpdateTaskResultCheckResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DeleteTaskResultCheckRequestResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = DeleteTaskResultCheckRequest
+  > {
+    /** Task result id */
+    id?: IdResolver<ObjectId, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = ObjectId,
+    Parent = DeleteTaskResultCheckRequest,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DeleteTaskResultCheckResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = DeleteTaskResultCheckResponse
+  > {
+    taskResult?: TaskResultResolver<TaskResult, TypeParent, Context>;
+  }
+
+  export type TaskResultResolver<
+    R = TaskResult,
+    Parent = DeleteTaskResultCheckResponse,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
 }

@@ -6,7 +6,7 @@ import * as Vts       from 'vee-type-safe';
 // import * as Debug     from '@modules/debug';
 import * as Apollo    from 'apollo-server-express';
 // import * as Debug     from '@modules/debug';
-import { notFound       } from '@modules/error';
+import { notFoundGql    } from '@modules/error';
 import { User           } from '@models/user';
 import { ResolveContext } from '@declarations/gql-params-v1';
 
@@ -109,6 +109,15 @@ type PaginateFilterOptions<T> = {
     [Key in keyof T]?: Maybe<T[Key] | T[Key][]>;
 };
 
+export function mapStringValuesToSearchRegexp(obj: Maybe<Vts.BasicObject>) {
+    return _.mapValues<unknown, unknown>(obj, value => (
+        typeof value === 'string'
+            ? new RegExp(escapeStringRegexp(value), 'i')
+            : value
+    ));
+}
+
+
 interface PaginateOptions<
     TDoc extends Mongoose.Document,
     TModel extends Mongoose.PaginateModel<TDoc>
@@ -122,6 +131,7 @@ interface PaginateOptions<
         include?: Maybe<PaginateFilterOptions<TDoc>>
         exclude?: Maybe<PaginateFilterOptions<TDoc>>
     }>;
+    __filter?: Vts.BasicObject
 }
 export async function paginate<
     TDoc   extends Mongoose.Document,
@@ -132,7 +142,8 @@ export async function paginate<
     limit,
     search,
     sort,
-    filter
+    filter,
+    __filter
 }: PaginateOptions<TDoc, TModel>
 ): Promise<ApiV1.Paginated<TDoc>> {
     try {
@@ -145,11 +156,7 @@ export async function paginate<
     }
 
     // FIXME: remove type arguments
-    const mongoSearch = _.mapValues<unknown, unknown>(search, value => (
-        typeof value === 'string'
-            ? new RegExp(escapeStringRegexp(value), 'i')
-            : value
-    ));
+    const mongoSearch = mapStringValuesToSearchRegexp(search);
     const schemaDef = model.schema.obj;
 
     const mongoExcludeFilter = !filter || !filter.exclude ? {} :
@@ -163,7 +170,12 @@ export async function paginate<
         ));
 
     const docsPage = await model.paginate(
-        Object.assign(mongoSearch, mongoExcludeFilter, mongoIncludeFilter),
+        Object.assign(
+            mongoSearch, 
+            mongoExcludeFilter, 
+            mongoIncludeFilter,
+            __filter
+        ),
         { page, limit, sort }
     );
 
@@ -234,10 +246,36 @@ export async function tryFindById<TDoc extends Mongoose.Document>(
     return doc;
 }
 
+export async function tryFindOne<TDoc extends Mongoose.Document>(
+    model: Mongoose.Model<TDoc>, criteria: Vts.BasicObject
+) {
+    const doc = await model.findByOne(criteria);
+    if (!doc) {
+        throw notFound(`nothing was found`);
+    }
+    return doc;
+}
+
+
 export function filterNilProps(obj: Vts.BasicObject) {
     return _.omitBy(obj, _.isNil);
 }
 
 export function filterObjectIds<T extends ObjectId[]>(source: T, exclude: ObjectId[]) {
     return source.filter(srcId => !exclude.find(removeId => srcId.equals(removeId)));
+}
+
+export function renameKey<
+    TMaybeObj extends Maybe<Vts.BasicObject>
+>(
+    obj: TMaybeObj, 
+    oldKey: Exclude<keyof NonNullable<TMaybeObj>, symbol>,
+    newKey: string
+): Maybe<Vts.BasicObject> {
+    if (!obj || !(oldKey in obj)) {
+        return obj;
+    }
+    obj[newKey] = obj[oldKey];
+    delete obj[oldKey];
+    return obj;
 }

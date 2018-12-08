@@ -2,6 +2,8 @@ import {
 	Component, 
 	Directive,
 	Input, 
+    Output,
+    EventEmitter,
 	TemplateRef,
 	ContentChild,
   ViewChild
@@ -46,6 +48,10 @@ export class ListSelectorComponent<TData extends Identifiable> {
     @Input() refetchOn?: Maybe<Rx.Observable<Maybe<Partial<Pagination>>>> = null;
     @Input() noInitFetch                = false;
     @Input('pageFetcher') fetchPage!: PageFetcher<TData>;
+
+    @Output() addedToChosen     = new EventEmitter<TData>();
+    @Output() removedFromChosen = new EventEmitter<TData>();
+
     @Input() set refetchOnChanged(_value: unknown) {
         this.freeListPageEl.doSearchRequest({ page: 1 });
     }
@@ -57,6 +63,7 @@ export class ListSelectorComponent<TData extends Identifiable> {
     chosenItemRef?: TemplateRef<ListSelectorContext<TData>>;
   	    
     trackById = trackById;
+    @Input()
     chosenItems: TData[] = [];
 
     get pageFetcher(): PageFetcher<TData> {
@@ -69,8 +76,10 @@ export class ListSelectorComponent<TData extends Identifiable> {
         const changedItem = value as TData;
         if (selected) {
             this.chosenItems.push(changedItem);
+            this.addedToChosen.emit(changedItem);
         } else {
             this.removeChosen(changedItem);
+            this.removedFromChosen.emit(changedItem);
         }
     }
 
