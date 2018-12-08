@@ -42,7 +42,7 @@ export class GroupComponent extends Subscriber implements OnInit {
         private pageHeader: PageHeaderService,
         private errHandler: ErrorHandlingService,
         private route:      ActivatedRoute,
-        private rt:         RoutingService
+        public  rt:         RoutingService
     ) { super(); }
 
 

@@ -17,14 +17,14 @@ export interface AuthInfo {
     message: string;
 }
 
-declare global {
-    namespace Express {
-        interface Request {
-            authInfo?: AuthInfo; // modified declaration file
-            user?: User;         //
-        }
-    }
-}
+// declare global {
+//     namespace Express {
+//         interface Request {
+//             authInfo?: AuthInfo; // beware, modified declaration file
+//             user?: User;         // '@types/passport.js'
+//         }
+//     }
+// }
 
 
 passport.use(new LocalStrategy({

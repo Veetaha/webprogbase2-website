@@ -14,11 +14,13 @@
         "build-start": "npm run build && npm start"
     },
     "dependencies": {
+        "@types/dotenv": "^6.1.0",
         "@types/lodash": "^4.14.118",
         "apollo-server-express": "^2.2.2",
         "body-parser": "latest",
         "chai": "latest",
         "debug": "latest",
+        "dotenv": "^6.2.0",
         "escape-string-regexp": "^1.0.5",
         "express": "latest",
         "fetch": "latest",

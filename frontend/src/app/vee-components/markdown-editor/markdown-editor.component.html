@@ -1,0 +1,11 @@
+<angular-markdown-editor 
+    [ngModel]="sourceText"
+    (ngModelChange)="
+        sourceText = $event;
+        sourceTextChange.emit($event);
+    "
+    [options]="editorOptions"
+    [textareaId]="textareaId"
+    [rows]="rows"
+    [name]="name">
+</angular-markdown-editor>

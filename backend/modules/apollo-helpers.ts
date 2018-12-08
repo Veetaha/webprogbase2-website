@@ -101,7 +101,7 @@ export class AllowGuardDirective extends RoleGuardDirective {
 
 
 function nothingFoundForId(id: ObjectId | string) {
-    return notFound(`nothing was found for id '${id}'`);
+    return notFoundGql(`nothing was found for id '${id}'`);
 }
 
 
@@ -202,6 +202,7 @@ export async function paginate<
     }
 }
 
+
 const PaginateMetasymbol = Symbol('Paginate metadata schema symbol');
 paginate.metaSymbol = PaginateMetasymbol;
 
@@ -229,7 +230,7 @@ export async function tryUpdateById<TDoc extends Mongoose.Document> (
     id:     ObjectId,
     update: Vts.BasicObject
 ) {
-    const updatedDoc = await model.findByIdAndUpdate(id, update).exec();
+    const updatedDoc = await model.findByIdAndUpdate(id, update, { new: true }).exec();
     if (!updatedDoc) {
         throw nothingFoundForId(id);
     }
@@ -241,7 +242,7 @@ export async function tryFindById<TDoc extends Mongoose.Document>(
 ) {
     const doc = await model.findById(id);
     if (!doc) {
-        throw notFound(`nothing was found for id "${id}"`);
+        throw notFoundGql(`nothing was found for id "${id}"`);
     }
     return doc;
 }
@@ -249,9 +250,9 @@ export async function tryFindById<TDoc extends Mongoose.Document>(
 export async function tryFindOne<TDoc extends Mongoose.Document>(
     model: Mongoose.Model<TDoc>, criteria: Vts.BasicObject
 ) {
-    const doc = await model.findByOne(criteria);
+    const doc = await model.findOne(criteria);
     if (!doc) {
-        throw notFound(`nothing was found`);
+        throw notFoundGql(`nothing was found`);
     }
     return doc;
 }

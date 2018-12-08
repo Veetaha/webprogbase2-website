@@ -1,6 +1,7 @@
 import * as Mongoose  from 'mongoose';
 import * as Jwt       from 'jsonwebtoken';
 import * as Paginate  from 'mongoose-paginate';
+import * as Apollo    from 'apollo-server-express';
 import * as Vts       from 'vee-type-safe';
 import * as GqlV1     from '@declarations/gql-gen-v1';
 import * as Config    from '@app/config';
@@ -18,7 +19,7 @@ import ObjectId = Mongoose.Types.ObjectId;
 import { paginate } from '@modules/common';
 
 export interface UserData {
-    id:            ObjectId;
+    // id:            ObjectId;
     login:         string;
     role:          UserRole;
     fullname:      string;
@@ -99,7 +100,7 @@ Schema.statics = {
 } as UserModel;
 
 import PutUser = ApiV1.V1.User.Put;
-Schema.methods = {
+const Methods: UserMethods = {
     group: getPopulated<User>('groupId'),
 
     async updateMe({ patch }) {
@@ -108,6 +109,18 @@ Schema.methods = {
             me: await this.save()
         };
     },
+    ensureHasGroup() {
+        if (!this.groupId) {
+            throw new Apollo.ForbiddenError(`user is required to be assigned to a group`);
+        }
+    },
+
+
+
+
+
+
+
 
     canPutUser(putReq) {
         return Vts.exactlyConforms(putReq, PutUser.RoleLimit[this.role]);
@@ -138,27 +151,30 @@ Schema.methods = {
             registeredAt: this.registeredAt!.toISOString(),
         };
     }
-} as User;
+};
 
+Schema.methods = Methods;
 // Schema.index()
 
 Schema.plugin(Paginate);
 
 export const User = Mongoose.model<User, UserModel>('User', Schema);
 
-// modified declaration file
-export interface User extends Mongoose.Document<UserData>, UserData {
-    makeJwt(): string;
-    group(): Promise<Group>;
-    updateMe(req: GqlV1.UpdateMeRequest): Promise<GqlV1.UpdateMeResponse>;
+export interface UserMethods {
+    makeJwt(this: User): string;
+    group(this: User): Promise<Group>;
+    updateMe(this: User, req: GqlV1.UpdateMeRequest): Promise<GqlV1.UpdateMeResponse>;
 
+    ensureHasGroup(this: User): void;
 
     // deprecated
-    canPutUser(putReq: PutUser.Request): boolean;
-    toJsonData(): ApiV1.Data.User.Json;
-    toBasicJsonData(): ApiV1.Data.User.BasicJson;
+    canPutUser(this: User, putReq: PutUser.Request): boolean;
+    toJsonData(this: User): ApiV1.Data.User.Json;
+    toBasicJsonData(this: User): ApiV1.Data.User.BasicJson;
 }
-export interface UserModel extends Mongoose.PaginateModel<User, UserData> {
+export interface User extends Mongoose.Document, UserData, UserMethods {
+}
+export interface UserModel extends Mongoose.PaginateModel<User> {
     updateUser(req: GqlV1.UpdateUserRequest): Promise<GqlV1.UpdateUserResponse>;
     deleteUser(req: GqlV1.DeleteUserRequest): Promise<GqlV1.DeleteUserResponse>;
     getUser(req: GqlV1.GetUserRequest):       Promise<GqlV1.GetUserResponse>;
@@ -166,6 +182,7 @@ export interface UserModel extends Mongoose.PaginateModel<User, UserData> {
     assignGroup  (groupId: ObjectId, usersId: ObjectId[]): Promise<number>;
     unAssignGroup(groupId: ObjectId, usersId: ObjectId[]): Promise<number>;
     findByLoginPassword(login: string, password: string): Promise<User | null>;
+    
 
     // deprecated
     getPageRest(

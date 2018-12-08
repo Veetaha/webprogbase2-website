@@ -29,10 +29,13 @@ const QueryResolvers: GqlV1.QueryResolvers.Resolvers = {
     getUsers:   (_p, { req }) => User.  getUsers(req),
     getCourses: (_p, { req }) => Course.getCourses(req),
     getGroups:  (_p, { req }) => Group. getGroups(req),
+    getTaskResults: (_p, { req }) => TaskResult.getTaskResults(req),
     
-    getTask:    (_p, { req }) => Task.  getTask(req),
-    getCourse:  (_p, { req }) => Course.getCourse(req),
-    getGroup:   (_p, { req }) => Group. getGroup(req),
+    getTask:       (_p, { req }) => Task.      getTask(req),
+    getCourse:     (_p, { req }) => Course.    getCourse(req),
+    getGroup:      (_p, { req }) => Group.     getGroup(req),
+    getTaskResult: (_p, { req }) => TaskResult.getTaskResult(req),
+    getUserTaskResult: (_p, { req }) => TaskResult.getUserTaskResult(req)
     
 };
 const UserResolvers: GqlV1.UserResolvers.Resolvers = {
@@ -42,7 +45,8 @@ const UserResolvers: GqlV1.UserResolvers.Resolvers = {
 
 const TaskResolvers: GqlV1.TaskResolvers.Resolvers = {
     author: task => task.author(),
-    course: task => task.course()
+    course: task => task.course(),
+    myTaskResult: (task, {}, { user }) => task.myTaskResult(user!)
 };
 const CourseResolvers: GqlV1.CourseResolvers.Resolvers = {
     author:    course           => course.author(),
@@ -56,18 +60,14 @@ const GroupResolvers: GqlV1.GroupResolvers.Resolvers = {
 
 const TaskResultResolvers: GqlV1.TaskResultResolvers.Resolvers = {
     author: taskResult => taskResult.author(),
-    task:   taskResult => taskResult.task(),
-    createCheck: (taskResult, { req }, { user }) => (
-        taskResult.createCheck(req, user!.id)
-    ),
-    updateCheck: (taskResult, { req }) => taskResult.updateCheck(req),
-    deleteCheck: taskResult => taskResult.deleteCheck()
+    task:   taskResult => taskResult.task()
+};
+
+const TaskResultCheckResolvers: GqlV1.TaskResultCheckResolvers.Resolvers = {
+    author: taskResultCheck => taskResultCheck.author()
 };
 
 const MutationResolvers: GqlV1.MutationResolvers.Resolvers = {
-    createTaskResult: async(_p, { req }, { user }) => (
-        TaskResult.createTaskResult(req, user!.id)
-    ),
     createCourse: async (_p, { req }, { user }) => ({
         course: await Course.create({ ...req, authorId: user!._id })
     }),
@@ -75,30 +75,50 @@ const MutationResolvers: GqlV1.MutationResolvers.Resolvers = {
         task: await Task.create({ ...req, authorId: user!._id })
     }),
     createGroup:  async (_p, { req }) => Group.createGroup(req),
-    
-    deleteCourse: (_p, { req }) => Course.deleteCourse(req),
-    deleteTask:   (_p, { req }) => Task.  deleteTask(req),
-    deleteGroup:  (_p, { req }) => Group. deleteGroup(req),
-    // deleteUser:   (_p, { req }) => User.  deleteUser(req),
+    createTaskResult: async(_p, { req }, { user }) => (
+        TaskResult.createTaskResult(req, user!)
+    ),
+
+
+    deleteTaskResult: (_p, { req }) => TaskResult.deleteTaskResult(req),    
+    deleteCourse:     (_p, { req }) => Course.deleteCourse(req),
+    deleteTask:       (_p, { req }) => Task.  deleteTask(req),
+    deleteGroup:      (_p, { req }) => Group. deleteGroup(req),
+    // deleteUser:    (_p, { req }) => User.  deleteUser(req),
+
+    updateTaskResult: (_p, { req }, { user }) => TaskResult.updateTaskResult(req, user!),
     updateCourse: (_p, { req }) => Course.updateCourse(req),
     updateTask:   (_p, { req }) => Task.  updateTask(req),
     updateUser:   (_p, { req }) => User.  updateUser(req),
     updateGroup:  (_p, { req }) => Group. updateGroup(req),
     
-    updateMe: (_p, { req }, { user }) => user!.updateMe(req)
+    updateMe: (_p, { req }, { user }) => user!.updateMe(req),
+
+    createTaskResultCheck: async (_p, { req }, { user }) => (await TaskResult
+        .getTaskResult(req))
+        .taskResult.createCheck(req, user!.id),
+
+    updateTaskResultCheck: async (_p, { req: { id, patch } }) => (await TaskResult
+        .getTaskResult({ id }))
+        .taskResult.updateCheck(patch),
+
+    deleteTaskResultCheck: async (_p, { req: { id } }) => (await TaskResult
+        .getTaskResult({ id }))
+        .taskResult.deleteCheck()
 };
 
 export const apolloServer = new Apollo.ApolloServer({
     playground: true,
     typeDefs: Apollo.gql(Config.GqlSchema),
     resolvers: {
-        Mutation:    MutationResolvers   as Apollo.IResolverObject,
-        Query:       QueryResolvers      as Apollo.IResolverObject,
-        User:        UserResolvers       as Apollo.IResolverObject,
-        Task:        TaskResolvers       as Apollo.IResolverObject,
-        Course:      CourseResolvers     as Apollo.IResolverObject,
-        Group:       GroupResolvers      as Apollo.IResolverObject,
-        TaskResult:  TaskResultResolvers as Apollo.IResolverObject,
+        Mutation:         MutationResolvers        as Apollo.IResolverObject,
+        Query:            QueryResolvers           as Apollo.IResolverObject,
+        User:             UserResolvers            as Apollo.IResolverObject,
+        Task:             TaskResolvers            as Apollo.IResolverObject,
+        Course:           CourseResolvers          as Apollo.IResolverObject,
+        Group:            GroupResolvers           as Apollo.IResolverObject,
+        TaskResult:       TaskResultResolvers      as Apollo.IResolverObject,
+        TaskResultCheck:  TaskResultCheckResolvers as Apollo.IResolverObject,
         BOID:        GqlBsonObjectId,
         Date:        GqlIsoDate.GraphQLDateTime
     },

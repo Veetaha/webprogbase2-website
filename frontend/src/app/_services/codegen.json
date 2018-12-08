@@ -12,6 +12,7 @@
                 "interfacePrefix": ""
             },
             "plugins": [
+                { "add": "export * from '@public-api/v1/gql';" },
                 "typescript-common",
                 "typescript-client",
                 "typescript-apollo-angular"

@@ -129,7 +129,7 @@ Schema.plugin(Paginate);
 // Schema.plugin(UniqueArrayPlugin);
 export const Group = Mongoose.model<Group, GroupModel>('Group', Schema);
 
-export interface GroupModel extends Mongoose.PaginateModel<Group, GroupData> {
+export interface GroupModel extends Mongoose.PaginateModel<Group> {
     getGroups  (req: GqlV1.GetGroupsRequest):   Promise<GqlV1.GetGroupsResponse>;
     getGroup   (req: GqlV1.GetGroupRequest):    Promise<GqlV1.GetGroupResponse>;
     createGroup(req: GqlV1.CreateGroupRequest): Promise<GqlV1.CreateGroupResponse>;

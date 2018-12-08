@@ -2,12 +2,15 @@ import * as Mongoose  from 'mongoose';
 import * as Paginate  from 'mongoose-paginate';
 import * as Vts       from 'vee-type-safe';
 
-import * as Helpers from '@modules/apollo-helpers';
-import * as GqlV1   from '@declarations/gql-gen-v1';
-import * as ApiV1   from '@public-api/v1';
-import { User }     from '@models/user';
-import { Course }   from '@models/course';
+import * as Debug     from '@modules/debug';
+import * as Helpers   from '@modules/apollo-helpers';
+import * as GqlV1     from '@declarations/gql-gen-v1';
+import * as ApiV1     from '@public-api/v1';
+import { User }       from '@models/user';
+import { Course }     from '@models/course';
+import { TaskResult } from '@models/task-result';
 import { getPopulated, get_id, set_id } from '@modules/common';
+
 
 import ApiTask = ApiV1.Data.Task;
 export import TaskType = GqlV1.TaskType;
@@ -15,7 +18,7 @@ export import TaskType = GqlV1.TaskType;
 import ObjectId = Mongoose.Types.ObjectId;
 
 export interface TaskData {
-    id:                ObjectId;
+    // id:                ObjectId;
     taskType:          TaskType;
     courseId:          ObjectId;
     authorId:          ObjectId;
@@ -23,7 +26,7 @@ export interface TaskData {
     body:              string;
     maxMark:           number;
     publicationDate:   Date;
-    attachedFileUrl?:  string | null;
+    attachedFileUrl?:  Helpers.Maybe<string>;
 }
 
 const Schema = new Mongoose.Schema({
@@ -57,7 +60,7 @@ const Schema = new Mongoose.Schema({
 
 Schema.virtual('id').get(get_id).set(set_id);
 
-Schema.statics = {
+const Statics: TaskStatics = {
     updateTask: async ({ id, patch }) => ({
         task: await Helpers.tryUpdateById(Task, id, Helpers.filterNilProps(patch))
     }),
@@ -66,8 +69,11 @@ Schema.statics = {
     getTask:    async ({ id }) => ({ task: await Helpers.tryFindById(Task, id)   }),
 
     isTaskType: Vts.isInEnum(TaskType)
-} as TaskModel;
-Schema.methods = {
+};
+const Methods: TaskMethods = {
+    myTaskResult(me) {
+        return TaskResult.findOne({ taskId: this._id, authorId: me.id }).exec();
+    },
     author: getPopulated<Task>('authorId'),
     course: getPopulated<Task>('courseId'),
     toCoreJsonData() {
@@ -93,24 +99,43 @@ Schema.methods = {
             courseId:        String(this.courseId)
         };
     }
-} as Task;
+};
+
+Schema.statics = Statics;
+Schema.methods = Methods;
+
+Schema.pre('remove', async function(this: Task, next) {
+    try {
+        void await TaskResult.where('taskId').equals(this._id).remove().exec();
+        return next();
+    } catch (err) {
+        Debug.error(`Failed to remove references to the deleted course`);
+        return next(err);
+    }
+});
 
 Schema.plugin(Paginate);
 export const Task = Mongoose.model<Task, TaskModel>('Task', Schema);
 
-export interface Task extends Mongoose.Document, TaskData {
-    author():          Promise<User>;
-    course():          Promise<Course>;
+export interface TaskMethods {
+    author(this: Task): Promise<User>;
+    course(this: Task): Promise<Course>;
+    myTaskResult(this: Task, me: User): Promise<TaskResult | null>;
     
-    toCoreJsonData():  ApiTask.CoreJson;
-    toBasicJsonData(): Promise<ApiTask.BasicJson>;
-    toJsonData():      Promise<ApiTask.Json>;
+    // deprecated
+    toCoreJsonData(this: Task):  ApiTask.CoreJson;
+    toBasicJsonData(this: Task): Promise<ApiTask.BasicJson>;
+    toJsonData(this: Task):      Promise<ApiTask.Json>;
 }
-export interface TaskModel  extends Mongoose.PaginateModel<Task, TaskData> {
+
+export interface Task extends Mongoose.Document, TaskData, TaskMethods {}
+export interface TaskStatics {
     updateTask(req: GqlV1.UpdateTaskRequest): Promise<GqlV1.UpdateTaskResponse>;
     deleteTask(req: GqlV1.DeleteTaskRequest): Promise<GqlV1.DeleteTaskResponse>;
     getTask(id: GqlV1.GetTaskRequest):        Promise<GqlV1.GetTaskResponse>;
 
     isTaskType(suspect: unknown): suspect is TaskType;
+
 }
+export interface TaskModel  extends Mongoose.PaginateModel<Task>, TaskStatics {}
 

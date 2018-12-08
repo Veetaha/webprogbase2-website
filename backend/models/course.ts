@@ -138,7 +138,7 @@ Schema.plugin(Paginate);
 export const Course = Mongoose.model<Course, CourseModel>('Course', Schema);
 
 
-export interface CourseModel extends Mongoose.PaginateModel<Course, CourseData> {
+export interface CourseModel extends Mongoose.PaginateModel<Course> {
     updateCourse(req: GqlV1.UpdateCourseRequest): Promise<GqlV1.UpdateCourseResponse>;
     deleteCourse(req: GqlV1.DeleteCourseRequest): Promise<GqlV1.DeleteCourseResponse>;
     getCourses  (req: GqlV1.GetCoursesRequest):   Promise<GqlV1.GetCoursesResponse>;

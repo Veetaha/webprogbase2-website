@@ -43,5 +43,6 @@
         </mat-tab>
 </mat-tab-group>
 <p *ngIf="group"
-    class="text-muted">Group created on {{group.creationDate | date}}</p>
+    class="text-muted">Group created on {{group!.creationDate | date}}
+</p>
 </div>

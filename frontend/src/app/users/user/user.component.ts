@@ -11,13 +11,19 @@ import { Subscriber             } from '@utils/subscriber';
 import * as Api from '@public-api/v1';
 import * as Gql from '@services/gql';
 
+import User = Gql.GetUser.User;
+
 @Component({
-  selector:    'app-user',
+  selector:    'app-user-profile',
   templateUrl: './user.component.html',
   styleUrls:  ['./user.component.scss']
 })
 export class UserComponent extends Subscriber implements OnInit {
-    user?: Gql.GetUser.User;
+    user?: User;
+
+    get userId() {
+        return this.user ? this.user.id : this.route.snapshot.paramMap.get('id')!;
+    }
 
     constructor(
         public  session:    SessionService,

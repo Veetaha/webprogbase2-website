@@ -234,10 +234,10 @@ export interface UpdateTaskRequest {
   /** Target task id. */
   id: string;
   /** Payload of the data to update. */
-  patch: TaskUpdatePatch;
+  patch: UpdateTaskRequestPatch;
 }
 
-export interface TaskUpdatePatch {
+export interface UpdateTaskRequestPatch {
   taskType?: TaskType | null;
 
   title?: string | null;
@@ -299,7 +299,7 @@ export interface DeleteTaskResultRequest {
 }
 /** ##TaskResultCheckCreate */
 export interface CreateTaskResultCheckRequest {
-  taskResultId: string;
+  id: string;
 
   payload: CreateTaskResultCheckRequestPayload;
 }
@@ -321,6 +321,11 @@ export interface UpdateTaskResultCheckPatch {
   comment?: string | null;
 
   score?: number | null;
+}
+
+export interface DeleteTaskResultCheckRequest {
+  /** Task result id */
+  id: string;
 }
 
 export interface DeleteUserRequest {
@@ -471,24 +476,14 @@ export interface Task {
   author: User;
   /** Course this task is attached to. */
   course: Course;
-}
 
-export interface GetGroupMembersResponse {
-  /** Page of members that satisfy input search filters. */
-  data: User[];
-  /** Total amount of members that may be queried for the given search input. */
-  total: number;
-}
-
-export interface GetTaskResultsResponse {
-  /** Page of task results that satisfy input search filters. */
-  data: TaskResult[];
-  /** Total amount of task results that may be queried for the given search input. */
-  total: number;
+  myTaskResult?: TaskResult | null;
 }
 
 /** Task fulfilment result */
 export interface TaskResult {
+  id: string;
+
   authorId: string;
 
   taskId: string;
@@ -517,6 +512,20 @@ export interface TaskResultCheck {
   comment?: string | null;
 
   score: number;
+}
+
+export interface GetGroupMembersResponse {
+  /** Page of members that satisfy input search filters. */
+  data: User[];
+  /** Total amount of members that may be queried for the given search input. */
+  total: number;
+}
+
+export interface GetTaskResultsResponse {
+  /** Page of task results that satisfy input search filters. */
+  data: TaskResult[];
+  /** Total amount of task results that may be queried for the given search input. */
+  total: number;
 }
 
 export interface GetTaskResultResponse {
@@ -676,11 +685,6 @@ export interface UpdateTaskResultCheckResponse {
   taskResult: TaskResult;
 }
 
-export interface DeleteTaskResultCheckRequest {
-  /** Task result id */
-  id: string;
-}
-
 export interface DeleteTaskResultCheckResponse {
   taskResult: TaskResult;
 }
@@ -826,7 +830,7 @@ export namespace Access {
     deleteTaskResult: new Set([UserRole.Admin]),
     createTaskResultCheck: new Set([UserRole.Teacher, UserRole.Admin]),
     updateTaskResultCheck: new Set([UserRole.Teacher, UserRole.Admin]),
-    deleteTaskResultCheck: new Set([UserRole.Teacher, UserRole.Admin])
+    deleteTaskResultCheck: new Set([UserRole.Admin])
   };
   // tslint:enable:no-shadowed-variable
 }

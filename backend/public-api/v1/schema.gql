@@ -94,7 +94,7 @@ type Mutation {
     deleteTaskResult (req: DeleteTaskResultRequest! ): DeleteTaskResultResponse!  @allow(roles: [admin])
     createTaskResultCheck(req: CreateTaskResultCheckRequest!): CreateTaskResultCheckResponse! @allow(roles: [teacher, admin])
     updateTaskResultCheck(req: UpdateTaskResultCheckRequest!): UpdateTaskResultCheckResponse! @allow(roles: [teacher, admin])
-    deleteTaskResultCheck(req: DeleteTaskResultCheckRequest!): DeleteTaskResultCheckResponse! @allow(roles: [teacher, admin])
+    deleteTaskResultCheck(req: DeleteTaskResultCheckRequest!): DeleteTaskResultCheckResponse! @allow(roles: [admin])
 }
 
 type GetTaskResponse {
@@ -331,10 +331,10 @@ input UpdateTaskRequest {
     # Target task id.
     id:    BOID!
     # Payload of the data to update.
-    patch: TaskUpdatePatch!
+    patch: UpdateTaskRequestPatch!
 }
 
-input TaskUpdatePatch {
+input UpdateTaskRequestPatch {
     taskType:        TaskType
     title:           String @notEmpty
     body:            String
@@ -396,6 +396,8 @@ type Task {
     author:          User!
     # Course this task is attached to.
     course:          Course!
+
+    myTaskResult:    TaskResult
 }
 
 
@@ -496,7 +498,7 @@ type DeleteGroupResponse {
 }
 
 # Examined task result info
-type TaskResultCheck {        
+type TaskResultCheck {   
     authorId:   BOID!
     author:     User!
     lastUpdate: Date!
@@ -504,7 +506,8 @@ type TaskResultCheck {
     score:      Float!
 }
 # Task fulfilment result
-type TaskResult {
+type TaskResult { 
+    id:          BOID!    
     authorId:    BOID!
     taskId:      BOID!
     author:      User!
@@ -609,7 +612,7 @@ type UpdateTaskResultCheckResponse {
     taskResult: TaskResult!
 }
 
-type DeleteTaskResultCheckRequest {
+input DeleteTaskResultCheckRequest {
     # Task result id
     id: BOID!
 }

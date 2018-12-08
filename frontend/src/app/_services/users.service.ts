@@ -24,7 +24,7 @@ export class UsersService {
     }
 
     getUserForEdit(req: Gql.GetUserRequest) {
-        return this.getUserGql.fetch({ req }, this.options);
+        return this.getUserForEditGql.fetch({ req }, this.options);
     }
 
     getUser(req: Gql.GetUserRequest) {

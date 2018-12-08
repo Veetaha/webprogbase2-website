@@ -1,19 +1,16 @@
 import { Component, OnInit      } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog              } from '@angular/material/dialog';
 import { EditorOption           } from 'angular-markdown-editor';
 import { ConfigService          } from '@services/config';
 import { CoursesService         } from '@services/courses';
 import { PageHeaderService      } from '@services/page-header';
 import { RoutingService         } from '@services/routing';
 import { Subscriber             } from '@utils/subscriber';
-import { 
-    ConfirmDialogComponent,
-    ConfirmDialogOptions,
-    ConfirmDialogResult
-} from '@vee/components/confirm-dialog';
 
-import * as Api from '@public-api/v1';
+import * as Gql from '@services/gql';
+import * as _   from 'lodash';
+
+import Task = Gql.GetTaskForEdit.Task;
 
 @Component({
   selector:    'app-task-edit',
@@ -21,25 +18,25 @@ import * as Api from '@public-api/v1';
   styleUrls:  ['./task-edit.component.scss']
 })
 export class TaskEditComponent extends Subscriber implements OnInit {
-    readonly taskTypes = Object.values(Api.TaskType);
+    readonly taskTypes = Object.values(Gql.TaskType);
 
-    task?: Api.V1.Task.Get.Response;
-    title = '';
-    attachedFileUrl?: string;
-    body = '';
-    taskType: Api.TaskType = Api.TaskType.Homework;
-    maxMark = 0;
+    srcTask?: Task;
+    updTask: Gql.UpdateTaskRequestPatch = {
+        title: '',
+        body: '',
+        taskType: Gql.TaskType.Homework,
+        maxMark: 0
+    };
     editorOptions!: EditorOption;
 
 
     get taskId() {
-        return this.task ? this.task.id : this.route.snapshot.paramMap.get('id')!;
+        return this.route.snapshot.paramMap.get('id')!;
     }
 
     constructor(
-        private dialog:         MatDialog,
         private pageHeader:     PageHeaderService,
-        private serverApi:      CoursesService,
+        private backend:      CoursesService,
         private router:         Router,
         private route:          ActivatedRoute,
         private configService:  ConfigService,
@@ -47,20 +44,21 @@ export class TaskEditComponent extends Subscriber implements OnInit {
     ) { super(); }
 
     onDeleteTaskDemand() {
-        this.dialog.open<ConfirmDialogComponent, ConfirmDialogOptions, ConfirmDialogResult>(
-            ConfirmDialogComponent, {
-                data: {
-                    titleHtml: 'Sanity check',
-                    contentHtml: 'Are you sure you want to delete this task?'
-                }
-            }
-        ).afterClosed().subscribe(confirmed => {
+        if (!this.srcTask) {
+            console.error('task has not been loaded yet');
+            return;
+        }
+        const { title, courseId } = this.srcTask;
+        this.pageHeader.openConfirmDialog({
+                titleHtml: 'Sanity check',
+                contentHtml: 'Are you sure you want to delete this task?'
+
+        }).subscribe(confirmed => {
             if (confirmed) {
-                this.serverApi.deleteTask(this.taskId).subscribe(() =>
-                    this.router.navigateByUrl(
-                        this.rt.to.course(this.task!.courseId)
-                    )
-                );
+                this.backend.deleteTask(this.taskId).subscribe(() => {
+                    this.pageHeader.flashSnackBar(`Task "${title} was successfully deleted`);
+                    this.router.navigateByUrl(this.rt.to.course(courseId));
+                });
             }
         });
     }
@@ -70,29 +68,31 @@ export class TaskEditComponent extends Subscriber implements OnInit {
         this.pageHeader.setHeader({ title: 'Edit task' });
         this.editorOptions    = this.configService.makeMarkdownEditorOptions();
         this.subscrs.paramMap = this.route.paramMap.subscribe(paramMap => {
-            this.serverApi.getTask(paramMap.get('id')!).subscribe(
+            this.backend.getTaskForEdit({ id: paramMap.get('id')! }).subscribe(
                 task => {
-                    this.task            = task;
-                    this.title           = task.title;
-                    this.taskType        = task.taskType;
-                    this.maxMark         = task.maxMark;
-                    this.body            = task.body;
-                    this.attachedFileUrl = task.attachedFileUrl;
+                    this.srcTask = task.data.getTask.task;
+                    this.updTask = _.cloneDeep(this.srcTask);
                 }
             );
         });
     }
 
     onFormSubmit() {
-        if (!this.task) {
+        if (!this.srcTask) {
             console.error(`task hasn't been loaded yet`);
             return;
         }
-        const task = this.task;
-        this.serverApi
-            .putTask(task.id, this)
-            .subscribe(() => this.router.navigateByUrl(
-                this.rt.to.task(task.id)
-            ));
+        const updatedTaskId = this.taskId;
+        const prevTaskTitle = this.srcTask.title;
+        this.backend
+            .updateTask({
+                id: updatedTaskId,
+                patch: this.updTask
+            })
+            .pipe(this.pageHeader.displayLoading())
+            .subscribe(() => {
+                this.pageHeader.flashSnackBar(`Successfully updated task "${prevTaskTitle}"`);
+                this.router.navigateByUrl(this.rt.to.task(updatedTaskId));
+            });
     }
 }

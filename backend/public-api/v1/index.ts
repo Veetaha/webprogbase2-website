@@ -1,6 +1,9 @@
 import * as Vts from 'vee-type-safe';
 import * as HttpCodes from 'http-status-codes';
 import * as GqlGen from './gql';
+
+export type Maybe<T> = T | null | undefined;
+
 export interface Paginated<T = unknown> {
     total: number;
     data:  T[];
@@ -96,7 +99,7 @@ export namespace Data {
             author:           User.Json;
             courseId:         string;
             body:             string;
-            attachedFileUrl?: string;
+            attachedFileUrl?: Maybe<string>;
         }
     }
     

@@ -1,5 +1,59 @@
 # import * from "./../../../../backend/public-api/v1/schema.gql"
 
+
+mutation updateTask($req: UpdateTaskRequest!) {
+    updateTask(req: $req) {
+        task {
+            id
+        }
+    }
+}
+
+query getTaskForEdit($req: GetTaskRequest!) {
+    getTask(req: $req) {
+        task {
+            taskType
+            title
+            maxMark
+            courseId
+            body
+            attachedFileUrl
+        }
+    }
+}
+query getTaskWithResult($req: GetTaskRequest!) {
+    getTask(req: $req) {
+        task {
+            taskType
+            title
+            maxMark
+            courseId
+            body
+            attachedFileUrl
+            author {
+                id
+                login
+            }
+            myTaskResult {
+                id
+                lastUpdate
+                body
+                fileUrl
+                check {
+                    comment
+                    score
+                    lastUpdate
+                    author {
+                        id
+                        login
+                        avaUrl
+                    }
+                }
+            }
+        }
+    }
+}
+
 mutation createGroup($req: CreateGroupRequest!) {
     createGroup(req: $req) {
         group {

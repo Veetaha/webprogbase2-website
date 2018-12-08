@@ -14,13 +14,15 @@ import * as Api    from '@public-api/v1';
 import * as Gql    from '@services/gql';
 import * as GqlApi from '@public-api/v1/gql';
 
+import User = Gql.GetUserForEdit.User;
+
 @Component({
   selector:    'app-user-edit',
   templateUrl: './user-edit.component.html',
   styleUrls:  ['./user-edit.component.scss']
 })
 export class UserEditComponent extends Subscriber implements OnInit {
-    user?: Gql.GetUser.User;
+    user?: User;
     input: Gql.UpdateUserPatch = {};
  
     Api = Api.Data.User;
@@ -65,13 +67,13 @@ export class UserEditComponent extends Subscriber implements OnInit {
             );
     }
 
-    setUser(user: Gql.GetUser.User) {
+    setUser(user: User) {
         this.user  = _.cloneDeep(user);
         this.input = Vts.take(user, (
             this.session.userRole === GqlApi.UserRole.Admin
                 ? GqlApi.UpdateUserPatchFields
                 : GqlApi.UpdateMePatchFields
-        ) as (keyof Gql.GetUser.User)[]);
+        ) as (keyof User)[]);
         this.onUserChange();
     }
 
@@ -87,7 +89,6 @@ export class UserEditComponent extends Subscriber implements OnInit {
                     this.router.navigateByUrl(this.rt.to.user(submittedUserId));
                 });
         }
-        const groupId = this.input!.group.I
         return this.backend.updateUser({ 
             id: submittedUserId, 
             patch: this.input

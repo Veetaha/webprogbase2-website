@@ -1,20 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute    } from '@angular/router';
 
-import * as Api from '@public-api/v1';
-
 import { RoutingService    } from '@services/routing';
 import { PageHeaderService } from '@services/page-header';
 import { CoursesService    } from '@services/courses';
 import { Subscriber        } from '@utils/subscriber';
 
+import * as Gql from '@services/gql';
+
+import Task = Gql.GetTaskWithResult.Task;
+
 @Component({
-    selector: 'app-task',
+    selector:    'app-task',
     templateUrl: './task.component.html',
-    styleUrls: ['./task.component.scss']
+    styleUrls:  ['./task.component.scss']
 })
 export class TaskComponent extends Subscriber implements OnInit {
-    task?: Api.V1.Task.Get.Response;
+    task?: Task;
 
     constructor(
         private pageHeader: PageHeaderService,
@@ -23,25 +25,29 @@ export class TaskComponent extends Subscriber implements OnInit {
         public  rt:         RoutingService
     ) { super(); }
 
+    get taskId() {
+        return this.route.snapshot.paramMap.get('id')!
+    }
+
     ngOnInit() {
         this.subscrs.paramMap = this.route.paramMap.subscribe(params => {
             this.backend
-                .getTask(params.get('id')!)
+                .getTaskWithResult({ id: params.get('id')! })
                 .pipe(this.pageHeader.displayLoading())
-                .subscribe(task => {
-                    this.task = task;
+                .subscribe(res => {
+                    this.task = res.data.getTask.task;
                     this.pageHeader.setHeader({
-                        title: task.title,
+                        title: this.task.title,
                         toolButtons: [{
                             iconName: 'edit',
                             name: 'Edit task',
                             routerLink: {
                                 pathFn: this.rt.to.taskEdit,
-                                args: [task.id]
+                                args: [this.taskId]
                             }
                         }]
                     });
-            });
+                });
         });
     }
 }

@@ -8,6 +8,7 @@ import { SearchInputComponent     } from './search-input';
 import { SlideMenuComponent       } from './slide-menu';
 import { MessageBoxComponent      } from './message-box';
 import { ConfirmDialogComponent   } from './confirm-dialog';
+import { MarkdownEditorComponent  } from './markdown-editor';
 import { 
     PaginationComponent, 
     PaginatedDirective      
@@ -27,6 +28,7 @@ const Directives = [
     ConfirmDialogComponent,
     PaginationComponent,
     ListSelectorComponent,
+    MarkdownEditorComponent,
 
     PaginatedDirective,
     FreeItemDirective,

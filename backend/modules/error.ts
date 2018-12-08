@@ -1,3 +1,4 @@
+import * as Apollo from 'apollo-server-express';
 import * as HttpCodes from 'http-status-codes';
 import { Errors } from 'veetaha-web';
 import * as Vts from 'vee-type-safe';
@@ -11,6 +12,10 @@ export function badRequest(errorMessage: string) {
 export function notFound(errorMessage: string) {
     return new StatusedError(errorMessage, HttpCodes.NOT_FOUND);
 }
+export function notFoundGql(errorMessage: string) {
+    return new Apollo.ValidationError(errorMessage);
+}
+
 
 export function invalidJwt(mismatch: Vts.MismatchInfo) {
     return new StatusedError(

@@ -1,3 +1,5 @@
+export * from "@public-api/v1/gql";
+
 export interface GetGroupCoursesRequest {
     /** Amount of courses per page. */
     limit: number;
@@ -37,6 +39,29 @@ export interface GetGroupMembersRequest {
 
 export interface GroupMembersSearch {
     login?: string | null;
+}
+/** Get paginated array of task results. */
+export interface GetTaskResultsRequest {
+    /** Amount of task results per page. */
+    limit: number;
+    /** 1-based page number. */
+    page: number;
+    /** Search filters. */
+    search?: TaskResultsSearch | null;
+}
+
+export interface TaskResultsSearch {
+    taskTitle?: string | null;
+}
+/** Get task result by id. */
+export interface GetTaskResultRequest {
+    id: string;
+}
+/** ReadGet task result by its author and taks ids. */
+export interface GetUserTaskResultRequest {
+    authorId: string;
+
+    taskId: string;
 }
 
 export interface GetUsersRequest {
@@ -209,10 +234,10 @@ export interface UpdateTaskRequest {
     /** Target task id. */
     id: string;
     /** Payload of the data to update. */
-    patch: TaskUpdatePatch;
+    patch: UpdateTaskRequestPatch;
 }
 
-export interface TaskUpdatePatch {
+export interface UpdateTaskRequestPatch {
     taskType?: TaskType | null;
 
     title?: string | null;
@@ -246,6 +271,62 @@ export interface DeleteCourseRequest {
     /** Target course id. */
     id: string;
 }
+/** Create */
+export interface CreateTaskResultRequest {
+    taskId: string;
+
+    body?: string | null;
+
+    fileUrl?: string | null;
+}
+/** Update */
+export interface UpdateTaskResultRequest {
+    id: string;
+
+    patch: UpdateTaskResultPatch;
+}
+
+export interface UpdateTaskResultPatch {
+    taskId?: string | null;
+
+    body?: string | null;
+
+    fileUrl?: string | null;
+}
+/** Delete */
+export interface DeleteTaskResultRequest {
+    id: string;
+}
+/** ##TaskResultCheckCreate */
+export interface CreateTaskResultCheckRequest {
+    id: string;
+
+    payload: CreateTaskResultCheckRequestPayload;
+}
+
+export interface CreateTaskResultCheckRequestPayload {
+    comment?: string | null;
+
+    score: number;
+}
+/** Update */
+export interface UpdateTaskResultCheckRequest {
+    /** Task result id */
+    id: string;
+
+    patch: UpdateTaskResultCheckPatch;
+}
+
+export interface UpdateTaskResultCheckPatch {
+    comment?: string | null;
+
+    score?: number | null;
+}
+
+export interface DeleteTaskResultCheckRequest {
+    /** Task result id */
+    id: string;
+}
 
 export interface DeleteUserRequest {
     /** Target user id. */
@@ -277,6 +358,146 @@ export type TypeMatchedScalar = any;
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace UpdateTask {
+    export type Variables = {
+        req: UpdateTaskRequest;
+    };
+
+    export type Mutation = {
+        __typename?: "Mutation";
+
+        updateTask: UpdateTask;
+    };
+
+    export type UpdateTask = {
+        __typename?: "UpdateTaskResponse";
+
+        task: Task;
+    };
+
+    export type Task = {
+        __typename?: "Task";
+
+        id: string;
+    };
+}
+
+export namespace GetTaskForEdit {
+    export type Variables = {
+        req: GetTaskRequest;
+    };
+
+    export type Query = {
+        __typename?: "Query";
+
+        getTask: GetTask;
+    };
+
+    export type GetTask = {
+        __typename?: "GetTaskResponse";
+
+        task: Task;
+    };
+
+    export type Task = {
+        __typename?: "Task";
+
+        taskType: TaskType;
+
+        title: string;
+
+        maxMark: number;
+
+        courseId: string;
+
+        body: string;
+
+        attachedFileUrl: string | null;
+    };
+}
+
+export namespace GetTaskWithResult {
+    export type Variables = {
+        req: GetTaskRequest;
+    };
+
+    export type Query = {
+        __typename?: "Query";
+
+        getTask: GetTask;
+    };
+
+    export type GetTask = {
+        __typename?: "GetTaskResponse";
+
+        task: Task;
+    };
+
+    export type Task = {
+        __typename?: "Task";
+
+        taskType: TaskType;
+
+        title: string;
+
+        maxMark: number;
+
+        courseId: string;
+
+        body: string;
+
+        attachedFileUrl: string | null;
+
+        author: Author;
+
+        myTaskResult: MyTaskResult | null;
+    };
+
+    export type Author = {
+        __typename?: "User";
+
+        id: string;
+
+        login: string;
+    };
+
+    export type MyTaskResult = {
+        __typename?: "TaskResult";
+
+        id: string;
+
+        lastUpdate: string;
+
+        body: string | null;
+
+        fileUrl: string | null;
+
+        check: Check | null;
+    };
+
+    export type Check = {
+        __typename?: "TaskResultCheck";
+
+        comment: string | null;
+
+        score: number;
+
+        lastUpdate: string;
+
+        author: _Author;
+    };
+
+    export type _Author = {
+        __typename?: "User";
+
+        id: string;
+
+        login: string;
+
+        avaUrl: string;
+    };
+}
 
 export namespace CreateGroup {
     export type Variables = {
@@ -840,6 +1061,87 @@ import gql from "graphql-tag";
 // Apollo Services
 // ====================================================
 
+@Injectable({
+    providedIn: "root"
+})
+export class UpdateTaskGQL extends Apollo.Mutation<
+    UpdateTask.Mutation,
+    UpdateTask.Variables
+> {
+    document: any = gql`
+        mutation updateTask($req: UpdateTaskRequest!) {
+            updateTask(req: $req) {
+                task {
+                    id
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
+export class GetTaskForEditGQL extends Apollo.Query<
+    GetTaskForEdit.Query,
+    GetTaskForEdit.Variables
+> {
+    document: any = gql`
+        query getTaskForEdit($req: GetTaskRequest!) {
+            getTask(req: $req) {
+                task {
+                    taskType
+                    title
+                    maxMark
+                    courseId
+                    body
+                    attachedFileUrl
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
+export class GetTaskWithResultGQL extends Apollo.Query<
+    GetTaskWithResult.Query,
+    GetTaskWithResult.Variables
+> {
+    document: any = gql`
+        query getTaskWithResult($req: GetTaskRequest!) {
+            getTask(req: $req) {
+                task {
+                    taskType
+                    title
+                    maxMark
+                    courseId
+                    body
+                    attachedFileUrl
+                    author {
+                        id
+                        login
+                    }
+                    myTaskResult {
+                        id
+                        lastUpdate
+                        body
+                        fileUrl
+                        check {
+                            comment
+                            score
+                            lastUpdate
+                            author {
+                                id
+                                login
+                                avaUrl
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
 @Injectable({
     providedIn: "root"
 })

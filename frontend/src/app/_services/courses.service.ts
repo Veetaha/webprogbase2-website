@@ -11,9 +11,12 @@ import { ErrorHandlingService } from '@services/error-handling';
   providedIn: 'root'
 }) export class CoursesService {
     constructor(
-        private getCoursesGql: Gql.GetCoursesGQL,
-        private http:          HttpClient,
-        private errHandling:   ErrorHandlingService
+        private getTaskWithResultGql: Gql.GetTaskWithResultGQL,
+        private getTaskForEditGql:    Gql.GetTaskForEditGQL,
+        private updateTaskGql:        Gql.UpdateTaskGQL,
+        private getCoursesGql:        Gql.GetCoursesGQL,
+        private http:                 HttpClient,
+        private errHandling:          ErrorHandlingService
     ) { }
     private options = { fetchPolicy: 'no-cache' } as { fetchPolicy: 'no-cache' };
 
@@ -66,19 +69,16 @@ import { ErrorHandlingService } from '@services/error-handling';
         .pipe(this.errHandler());
     }
 
-    getTask(taskId: string) {
-        return this.http.get<Api.V1.Task.Get.Response>(
-            Api.V1.Task.Get._(taskId)
-        )
-        .pipe(this.errHandler());
+    getTaskWithResult(req: Gql.GetTaskRequest) {
+        return this.getTaskWithResultGql.fetch({ req }, this.options);
+    }
+    
+    getTaskForEdit(req: Gql.GetTaskRequest) {
+        return this.getTaskForEditGql.fetch({req}, this.options);
     }
 
-    putTask(taskId: string, taskPutRequest: Api.V1.Task.Put.Request) {
-        return this.http.put<Api.V1.Task.Put.Request>(
-            Api.V1.Task.Put._(taskId),
-            Vts.takeFromKeys(taskPutRequest, Api.V1.Task.Put.RequestTD)
-        )
-        .pipe(this.errHandler());
+    updateTask(req: Gql.UpdateTaskRequest) {
+        return this.updateTaskGql.mutate({ req }, this.options);
     }
 
     deleteTask(taskId: string) {

@@ -234,10 +234,10 @@ export interface UpdateTaskRequest {
   /** Target task id. */
   id: ObjectId;
   /** Payload of the data to update. */
-  patch: TaskUpdatePatch;
+  patch: UpdateTaskRequestPatch;
 }
 
-export interface TaskUpdatePatch {
+export interface UpdateTaskRequestPatch {
   taskType?: TaskType | null;
 
   title?: string | null;
@@ -299,7 +299,7 @@ export interface DeleteTaskResultRequest {
 }
 /** ##TaskResultCheckCreate */
 export interface CreateTaskResultCheckRequest {
-  taskResultId: ObjectId;
+  id: ObjectId;
 
   payload: CreateTaskResultCheckRequestPayload;
 }
@@ -321,6 +321,11 @@ export interface UpdateTaskResultCheckPatch {
   comment?: string | null;
 
   score?: number | null;
+}
+
+export interface DeleteTaskResultCheckRequest {
+  /** Task result id */
+  id: ObjectId;
 }
 
 export interface DeleteUserRequest {
@@ -471,24 +476,14 @@ export interface Task {
   author: User;
   /** Course this task is attached to. */
   course: Course;
-}
 
-export interface GetGroupMembersResponse {
-  /** Page of members that satisfy input search filters. */
-  data: User[];
-  /** Total amount of members that may be queried for the given search input. */
-  total: number;
-}
-
-export interface GetTaskResultsResponse {
-  /** Page of task results that satisfy input search filters. */
-  data: TaskResult[];
-  /** Total amount of task results that may be queried for the given search input. */
-  total: number;
+  myTaskResult?: TaskResult | null;
 }
 
 /** Task fulfilment result */
 export interface TaskResult {
+  id: ObjectId;
+
   authorId: ObjectId;
 
   taskId: ObjectId;
@@ -517,6 +512,20 @@ export interface TaskResultCheck {
   comment?: string | null;
 
   score: number;
+}
+
+export interface GetGroupMembersResponse {
+  /** Page of members that satisfy input search filters. */
+  data: User[];
+  /** Total amount of members that may be queried for the given search input. */
+  total: number;
+}
+
+export interface GetTaskResultsResponse {
+  /** Page of task results that satisfy input search filters. */
+  data: TaskResult[];
+  /** Total amount of task results that may be queried for the given search input. */
+  total: number;
 }
 
 export interface GetTaskResultResponse {
@@ -676,11 +685,6 @@ export interface UpdateTaskResultCheckResponse {
   taskResult: TaskResult;
 }
 
-export interface DeleteTaskResultCheckRequest {
-  /** Task result id */
-  id: ObjectId;
-}
-
 export interface DeleteTaskResultCheckResponse {
   taskResult: TaskResult;
 }
@@ -787,7 +791,14 @@ export interface DeleteTaskResultCheckMutationArgs {
 
 import { GraphQLResolveInfo, GraphQLScalarTypeConfig } from "graphql";
 
-import { Task, Course, Group, User, TaskResult } from "./gql-params-v1";
+import {
+  Task,
+  Course,
+  Group,
+  User,
+  TaskResult,
+  TaskResultCheck
+} from "./gql-params-v1";
 
 import { ResolveContext } from "./gql-params-v1";
 
@@ -1233,6 +1244,8 @@ export namespace TaskResolvers {
     author?: AuthorResolver<User, TypeParent, Context>;
     /** Course this task is attached to. */
     course?: CourseResolver<Course, TypeParent, Context>;
+
+    myTaskResult?: MyTaskResultResolver<TaskResult | null, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -1290,50 +1303,9 @@ export namespace TaskResolvers {
     Parent = Task,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace GetGroupMembersResponseResolvers {
-  export interface Resolvers<
-    Context = ResolveContext,
-    TypeParent = GetGroupMembersResponse
-  > {
-    /** Page of members that satisfy input search filters. */
-    data?: DataResolver<User[], TypeParent, Context>;
-    /** Total amount of members that may be queried for the given search input. */
-    total?: TotalResolver<number, TypeParent, Context>;
-  }
-
-  export type DataResolver<
-    R = User[],
-    Parent = GetGroupMembersResponse,
-    Context = ResolveContext
-  > = Resolver<R, Parent, Context>;
-  export type TotalResolver<
-    R = number,
-    Parent = GetGroupMembersResponse,
-    Context = ResolveContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace GetTaskResultsResponseResolvers {
-  export interface Resolvers<
-    Context = ResolveContext,
-    TypeParent = GetTaskResultsResponse
-  > {
-    /** Page of task results that satisfy input search filters. */
-    data?: DataResolver<TaskResult[], TypeParent, Context>;
-    /** Total amount of task results that may be queried for the given search input. */
-    total?: TotalResolver<number, TypeParent, Context>;
-  }
-
-  export type DataResolver<
-    R = TaskResult[],
-    Parent = GetTaskResultsResponse,
-    Context = ResolveContext
-  > = Resolver<R, Parent, Context>;
-  export type TotalResolver<
-    R = number,
-    Parent = GetTaskResultsResponse,
+  export type MyTaskResultResolver<
+    R = TaskResult | null,
+    Parent = Task,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1343,6 +1315,8 @@ export namespace TaskResultResolvers {
     Context = ResolveContext,
     TypeParent = TaskResult
   > {
+    id?: IdResolver<ObjectId, TypeParent, Context>;
+
     authorId?: AuthorIdResolver<ObjectId, TypeParent, Context>;
 
     taskId?: TaskIdResolver<ObjectId, TypeParent, Context>;
@@ -1360,6 +1334,11 @@ export namespace TaskResultResolvers {
     check?: CheckResolver<TaskResultCheck | null, TypeParent, Context>;
   }
 
+  export type IdResolver<
+    R = ObjectId,
+    Parent = TaskResult,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
   export type AuthorIdResolver<
     R = ObjectId,
     Parent = TaskResult,
@@ -1441,6 +1420,52 @@ export namespace TaskResultCheckResolvers {
   export type ScoreResolver<
     R = number,
     Parent = TaskResultCheck,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GetGroupMembersResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetGroupMembersResponse
+  > {
+    /** Page of members that satisfy input search filters. */
+    data?: DataResolver<User[], TypeParent, Context>;
+    /** Total amount of members that may be queried for the given search input. */
+    total?: TotalResolver<number, TypeParent, Context>;
+  }
+
+  export type DataResolver<
+    R = User[],
+    Parent = GetGroupMembersResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalResolver<
+    R = number,
+    Parent = GetGroupMembersResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GetTaskResultsResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = GetTaskResultsResponse
+  > {
+    /** Page of task results that satisfy input search filters. */
+    data?: DataResolver<TaskResult[], TypeParent, Context>;
+    /** Total amount of task results that may be queried for the given search input. */
+    total?: TotalResolver<number, TypeParent, Context>;
+  }
+
+  export type DataResolver<
+    R = TaskResult[],
+    Parent = GetTaskResultsResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalResolver<
+    R = number,
+    Parent = GetTaskResultsResponse,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
 }
@@ -2078,22 +2103,6 @@ export namespace UpdateTaskResultCheckResponseResolvers {
   export type TaskResultResolver<
     R = TaskResult,
     Parent = UpdateTaskResultCheckResponse,
-    Context = ResolveContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace DeleteTaskResultCheckRequestResolvers {
-  export interface Resolvers<
-    Context = ResolveContext,
-    TypeParent = DeleteTaskResultCheckRequest
-  > {
-    /** Task result id */
-    id?: IdResolver<ObjectId, TypeParent, Context>;
-  }
-
-  export type IdResolver<
-    R = ObjectId,
-    Parent = DeleteTaskResultCheckRequest,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
 }
