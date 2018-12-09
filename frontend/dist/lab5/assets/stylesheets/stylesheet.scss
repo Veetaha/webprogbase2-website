@@ -1,0 +1,69 @@
+
+
+.user-avatar {
+    $size: 200px;
+    border: {
+        color: $main-accent-cocolor;
+        radius: 50%;
+        style:  solid;
+        width:  6px;
+    };
+    box-shadow: $shadow-middle;
+    height:     $size;
+    object-fit: cover;
+    padding:    2px;
+    width:      $size;
+}
+
+.user-bio {
+    border: 5px solid $main-accent-color;
+    box-shadow: $shadow-middle;
+    height: 100%;
+    margin-top: .5em;
+    padding: .5em;
+
+    &::before {
+        content: 'BIO: ';
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+}
+
+#task-list {
+    $border-width: 1px;
+    $border-color: silver;
+    border: {
+        width: 0 0 $border-width $border-width;
+        color: $border-color;
+        style: solid;
+    }
+
+    padding: 0;
+
+    //li:nth-child(even) {
+    //    background-color: $main-accent-cocolor2;
+    //}
+
+    > li {
+        border: {
+            width: $border-width $border-width 0 0;
+            color: $border-color;
+            style: solid;
+        }
+        list-style: none;
+        padding: .4em;
+    }
+}
+
+#red-exclamation-mark-img {
+    width: 8em;
+}
+
+
+
+
+#not-found {
+    font-size: 2em;
+    display: none;
+}
+
