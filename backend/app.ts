@@ -33,7 +33,11 @@ app .use(ApiV1.Routes.Api.V1._, ApiV1Router)
     }) as Express.ErrorRequestHandler);
 
 
-Mongoose.connect(Config.MongoDbUri, { useNewUrlParser: true })
+Mongoose.connect(Config.MongoDbUri, { 
+        useNewUrlParser: true,
+        keepAlive: 1, 
+        connectTimeoutMS: 30000 
+    })
     .then(() => app.listen(
         Config.Port,
         () => console.log(`🚀  Server is listening on port ${Config.Port}`)

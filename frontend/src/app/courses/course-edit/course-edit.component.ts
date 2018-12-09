@@ -1,6 +1,5 @@
 import { Component, OnInit      } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog              } from '@angular/material/dialog';
 import { EditorOption           } from 'angular-markdown-editor';
 import { Defaults               } from '@services/config';
 import { ConfigService          } from '@services/config';
@@ -9,11 +8,6 @@ import { Subscriber             } from '@utils/subscriber';
 import { RoutingService         } from '@services/routing';
 import { PageHeaderService      } from '@services/page-header';
 import { parsePagination        } from '@utils/helpers';
-import {
-    ConfirmDialogComponent,
-    ConfirmDialogOptions,
-    ConfirmDialogResult
-} from '@vee/components/confirm-dialog';
 
 import * as RxO from 'rxjs/operators';
 import * as Api from '@public-api/v1';
@@ -42,9 +36,8 @@ export class CourseEditComponent extends Subscriber implements OnInit {
     }
 
     constructor(
-        private dialog:         MatDialog,
         private pageHeader:     PageHeaderService,
-        private serverApi:      CoursesService,
+        private backend:      CoursesService,
         private router:         Router,
         private route:          ActivatedRoute,
         private configService:  ConfigService,
@@ -52,24 +45,21 @@ export class CourseEditComponent extends Subscriber implements OnInit {
     ) { super(); }
 
     onTaskDeleteDemand(task: Api.Data.Task.BasicJson) {
-        this.dialog.open<ConfirmDialogComponent, ConfirmDialogOptions, ConfirmDialogResult>(
-            ConfirmDialogComponent, {
-            data: {
-                titleHtml:   `Sanity check`,
-                contentHtml: `Are you sure you want to delete this task?`
-            }
-        }).afterClosed().subscribe(confirmed => {
+        this.pageHeader.openConfirmDialog({
+            titleHtml:   `Sanity check`,
+            contentHtml: `Are you sure you want to delete this task?`
+        }).subscribe(confirmed => {
             if (confirmed) {
                 const deletedTaskTitle = task.title;
-                this.pageHeader.loading = true;
-                this.serverApi.deleteTask(task.id)
-                .subscribe(() => {
-                    this.pageHeader.loading = false;
-                    this.pageHeader.flashSnackBar(
-                        `Task '${deletedTaskTitle}' was successfully deleted.`
-                    );
-                    this.doSearchRequest();
-                });
+                this.backend
+                    .deleteTask(task.id)
+                    .pipe(this.pageHeader.displayLoading())
+                    .subscribe(() => {
+                        this.pageHeader.flashSnackBar(
+                            `Task '${deletedTaskTitle}' was successfully deleted.`
+                        );
+                        this.doSearchRequest();
+                    });
             }
         });
 
@@ -77,23 +67,23 @@ export class CourseEditComponent extends Subscriber implements OnInit {
     }
 
     onDeleteCourseDemand() {
-        this.dialog.open<ConfirmDialogComponent, ConfirmDialogOptions, ConfirmDialogResult>(
-            ConfirmDialogComponent, {
-            data: {
-                titleHtml:   `Sanity check`,
-                contentHtml: `Are you sure you want to delete this course?`
-            }
-        }).afterClosed().subscribe(confirmed => {
+        this.pageHeader.openConfirmDialog({
+            titleHtml:   `Sanity check`,
+            contentHtml: `Are you sure you want to delete this course?`
+        }).subscribe(confirmed => {   
             if (confirmed) {
                 const deletedCourseName = this.course!.name;
-                this.serverApi.deleteCourse(this.courseId).subscribe(
-                    () =>  {
-                        this.pageHeader.flashSnackBar(
-                            `Course '${deletedCourseName}' was successfully deleted.`
-                        );
-                        this.router.navigateByUrl(this.rt.to.courses());
-                    }
-                );
+                this.backend
+                    .deleteCourse(this.courseId)
+                    .pipe(this.pageHeader.displayLoading())
+                    .subscribe(
+                        () =>  {
+                            this.pageHeader.flashSnackBar(
+                                `Course '${deletedCourseName}' was successfully deleted.`
+                            );
+                            this.router.navigateByUrl(this.rt.to.courses());
+                        }
+                    );
             }
         });
 
@@ -110,7 +100,7 @@ export class CourseEditComponent extends Subscriber implements OnInit {
         this.subscrs.query = this
             .route
             .queryParamMap
-            .subscribe(queryParamMap =>  this.doSearchRequest(
+            .subscribe(queryParamMap => this.doSearchRequest(
                 parsePagination(queryParamMap, this.pagination)
             ));
         
@@ -125,7 +115,10 @@ export class CourseEditComponent extends Subscriber implements OnInit {
 
     onFormSubmit() {
         const updatedCourseName = this.course!.name;
-        this.serverApi.putCourse(this.courseId, this.userInput).subscribe(
+        this.backend
+            .putCourse(this.courseId, this.userInput)
+            .pipe(this.pageHeader.displayLoading())
+            .subscribe(
             () => {
                 this.pageHeader.flashSnackBar(
                     `Course '${updatedCourseName}' was successfully updated.`
@@ -143,16 +136,17 @@ export class CourseEditComponent extends Subscriber implements OnInit {
         courseId = this.courseId
     ) {
         const newPagination = { page, limit, search };
-        this.pageHeader.loading = true;
-        this.serverApi.getCourse(courseId, newPagination).subscribe(
-            resCourse => {
-                this.pageHeader.loading = false;
-                if (!this.course || courseId !== resCourse.id) {
-                    this.userInput = resCourse;
+        this.backend
+            .getCourse(courseId, newPagination)
+            .pipe(this.pageHeader.displayLoading())
+            .subscribe(
+                resCourse => {
+                    if (!this.course || courseId !== resCourse.id) {
+                        this.userInput = resCourse;
+                    }
+                    this.course     = resCourse;
+                    this.pagination = newPagination;
                 }
-                this.course     = resCourse;
-                this.pagination = newPagination;
-            }
         );
     }
 }

@@ -1,0 +1,45 @@
+<h1 mat-dialog-title> 
+    <app-user-item 
+        [user]="options.taskResult.author" 
+        provideLink
+    ></app-user-item>
+</h1>
+<mat-dialog-content>
+    <app-task-result-view
+        [taskResult]="options.taskResult"
+        showLastUpdate
+    ></app-task-result-view>
+
+    <h3 class="mt-2">
+        Comment:
+    </h3>
+    <vee-markdown-editor
+        [(sourceText)]="inputCheck.comment"
+    ></vee-markdown-editor>
+    <mat-form-field class="mt-2">
+        <input matInput
+            [(ngModel)]="inputCheck.score"
+            placeholder="Score"
+            type="number"
+            name="score"
+            value="0"
+            min="0"
+            required
+        >
+    </mat-form-field>
+</mat-dialog-content>
+<mat-divider></mat-divider>
+<div mat-dialog-actions 
+    class="float-right mt-2"
+>
+    <button mat-button  
+        [mat-dialog-close]="submit()"
+        type="submit"
+        color="primary"
+    >Submit</button>
+    <button mat-button cdkFocusInitial
+        [mat-dialog-close]="cancel()"
+        color="warn"
+        class="ml-2"
+    >Cancel</button>
+</div>

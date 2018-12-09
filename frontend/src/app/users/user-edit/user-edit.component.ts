@@ -8,6 +8,7 @@ import { RoutingService         } from '@services/routing';
 import { Subscriber             } from '@utils/subscriber';
 
 import * as _      from 'lodash';
+import * as Rx     from 'rxjs';
 import * as RxO    from 'rxjs/operators';
 import * as Vts    from 'vee-type-safe';
 import * as Api    from '@public-api/v1';
@@ -79,22 +80,23 @@ export class UserEditComponent extends Subscriber implements OnInit {
 
     onFormSubmit() {
         const submittedUserId = this.userId;
-        if (this.session.userRole !== Gql.UserRole.Admin) {
-            const newMe = { ...this.session.user, ...this.input };
-            return this.backend
-                .updateMe({ patch: this.input })
-                .pipe(this.pageHeader.displayLoading())
-                .subscribe(() => {
-                    this.session.user = newMe as Api.Data.User.Json;
-                    this.router.navigateByUrl(this.rt.to.user(submittedUserId));
-                });
-        }
-        return this.backend.updateUser({ 
-            id: submittedUserId, 
-            patch: this.input
-        })  .pipe(this.pageHeader.displayLoading())
+        const newMe = { ..._.cloneDeep(this.session.user), ..._.cloneDeep(this.input) };
+        const request: Rx.Observable<unknown> = this.session.userRole !== Gql.UserRole.Admin
+            ? this.backend.updateMe  ({ patch: this.input })
+            : this.backend.updateUser({ patch: this.input, id: submittedUserId, });
+        return request
+            .pipe(this.pageHeader.displayLoading())
             .subscribe(
-                ()  => this.router.navigateByUrl(this.rt.to.user(submittedUserId)),
+                () => {
+                    if (!this.session.user) {
+                        console.error('User is not logged in');
+                        return;
+                    }
+                    if (submittedUserId === this.session.user.id) {
+                        this.session.user = newMe as Api.Data.User.Json;
+                    }
+                    this.router.navigateByUrl(this.rt.to.user(submittedUserId));
+                },
                 err => this.errHandler.handle(err)
             );
     }

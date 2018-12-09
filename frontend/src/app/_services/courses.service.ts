@@ -11,16 +11,18 @@ import { ErrorHandlingService } from '@services/error-handling';
   providedIn: 'root'
 }) export class CoursesService {
     constructor(
-        private getLocalTaskResultsGql: Gql.GetLocalTaskResultsGQL,
-        private getTaskResultsGql:      Gql.GetTaskResultsGQL,
-        private getTaskWithResultGql:   Gql.GetTaskWithResultGQL,
-        private createTaskResultGql:    Gql.CreateTaskResultGQL,
-        private updateTaskResultGql:    Gql.UpdateTaskResultGQL,
-        private getTaskForEditGql:      Gql.GetTaskForEditGQL,
-        private updateTaskGql:          Gql.UpdateTaskGQL,
-        private getCoursesGql:          Gql.GetCoursesGQL,
-        private http:                   HttpClient,
-        private errHandling:            ErrorHandlingService
+        private updateTaskResultCheckGql: Gql.UpdateTaskResultCheckGQL,
+        private createTaskResultCheckGql: Gql.CreateTaskResultCheckGQL,
+        private getLocalTaskResultsGql:   Gql.GetLocalTaskResultsGQL,
+        private getTaskResultsGql:        Gql.GetTaskResultsGQL,
+        private getTaskWithResultGql:     Gql.GetTaskWithResultGQL,
+        private createTaskResultGql:      Gql.CreateTaskResultGQL,
+        private updateTaskResultGql:      Gql.UpdateTaskResultGQL,
+        private getTaskForEditGql:        Gql.GetTaskForEditGQL,
+        private updateTaskGql:            Gql.UpdateTaskGQL,
+        private getCoursesGql:            Gql.GetCoursesGQL,
+        private http:                     HttpClient,
+        private errHandling:              ErrorHandlingService
     ) { }
     private options = { fetchPolicy: 'no-cache' } as { fetchPolicy: 'no-cache' };
 
@@ -28,6 +30,16 @@ import { ErrorHandlingService } from '@services/error-handling';
     private errHandler<T>() {
         return this.errHandling.handler<T>();
     }
+
+
+    updateTaskResultCheck(req: Gql.UpdateTaskResultCheckRequest) {
+        return this.updateTaskResultCheckGql.mutate({ req }, this.options);
+    }
+
+    createTaskResultCheck(req: Gql.CreateTaskResultCheckRequest) {
+        return this.createTaskResultCheckGql.mutate({ req }, this.options);
+    }
+
 
     getLocalTaskResults(
         taskReq: Gql.GetTaskRequest, 

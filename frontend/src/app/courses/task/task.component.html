@@ -13,8 +13,8 @@
         <div class="col-md">
             <mat-card>
                 <mat-card-header>
-                    <span class="task-property">Maximum score:</span>
-                    <strong>{{task!.maxMark}}</strong>
+                    <span class="task-property">Score:</span>
+                    <strong>{{ resultCheck?.score?.toString() || '?'}}/{{task!.maxMark}}</strong>
                 </mat-card-header>
             </mat-card>
         </div>
@@ -69,7 +69,9 @@
             </mat-accordion>
         </div>
         </mat-tab>
-        <mat-tab label="Score">
+        <mat-tab *ngIf="canSolveTask && resultCheck"
+            label="Checked"
+        >
             <ng-container *ngIf="resultCheck; else elseTaskNotChecked">
                 <blockquote class="result-check-comment">
                     <markdown [data]="resultCheck!.comment || '*Author left no comments*' ">

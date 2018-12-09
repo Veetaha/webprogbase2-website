@@ -9,6 +9,7 @@ import { Subscriber             } from '@utils/subscriber';
 
 import * as Gql from '@services/gql';
 import * as _   from 'lodash';
+import * as Vts from 'vee-type-safe';
 
 import Task = Gql.GetTaskForEdit.Task;
 
@@ -71,7 +72,13 @@ export class TaskEditComponent extends Subscriber implements OnInit {
             this.backend.getTaskForEdit({ id: paramMap.get('id')! }).subscribe(
                 task => {
                     this.srcTask = task.data.getTask.task;
-                    this.updTask = _.cloneDeep(this.srcTask);
+                    this.updTask = Vts.take(this.srcTask, [
+                        'attachedFileUrl', 
+                        'body',
+                        'maxMark',
+                        'taskType',
+                        'title'
+                    ]);
                 }
             );
         });

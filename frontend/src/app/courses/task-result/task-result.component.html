@@ -1,21 +1,9 @@
 <ng-container *ngIf="!updResult; else elseEditingResult">
     <ng-container *ngIf="srcResult">
-        <markdown
-            [data]="srcResult!.body"
-            class="task-result-display"
-        >
-        </markdown>
-        <vee-file-download *ngIf="srcResult!.fileUrl"
-            [href]="srcResult!.fileUrl"
-            fileName="task-result"
-        >
-            Attached file
-        </vee-file-download>
-        <small 
-            class="text-muted d-block"
-        >
-            Last update {{ srcResult!.lastUpdate | date: 'medium' }}
-        </small>
+        <app-task-result-view
+            [taskResult]="srcResult"
+            showLastUpdate
+        ></app-task-result-view>
     </ng-container>
     <button mat-button
         (click)="editTaskResult()"
@@ -53,6 +41,5 @@
                 Cancel
             </button>
         </div>
-        
     </form>
 </ng-template>

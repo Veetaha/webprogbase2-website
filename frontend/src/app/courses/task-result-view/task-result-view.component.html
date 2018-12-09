@@ -1,0 +1,16 @@
+<markdown
+    [data]="taskResult.body"
+    class="task-result-display"
+>
+</markdown>
+<vee-file-download *ngIf="taskResult.fileUrl"
+    [href]="taskResult.fileUrl"
+    fileName="task-result"
+>
+    Attached file
+</vee-file-download>
+<small *ngIf="showLastUpdate"
+    class="text-muted d-block"
+>
+    Last update {{ taskResult.lastUpdate | date: 'medium' }}
+</small>

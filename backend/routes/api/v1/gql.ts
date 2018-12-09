@@ -66,7 +66,7 @@ const TaskResultResolvers: GqlV1.TaskResultResolvers.Resolvers = {
 };
 
 const TaskResultCheckResolvers: GqlV1.TaskResultCheckResolvers.Resolvers = {
-    author: taskResultCheck => taskResultCheck.author()
+    author: check => check.author()
 };
 
 const MutationResolvers: GqlV1.MutationResolvers.Resolvers = {

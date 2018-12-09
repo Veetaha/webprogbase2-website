@@ -45,7 +45,9 @@ const TaskResultCheckSchema = new Mongoose.Schema({
 });
 
 const TaskResultCheckMethods: TaskResultCheckMethods = {
-    author: getPopulated('authorId')
+    author() {
+        return Helpers.tryFindById(User, this.authorId);
+    }
 };
 
 TaskResultCheckSchema.methods = TaskResultCheckMethods;
@@ -192,7 +194,17 @@ const Methods: TaskResultMethods = {
             );
         }
         return {                                
-            taskResult: await Helpers.tryUpdateById(TaskResult, this.id, { check: { ...patch, lastUpdate: new Date } })
+            taskResult: await Helpers.tryUpdateById(
+                TaskResult, 
+                this.id, 
+                _.mapKeys(
+                    { 
+                        ..._.omitBy(patch, _.isUndefined), 
+                        lastUpdate: new Date 
+                    }, 
+                    (_value, key) => `check.${key}`
+                )
+            )
         };
     },
     async deleteCheck() {

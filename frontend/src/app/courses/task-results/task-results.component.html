@@ -1,10 +1,11 @@
 
 <vee-pagination
     [pageFetcher]="taskResultsPageFetcher"
+    [refetchOn]="updatePage"
     noSearch
 >
-<mat-list *veePaginated="let taskResults">
-    <mat-list-item *ngFor="let taskResult of taskResults; trackBy: trackById">
+<div *veePaginated="let taskResults">
+    <div *ngFor="let taskResult of taskResults; trackBy: trackById">
         <mat-accordion>
         <mat-expansion-panel>
             <mat-expansion-panel-header>
@@ -19,8 +20,13 @@
                 </mat-panel-description>
             </mat-expansion-panel-header>
         
+            <app-task-result-view
+                [taskResult]="taskResult"
+            ></app-task-result-view>
+            <br>
             <button mat-button
                 (click)="checkTaskResult(taskResult)"
+                class="mt-2"
                 type="button"
                 color="primary"
             >
@@ -29,7 +35,7 @@
             </button>
         </mat-expansion-panel>
         </mat-accordion>
-    </mat-list-item>
-</mat-list>
+    </div>
+</div>
 </vee-pagination>
     

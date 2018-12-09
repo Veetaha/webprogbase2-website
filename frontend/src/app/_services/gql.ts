@@ -371,6 +371,130 @@ export type TypeMatchedScalar = any;
 // Documents
 // ====================================================
 
+export namespace CreateTaskResultCheck {
+    export type Variables = {
+        req: CreateTaskResultCheckRequest;
+    };
+
+    export type Mutation = {
+        __typename?: "Mutation";
+
+        createTaskResultCheck: CreateTaskResultCheck;
+    };
+
+    export type CreateTaskResultCheck = {
+        __typename?: "CreateTaskResultCheckResponse";
+
+        taskResult: TaskResult;
+    };
+
+    export type TaskResult = {
+        __typename?: "TaskResult";
+
+        id: string;
+
+        lastUpdate: string;
+
+        author: Author;
+
+        check: Check | null;
+    };
+
+    export type Author = {
+        __typename?: "User";
+
+        id: string;
+
+        avaUrl: string;
+
+        login: string;
+    };
+
+    export type Check = {
+        __typename?: "TaskResultCheck";
+
+        comment: string | null;
+
+        score: number;
+
+        lastUpdate: string;
+
+        author: _Author;
+    };
+
+    export type _Author = {
+        __typename?: "User";
+
+        id: string;
+
+        avaUrl: string;
+
+        login: string;
+    };
+}
+
+export namespace UpdateTaskResultCheck {
+    export type Variables = {
+        req: UpdateTaskResultCheckRequest;
+    };
+
+    export type Mutation = {
+        __typename?: "Mutation";
+
+        updateTaskResultCheck: UpdateTaskResultCheck;
+    };
+
+    export type UpdateTaskResultCheck = {
+        __typename?: "UpdateTaskResultCheckResponse";
+
+        taskResult: TaskResult;
+    };
+
+    export type TaskResult = {
+        __typename?: "TaskResult";
+
+        id: string;
+
+        lastUpdate: string;
+
+        author: Author;
+
+        check: Check | null;
+    };
+
+    export type Author = {
+        __typename?: "User";
+
+        id: string;
+
+        avaUrl: string;
+
+        login: string;
+    };
+
+    export type Check = {
+        __typename?: "TaskResultCheck";
+
+        comment: string | null;
+
+        score: number;
+
+        lastUpdate: string;
+
+        author: _Author;
+    };
+
+    export type _Author = {
+        __typename?: "User";
+
+        id: string;
+
+        avaUrl: string;
+
+        login: string;
+    };
+}
+
 export namespace GetLocalTaskResults {
     export type Variables = {
         taskReq: GetTaskRequest;
@@ -410,6 +534,10 @@ export namespace GetLocalTaskResults {
 
         lastUpdate: string;
 
+        body: string | null;
+
+        fileUrl: string | null;
+
         author: Author;
 
         check: Check | null;
@@ -431,6 +559,8 @@ export namespace GetLocalTaskResults {
         comment: string | null;
 
         score: number;
+
+        lastUpdate: string;
 
         author: _Author;
     };
@@ -1346,6 +1476,72 @@ import gql from "graphql-tag";
 @Injectable({
     providedIn: "root"
 })
+export class CreateTaskResultCheckGQL extends Apollo.Mutation<
+    CreateTaskResultCheck.Mutation,
+    CreateTaskResultCheck.Variables
+> {
+    document: any = gql`
+        mutation createTaskResultCheck($req: CreateTaskResultCheckRequest!) {
+            createTaskResultCheck(req: $req) {
+                taskResult {
+                    id
+                    lastUpdate
+                    author {
+                        id
+                        avaUrl
+                        login
+                    }
+                    check {
+                        comment
+                        score
+                        lastUpdate
+                        author {
+                            id
+                            avaUrl
+                            login
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
+export class UpdateTaskResultCheckGQL extends Apollo.Mutation<
+    UpdateTaskResultCheck.Mutation,
+    UpdateTaskResultCheck.Variables
+> {
+    document: any = gql`
+        mutation updateTaskResultCheck($req: UpdateTaskResultCheckRequest!) {
+            updateTaskResultCheck(req: $req) {
+                taskResult {
+                    id
+                    lastUpdate
+                    author {
+                        id
+                        avaUrl
+                        login
+                    }
+                    check {
+                        comment
+                        score
+                        lastUpdate
+                        author {
+                            id
+                            avaUrl
+                            login
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
 export class GetLocalTaskResultsGQL extends Apollo.Query<
     GetLocalTaskResults.Query,
     GetLocalTaskResults.Variables
@@ -1362,6 +1558,8 @@ export class GetLocalTaskResultsGQL extends Apollo.Query<
                         data {
                             id
                             lastUpdate
+                            body
+                            fileUrl
                             author {
                                 id
                                 avaUrl
@@ -1370,6 +1568,7 @@ export class GetLocalTaskResultsGQL extends Apollo.Query<
                             check {
                                 comment
                                 score
+                                lastUpdate
                                 author {
                                     id
                                     avaUrl

@@ -1,5 +1,54 @@
 # import * from "./../../../../backend/public-api/v1/schema.gql"
 
+
+mutation createTaskResultCheck($req: CreateTaskResultCheckRequest!) {
+    createTaskResultCheck(req: $req) {
+        taskResult {
+            id
+            lastUpdate
+            author {
+                id
+                avaUrl
+                login
+            }
+            check {
+                comment
+                score
+                lastUpdate
+                author {
+                    id
+                    avaUrl
+                    login
+                }
+            }
+        }
+    }
+}
+
+mutation updateTaskResultCheck($req: UpdateTaskResultCheckRequest!) {
+    updateTaskResultCheck(req: $req) {
+        taskResult {
+            id
+            lastUpdate
+            author {
+                id
+                avaUrl
+                login
+            }
+            check {
+                comment
+                score
+                lastUpdate
+                author {
+                    id
+                    avaUrl
+                    login
+                }
+            }
+        }
+    }
+}
+
 query getLocalTaskResults(
     $taskReq: GetTaskRequest!
     $localResultsReq: GetLocalTaskResultsRequest!
@@ -11,6 +60,8 @@ query getLocalTaskResults(
                 data {
                     id
                     lastUpdate
+                    body
+                    fileUrl
                     author {
                         id
                         avaUrl
@@ -19,6 +70,7 @@ query getLocalTaskResults(
                     check {
                         comment
                         score
+                        lastUpdate
                         author {
                             id
                             avaUrl
