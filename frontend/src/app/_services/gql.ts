@@ -147,6 +147,11 @@ export interface GetGroupRequest {
     /** Target group id. */
     id: string;
 }
+
+export interface CanSolveTaskRequest {
+    /** Suspect task Id */
+    id: string;
+}
 /** Holds the payload of the new task. */
 export interface CreateTaskRequest {
     courseId: string;
@@ -359,6 +364,80 @@ export type TypeMatchedScalar = any;
 // Documents
 // ====================================================
 
+export namespace GetTaskResults {
+    export type Variables = {
+        req: GetTaskResultsRequest;
+    };
+
+    export type Query = {
+        __typename?: "Query";
+
+        getTaskResults: GetTaskResults;
+    };
+
+    export type GetTaskResults = {
+        __typename?: "GetTaskResultsResponse";
+
+        total: number;
+
+        data: Data[];
+    };
+
+    export type Data = {
+        __typename?: "TaskResult";
+
+        id: string;
+
+        lastUpdate: string;
+
+        author: Author;
+
+        task: Task;
+
+        check: Check | null;
+    };
+
+    export type Author = {
+        __typename?: "User";
+
+        id: string;
+
+        avaUrl: string;
+
+        login: string;
+    };
+
+    export type Task = {
+        __typename?: "Task";
+
+        id: string;
+
+        title: string;
+
+        taskType: TaskType;
+    };
+
+    export type Check = {
+        __typename?: "TaskResultCheck";
+
+        comment: string | null;
+
+        score: number;
+
+        author: _Author;
+    };
+
+    export type _Author = {
+        __typename?: "User";
+
+        id: string;
+
+        avaUrl: string;
+
+        login: string;
+    };
+}
+
 export namespace CreateTaskResult {
     export type Variables = {
         req: CreateTaskResultRequest;
@@ -527,13 +606,22 @@ export namespace GetTaskForEdit {
 
 export namespace GetTaskWithResult {
     export type Variables = {
-        req: GetTaskRequest;
+        taskReq: GetTaskRequest;
+        canSolveTaskReq: CanSolveTaskRequest;
     };
 
     export type Query = {
         __typename?: "Query";
 
+        canSolveTask: CanSolveTask;
+
         getTask: GetTask;
+    };
+
+    export type CanSolveTask = {
+        __typename?: "CanSolveTaskResponse";
+
+        answer: boolean;
     };
 
     export type GetTask = {
@@ -570,6 +658,8 @@ export namespace GetTaskWithResult {
         id: string;
 
         login: string;
+
+        avaUrl: string;
     };
 
     export type MyTaskResult = {
@@ -1174,6 +1264,44 @@ import gql from "graphql-tag";
 @Injectable({
     providedIn: "root"
 })
+export class GetTaskResultsGQL extends Apollo.Query<
+    GetTaskResults.Query,
+    GetTaskResults.Variables
+> {
+    document: any = gql`
+        query getTaskResults($req: GetTaskResultsRequest!) {
+            getTaskResults(req: $req) {
+                total
+                data {
+                    id
+                    lastUpdate
+                    author {
+                        id
+                        avaUrl
+                        login
+                    }
+                    task {
+                        id
+                        title
+                        taskType
+                    }
+                    check {
+                        comment
+                        score
+                        author {
+                            id
+                            avaUrl
+                            login
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
 export class CreateTaskResultGQL extends Apollo.Mutation<
     CreateTaskResult.Mutation,
     CreateTaskResult.Variables
@@ -1278,8 +1406,14 @@ export class GetTaskWithResultGQL extends Apollo.Query<
     GetTaskWithResult.Variables
 > {
     document: any = gql`
-        query getTaskWithResult($req: GetTaskRequest!) {
-            getTask(req: $req) {
+        query getTaskWithResult(
+            $taskReq: GetTaskRequest!
+            $canSolveTaskReq: CanSolveTaskRequest!
+        ) {
+            canSolveTask(req: $canSolveTaskReq) {
+                answer
+            }
+            getTask(req: $taskReq) {
                 task {
                     taskType
                     title
@@ -1291,6 +1425,7 @@ export class GetTaskWithResultGQL extends Apollo.Query<
                     author {
                         id
                         login
+                        avaUrl
                     }
                     myTaskResult {
                         id

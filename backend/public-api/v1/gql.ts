@@ -147,6 +147,11 @@ export interface GetGroupRequest {
   /** Target group id. */
   id: string;
 }
+
+export interface CanSolveTaskRequest {
+  /** Suspect task Id */
+  id: string;
+}
 /** Holds the payload of the new task. */
 export interface CreateTaskRequest {
   courseId: string;
@@ -386,6 +391,8 @@ export interface Query {
   getCourse: GetCourseResponse;
   /** Returns a single group by id, throws an error if it was not found. */
   getGroup: GetGroupResponse;
+
+  canSolveTask: CanSolveTaskResponse;
 }
 
 export interface User {
@@ -573,6 +580,10 @@ export interface GetGroupResponse {
   group: Group;
 }
 
+export interface CanSolveTaskResponse {
+  answer: boolean;
+}
+
 /** Root mutations endpoint */
 export interface Mutation {
   /** Creates a new task with the given input data. */
@@ -728,6 +739,9 @@ export interface GetCourseQueryArgs {
 export interface GetGroupQueryArgs {
   req: GetGroupRequest;
 }
+export interface CanSolveTaskQueryArgs {
+  req: CanSolveTaskRequest;
+}
 export interface GetCoursesGroupArgs {
   req: GetGroupCoursesRequest;
 }
@@ -808,7 +822,8 @@ export namespace Access {
     getGroups: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
     getUser: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
     getTask: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
-    getGroup: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin])
+    getGroup: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
+    canSolveTask: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin])
   };
   export const Group = {
     $: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin])

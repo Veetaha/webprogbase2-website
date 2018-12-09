@@ -1,2 +1,19 @@
-<img *ngIf="user" [src]="user!.avaUrl" class="user-avatar">
-{{user?.login || 'Loading...'}}
+<ng-template #userViewTemplate>
+    <img [src]="user!.avaUrl" class="user-avatar">&nbsp;<strong>{{user!.login}}</strong>
+</ng-template>
+
+<ng-container *ngIf=user; else elseNoUser>
+    <a *ngIf="provideLink; else elseDontProvideLink"
+        [routerLink]="rt.to.user(user!.id)"
+    >
+        <ng-container *ngTemplateOutlet="userViewTemplate">
+        </ng-container>
+    </a>
+    <ng-template #elseDontProvideLink>
+        <ng-container *ngTemplateOutlet="userViewTemplate">
+        </ng-container>
+    </ng-template>
+</ng-container>
+<ng-template #elseNoUser>
+    <p class="text-info">Loading...</p>
+</ng-template>

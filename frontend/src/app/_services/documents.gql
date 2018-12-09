@@ -1,6 +1,36 @@
 # import * from "./../../../../backend/public-api/v1/schema.gql"
 
 
+query getTaskResults($req: GetTaskResultsRequest!) {
+    getTaskResults(req: $req) {
+        total
+        data {
+            id
+            lastUpdate
+            author {
+                id
+                avaUrl
+                login
+            }
+            task {
+                id
+                title
+                taskType
+            }
+            check {
+                comment
+                score
+                author {
+                    id
+                    avaUrl
+                    login
+                }
+            }
+        }
+    }
+}
+
+
 mutation createTaskResult($req: CreateTaskResultRequest!) {
     createTaskResult(req: $req) {
         taskResult {
@@ -63,8 +93,12 @@ query getTaskForEdit($req: GetTaskRequest!) {
         }
     }
 }
-query getTaskWithResult($req: GetTaskRequest!) {
-    getTask(req: $req) {
+query getTaskWithResult($taskReq: GetTaskRequest!, $canSolveTaskReq: CanSolveTaskRequest!) {
+    canSolveTask(req: $canSolveTaskReq) {
+        answer
+    }
+
+    getTask(req: $taskReq) {
         task {
             taskType
             title
@@ -76,6 +110,7 @@ query getTaskWithResult($req: GetTaskRequest!) {
             author {
                 id
                 login
+                avaUrl
             }
             myTaskResult {
                 id

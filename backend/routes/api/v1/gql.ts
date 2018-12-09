@@ -26,16 +26,17 @@ const QueryResolvers: GqlV1.QueryResolvers.Resolvers = {
     getUser: async (_p, { req }, { user }) => (
         user && user._id.equals(req.id) ? { user } : User.getUser(req)
     ),
-    getUsers:   (_p, { req }) => User.  getUsers(req),
-    getCourses: (_p, { req }) => Course.getCourses(req),
-    getGroups:  (_p, { req }) => Group. getGroups(req),
+    getUsers:       (_p, { req }) => User.      getUsers(req),
+    getCourses:     (_p, { req }) => Course.    getCourses(req),
+    getGroups:      (_p, { req }) => Group.     getGroups(req),
     getTaskResults: (_p, { req }) => TaskResult.getTaskResults(req),
     
-    getTask:       (_p, { req }) => Task.      getTask(req),
-    getCourse:     (_p, { req }) => Course.    getCourse(req),
-    getGroup:      (_p, { req }) => Group.     getGroup(req),
-    getTaskResult: (_p, { req }) => TaskResult.getTaskResult(req),
-    getUserTaskResult: (_p, { req }) => TaskResult.getUserTaskResult(req)
+    getTask:           (_p, { req })           => Task.      getTask(req),
+    getCourse:         (_p, { req })           => Course.    getCourse(req),
+    getGroup:          (_p, { req })           => Group.     getGroup(req),
+    getTaskResult:     (_p, { req })           => TaskResult.getTaskResult(req),
+    getUserTaskResult: (_p, { req })           => TaskResult.getUserTaskResult(req),
+    canSolveTask:      (_p, { req }, { user }) => TaskResult.canSolveTask(req, user!)
     
 };
 const UserResolvers: GqlV1.UserResolvers.Resolvers = {

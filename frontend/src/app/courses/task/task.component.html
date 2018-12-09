@@ -1,5 +1,36 @@
 <div class="col-md-10 offset-md-1">
-    <mat-tab-group dynamicHeight>
+    <div *ngIf="task" 
+        class="row"
+    >
+        <div class="col-md">
+            <mat-card>
+                <mat-card-header>
+                    <span class="task-property">Type:</span>
+                    <strong>{{task!.taskType}}</strong>
+                </mat-card-header>
+            </mat-card>
+        </div>
+        <div class="col-md">
+            <mat-card>
+                <mat-card-header>
+                    <span class="task-property">Maximum score:</span>
+                    <strong>{{task!.maxMark}}</strong>
+                </mat-card-header>
+            </mat-card>
+        </div>
+        <div class="col-md">
+            <mat-card>
+                <mat-card-header>
+                    <span class="task-property">Author:</span>
+                    <app-user-item 
+                        [user]="task!.author" 
+                        provideLink
+                    ></app-user-item>
+                </mat-card-header>
+            </mat-card>
+        </div>
+    </div>
+    <mat-tab-group dynamicHeight class="mt-2">
         <mat-tab label="Description">
         <div *ngIf="task" class="mt-4">
             <markdown
@@ -19,16 +50,32 @@
                             Solve task
                         </mat-panel-title>
                     </mat-expansion-panel-header>
-                    <app-task-result
-                        [(taskResult)]="task!.myTaskResult"
-                        [taskId]="taskId"
-                    ></app-task-result>
+                    <ng-container *ngIf="canSolveTask; else elseCantSolveTask">
+                        <app-task-result
+                            [(taskResult)]="task!.myTaskResult"
+                            [taskId]="taskId"
+                        ></app-task-result>
+                    </ng-container>
+                    <ng-template #elseCantSolveTask>
+                        <p class="text-warning">
+                            You can't solve this task. 
+                            Appeal to administrator in order to get access.
+                        </p>
+                    </ng-template>
                 </mat-expansion-panel>
             </mat-accordion>
         </div>
         </mat-tab>
         <mat-tab label="Score">
-        Task Check here
+            <ng-container *ngIf="resultCheck; else elseTaskNotChecked">
+                <blockquote class="result-check-comment">
+                    <markdown [data]="resultCheck!.comment || '*Author left no comments*' ">
+                    </markdown>
+                </blockquote>
+            </ng-container>
+            <ng-template #elseTaskNotChecked>
+
+            </ng-template>
         </mat-tab>
     </mat-tab-group>
     <p *ngIf="task"

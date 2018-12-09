@@ -79,7 +79,7 @@ import { ErrorHandlingService } from '@services/error-handling';
     }
 
     getTaskWithResult(req: Gql.GetTaskRequest) {
-        return this.getTaskWithResultGql.fetch({ req }, this.options);
+        return this.getTaskWithResultGql.fetch({ taskReq: req, canSolveTaskReq: req }, this.options);
     }
     
     getTaskForEdit(req: Gql.GetTaskRequest) {

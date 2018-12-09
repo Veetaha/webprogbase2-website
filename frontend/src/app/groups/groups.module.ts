@@ -28,6 +28,9 @@ import { UserItemComponent   } from './user-item/user-item.component';
         CourseItemComponent,
         UserItemComponent
     ],
+    exports: [
+        UserItemComponent
+    ],
     providers: [
         // MarkdownService
     ]

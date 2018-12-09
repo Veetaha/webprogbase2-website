@@ -135,31 +135,28 @@ const Statics: TaskResultStatics = {
         const { taskResult } = await TaskResult.getTaskResult({ id });
 
         TaskResult.ensureUserCanUpdateTaskResult(user, taskResult);
-        const res = {
+        return {
             taskResult: await Helpers.tryUpdateById(
                 TaskResult, id, { ...patch, lastUpdate: new Date }
             ) 
         };
-        debugger;
-        return res; 
     },
 
     deleteTaskResult: async ({ id }) => ({ 
         taskResult: await Helpers.tryDeleteById(TaskResult, id) 
     }),
+    async hasUserCreatedTaskResult(authorId, taskId) {
+        return !!await TaskResult.findOne({ authorId, taskId });
+    },
     async ensureUserHasntCreatedTaskResult(authorId, taskId) {
-        if (await TaskResult.findOne({ taskId, authorId })) {
+        if (await TaskResult.hasUserCreatedTaskResult(taskId, authorId)) {
             throw new Apollo.ValidationError(`user has already submitted a result for this task`);
         }
     },
     async ensureUserCanCreateTaskResult(user, taskId) {
         user.ensureHasGroup();
         void await TaskResult.ensureUserHasntCreatedTaskResult(user.id, taskId);
-        const [group, { task }] = await Promise.all([
-            user.group(), 
-            Task.getTask({ id: taskId })
-        ]);
-        if (!group.coursesId.find(courseId => courseId.equals(task.courseId))) {
+        if (!(await TaskResult.canSolveTask({ id: taskId }, user)).answer){
             throw new Apollo.ForbiddenError(`user group has no access to the course`);
         }
     },
@@ -168,6 +165,16 @@ const Statics: TaskResultStatics = {
             throw new Apollo.ForbiddenError('user has no access to updating this task result');
         }
     },
+    async canSolveTask(req, user) {
+        if (!user.groupId) {
+            return { answer: false };
+        }
+        const [group, { task }] = await Promise.all([
+            user.group(), 
+            Task.getTask({ id: req.id })
+        ]);
+        return { answer: !!group.coursesId.find(courseId => courseId.equals(task.courseId)) };
+    }
 };
 
 const Methods: TaskResultMethods = {
@@ -216,6 +223,12 @@ Schema.plugin(Paginate);
 export const TaskResult = Mongoose.model<TaskResult, TaskResultModel>('TaskResult', Schema);
 
 export interface TaskResultStatics {
+    hasUserCreatedTaskResult(userId: ObjectId, taskId: ObjectId): Promise<boolean>;
+
+    canSolveTask(
+        req: GqlV1.CanSolveTaskRequest,
+        user: User
+    ): Promise<GqlV1.CanSolveTaskResponse>;
 
     getTaskResults(  
           req: GqlV1.GetTaskResultsRequest

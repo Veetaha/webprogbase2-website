@@ -17,6 +17,7 @@ import Task = Gql.GetTaskWithResult.Task;
 })
 export class TaskComponent extends Subscriber implements OnInit {
     task?: Task;
+    canSolveTask?: boolean;
 
     constructor(
         private pageHeader: PageHeaderService,
@@ -29,13 +30,18 @@ export class TaskComponent extends Subscriber implements OnInit {
         return this.route.snapshot.paramMap.get('id')!
     }
 
+    get resultCheck() {
+        return this.task && this.task.myTaskResult && this.task.myTaskResult.check;
+    }
+
     ngOnInit() {
         this.subscrs.paramMap = this.route.paramMap.subscribe(params => {
             this.backend
                 .getTaskWithResult({ id: params.get('id')! })
                 .pipe(this.pageHeader.displayLoading())
                 .subscribe(res => {
-                    this.task = res.data.getTask.task;
+                    this.task         = res.data.getTask.task;
+                    this.canSolveTask = res.data.canSolveTask.answer;
                     this.pageHeader.setHeader({
                         title: this.task.title,
                         toolButtons: [{
