@@ -12,7 +12,7 @@ import { CourseComponent     } from './course/course.component';
 import { CourseNewComponent  } from './course-new/course-new.component';
 import { CourseEditComponent } from './course-edit/course-edit.component';
 import { TaskEditComponent   } from './task-edit/task-edit.component';
-
+import { TaskResultComponent } from './task-result/task-result.component';
 
 @NgModule({
     imports: [
@@ -30,7 +30,8 @@ import { TaskEditComponent   } from './task-edit/task-edit.component';
         CoursesComponent,
         CourseNewComponent,
         CourseEditComponent,
-        TaskEditComponent
+        TaskEditComponent,
+        TaskResultComponent
     ],
     providers: [
         // MarkdownService

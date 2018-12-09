@@ -34,7 +34,7 @@ export interface TaskResultData {
     body?:       Helpers.Maybe<string>;
     fileUrl?:    Helpers.Maybe<string>;
 
-    check?:      TaskResultCheck;
+    check?:      Helpers.Maybe<TaskResultCheck>;
 }
 
 const TaskResultCheckSchema = new Mongoose.Schema({
@@ -135,12 +135,13 @@ const Statics: TaskResultStatics = {
         const { taskResult } = await TaskResult.getTaskResult({ id });
 
         TaskResult.ensureUserCanUpdateTaskResult(user, taskResult);
-
-        return {
+        const res = {
             taskResult: await Helpers.tryUpdateById(
                 TaskResult, id, { ...patch, lastUpdate: new Date }
             ) 
         };
+        debugger;
+        return res; 
     },
 
     deleteTaskResult: async ({ id }) => ({ 
@@ -163,7 +164,7 @@ const Statics: TaskResultStatics = {
         }
     },
     ensureUserCanUpdateTaskResult(user, taskResult) {
-        if (taskResult.authorId.equals(user.id)) {
+        if (!taskResult.authorId.equals(user.id)) {
             throw new Apollo.ForbiddenError('user has no access to updating this task result');
         }
     },
@@ -197,9 +198,7 @@ const Methods: TaskResultMethods = {
                 `Can't delete task result check as it doesn't exits`
             );
         }
-        debugger;
-        await this.check.remove();
-        debugger;
+        this.check = null;
         return {
             taskResult: await this.save()
         };

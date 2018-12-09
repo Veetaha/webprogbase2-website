@@ -10,14 +10,24 @@ import * as Prism from 'prismjs';
     styleUrls:  ['./markdown-editor.component.scss']
 })
 export class MarkdownEditorComponent implements OnInit {
-    @Input() textareaId?: Maybe<string>;
+    private _sourceText = '';
+
+    @Input() textareaId?: Maybe<string> = 'markdownTextId';
     @Input() rows = 12;
-    @Input() sourceText = '';
+    @Input() set sourceText(value: string) {
+        this._sourceText = value;
+        this.sourceTextChange.emit(value);
+    }
+    get sourceText() {
+        return this._sourceText;
+    }
+
     @Input() name = 'markdownText'
     @Output() sourceTextChange = new EventEmitter<string>();
  
 
     editorOptions: { parser: (input: string) => string; };
+    
   	constructor(private markdown: MarkdownService) {
         this.editorOptions = {
             parser: input => {

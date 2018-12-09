@@ -12,6 +12,8 @@ import { ErrorHandlingService } from '@services/error-handling';
 }) export class CoursesService {
     constructor(
         private getTaskWithResultGql: Gql.GetTaskWithResultGQL,
+        private createTaskResultGql:  Gql.CreateTaskResultGQL,
+        private updateTaskResultGql:  Gql.UpdateTaskResultGQL,
         private getTaskForEditGql:    Gql.GetTaskForEditGQL,
         private updateTaskGql:        Gql.UpdateTaskGQL,
         private getCoursesGql:        Gql.GetCoursesGQL,
@@ -25,6 +27,13 @@ import { ErrorHandlingService } from '@services/error-handling';
         return this.errHandling.handler<T>();
     }
 
+    createTaskResult(req: Gql.CreateTaskResultRequest) {
+        return this.createTaskResultGql.mutate({ req }, this.options);
+    }
+    
+    updateTaskResult(req: Gql.UpdateTaskResultRequest) {
+        return this.updateTaskResultGql.mutate({ req }, this.options);
+    }
 
     postCourse(coursePostRequest: Api.V1.Course.Post.Request) {
         return this.http.post<Api.V1.Course.Post.Response>(

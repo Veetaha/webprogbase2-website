@@ -359,6 +359,114 @@ export type TypeMatchedScalar = any;
 // Documents
 // ====================================================
 
+export namespace CreateTaskResult {
+    export type Variables = {
+        req: CreateTaskResultRequest;
+    };
+
+    export type Mutation = {
+        __typename?: "Mutation";
+
+        createTaskResult: CreateTaskResult;
+    };
+
+    export type CreateTaskResult = {
+        __typename?: "CreateTaskResultResponse";
+
+        taskResult: TaskResult;
+    };
+
+    export type TaskResult = {
+        __typename?: "TaskResult";
+
+        id: string;
+
+        lastUpdate: string;
+
+        body: string | null;
+
+        fileUrl: string | null;
+
+        check: Check | null;
+    };
+
+    export type Check = {
+        __typename?: "TaskResultCheck";
+
+        comment: string | null;
+
+        score: number;
+
+        lastUpdate: string;
+
+        author: Author;
+    };
+
+    export type Author = {
+        __typename?: "User";
+
+        id: string;
+
+        login: string;
+
+        avaUrl: string;
+    };
+}
+
+export namespace UpdateTaskResult {
+    export type Variables = {
+        req: UpdateTaskResultRequest;
+    };
+
+    export type Mutation = {
+        __typename?: "Mutation";
+
+        updateTaskResult: UpdateTaskResult;
+    };
+
+    export type UpdateTaskResult = {
+        __typename?: "UpdateTaskResultResponse";
+
+        taskResult: TaskResult;
+    };
+
+    export type TaskResult = {
+        __typename?: "TaskResult";
+
+        id: string;
+
+        lastUpdate: string;
+
+        body: string | null;
+
+        fileUrl: string | null;
+
+        check: Check | null;
+    };
+
+    export type Check = {
+        __typename?: "TaskResultCheck";
+
+        comment: string | null;
+
+        score: number;
+
+        lastUpdate: string;
+
+        author: Author;
+    };
+
+    export type Author = {
+        __typename?: "User";
+
+        id: string;
+
+        login: string;
+
+        avaUrl: string;
+    };
+}
+
 export namespace UpdateTask {
     export type Variables = {
         req: UpdateTaskRequest;
@@ -448,6 +556,8 @@ export namespace GetTaskWithResult {
         body: string;
 
         attachedFileUrl: string | null;
+
+        publicationDate: string;
 
         author: Author;
 
@@ -1064,6 +1174,66 @@ import gql from "graphql-tag";
 @Injectable({
     providedIn: "root"
 })
+export class CreateTaskResultGQL extends Apollo.Mutation<
+    CreateTaskResult.Mutation,
+    CreateTaskResult.Variables
+> {
+    document: any = gql`
+        mutation createTaskResult($req: CreateTaskResultRequest!) {
+            createTaskResult(req: $req) {
+                taskResult {
+                    id
+                    lastUpdate
+                    body
+                    fileUrl
+                    check {
+                        comment
+                        score
+                        lastUpdate
+                        author {
+                            id
+                            login
+                            avaUrl
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
+export class UpdateTaskResultGQL extends Apollo.Mutation<
+    UpdateTaskResult.Mutation,
+    UpdateTaskResult.Variables
+> {
+    document: any = gql`
+        mutation updateTaskResult($req: UpdateTaskResultRequest!) {
+            updateTaskResult(req: $req) {
+                taskResult {
+                    id
+                    lastUpdate
+                    body
+                    fileUrl
+                    check {
+                        comment
+                        score
+                        lastUpdate
+                        author {
+                            id
+                            login
+                            avaUrl
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
+@Injectable({
+    providedIn: "root"
+})
 export class UpdateTaskGQL extends Apollo.Mutation<
     UpdateTask.Mutation,
     UpdateTask.Variables
@@ -1117,6 +1287,7 @@ export class GetTaskWithResultGQL extends Apollo.Query<
                     courseId
                     body
                     attachedFileUrl
+                    publicationDate
                     author {
                         id
                         login

@@ -1,0 +1,8 @@
+<ngx-uploadcare-widget
+    [value]="fileUrl"
+    [images-only]="imagesOnly"
+    (on-upload-complete)="onDownloadComplete($event.cdnUrl)"
+    (on-progress)="onProgress()"
+    public-key="11454e13e4be7273d843"
+>
+</ngx-uploadcare-widget>

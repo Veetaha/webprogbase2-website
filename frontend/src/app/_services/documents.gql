@@ -1,6 +1,48 @@
 # import * from "./../../../../backend/public-api/v1/schema.gql"
 
 
+mutation createTaskResult($req: CreateTaskResultRequest!) {
+    createTaskResult(req: $req) {
+        taskResult {
+            id
+            lastUpdate
+            body
+            fileUrl
+            check {
+                comment
+                score
+                lastUpdate
+                author {
+                    id
+                    login
+                    avaUrl
+                }
+            }
+        }
+    }
+}
+
+mutation updateTaskResult($req: UpdateTaskResultRequest!) {
+    updateTaskResult(req: $req) {
+        taskResult {
+            id
+            lastUpdate
+            body
+            fileUrl
+            check {
+                comment
+                score
+                lastUpdate
+                author {
+                    id
+                    login
+                    avaUrl
+                }
+            }
+        }
+    }
+}
+
 mutation updateTask($req: UpdateTaskRequest!) {
     updateTask(req: $req) {
         task {
@@ -30,6 +72,7 @@ query getTaskWithResult($req: GetTaskRequest!) {
             courseId
             body
             attachedFileUrl
+            publicationDate
             author {
                 id
                 login
