@@ -7,7 +7,6 @@ import { PageFetcher       } from '@vee/components/pagination';
 
 import * as RxO from 'rxjs/operators';
 import * as Gql from '@services/gql';
-import { ErrorHandlingService } from '@services/error-handling';
 
 import User = Gql.GetUsers.Data;
 
@@ -24,8 +23,7 @@ export class UsersComponent implements OnInit {
     constructor(
         private pageHeader: PageHeaderService,
         private backend:    UsersService,
-        public  rt:         RoutingService,
-        public  errHandler: ErrorHandlingService
+        public  rt:         RoutingService
     ) {}
 
     ngOnInit() {

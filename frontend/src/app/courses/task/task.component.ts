@@ -5,6 +5,7 @@ import { RoutingService    } from '@services/routing';
 import { PageHeaderService } from '@services/page-header';
 import { CoursesService    } from '@services/courses';
 import { Subscriber        } from '@utils/subscriber';
+import { SessionService    } from '@services/session';
 
 import * as Gql from '@services/gql';
 
@@ -23,7 +24,8 @@ export class TaskComponent extends Subscriber implements OnInit {
         private pageHeader: PageHeaderService,
         private backend:    CoursesService,
         private route:      ActivatedRoute,
-        public  rt:         RoutingService
+        public  rt:         RoutingService,
+        public  session:    SessionService
     ) { super(); }
 
     get taskId() {

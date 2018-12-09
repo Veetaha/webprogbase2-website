@@ -1,6 +1,5 @@
 <div class="form-group row">
-    <button 
-        mat-raised-button
+    <button mat-raised-button
         (click)="searchDemand.emit(searchInput.value)"
         type="button"
         class="form-control col-sm-2"
@@ -10,11 +9,11 @@
         <strong>Search</strong>
     </button>
     <mat-form-field class="col-sm-10" id="searchField">
-        <input #searchInput
+        <input #searchInput matInput
+            (keydown.enter)="$event.preventDefault();"
             (keyup.enter)="searchDemand.emit(searchInput.value)"
             [placeholder]="placeholder"
-            matInput
-            type="search"
+            type="text"
         >
     </mat-form-field>
 </div>

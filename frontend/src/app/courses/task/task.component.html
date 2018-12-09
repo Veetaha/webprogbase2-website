@@ -43,11 +43,14 @@
             >
                 Attached file
             </vee-file-download>
+            <p class="text-muted">
+                Task created on {{task!.publicationDate | date}}
+            </p>
             <mat-accordion>
                 <mat-expansion-panel>
                     <mat-expansion-panel-header>
                         <mat-panel-title>
-                            Solve task
+                            Task solution
                         </mat-panel-title>
                     </mat-expansion-panel-header>
                     <ng-container *ngIf="canSolveTask; else elseCantSolveTask">
@@ -77,8 +80,12 @@
 
             </ng-template>
         </mat-tab>
+        <mat-tab *ngIf="task && session.canUserViewTaskResults()"
+            label="Results"
+        >
+            <app-task-results
+                [taskId]="taskId"
+            ></app-task-results>
+        </mat-tab>
     </mat-tab-group>
-    <p *ngIf="task"
-        class="text-muted">Task created on {{task!.publicationDate | date}}
-    </p>
 </div>

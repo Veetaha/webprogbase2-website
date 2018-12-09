@@ -1,0 +1,35 @@
+
+<vee-pagination
+    [pageFetcher]="taskResultsPageFetcher"
+    noSearch
+>
+<mat-list *veePaginated="let taskResults">
+    <mat-list-item *ngFor="let taskResult of taskResults; trackBy: trackById">
+        <mat-accordion>
+        <mat-expansion-panel>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    <app-user-item 
+                        [user]="taskResult.author" 
+                        provideLink
+                    ></app-user-item>
+                </mat-panel-title>
+                <mat-panel-description>
+                    <small>{{taskResult.lastUpdate | date: 'medium'}}</small>
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+        
+            <button mat-button
+                (click)="checkTaskResult(taskResult)"
+                type="button"
+                color="primary"
+            >
+                <mat-icon>edit</mat-icon>
+                Do check
+            </button>
+        </mat-expansion-panel>
+        </mat-accordion>
+    </mat-list-item>
+</mat-list>
+</vee-pagination>
+    

@@ -9,10 +9,6 @@ import * as Vts       from 'vee-type-safe';
 import { getPopulated } from '@modules/common';
 import { User   } from '@models/user';
 import { Task   } from '@models/task';
-// import { Group  } from '@models/group';
-// import { Course } from '@models/course';
-// import escapeStringRegexp = require('escape-string-regexp');
-
 
 
 import ObjectId   = Mongoose.Types.ObjectId;

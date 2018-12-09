@@ -28,6 +28,13 @@ export interface TasksSearch {
     title?: string | null;
 }
 
+export interface GetLocalTaskResultsRequest {
+    /** 1-based page number. */
+    page: number;
+    /** Amount of tasks per page. */
+    limit: number;
+}
+
 export interface GetGroupMembersRequest {
     /** Amount of members per page. */
     limit: number;
@@ -47,10 +54,10 @@ export interface GetTaskResultsRequest {
     /** 1-based page number. */
     page: number;
     /** Search filters. */
-    search?: TaskResultsSearch | null;
+    search?: TaskResultsRequestSearch | null;
 }
 
-export interface TaskResultsSearch {
+export interface TaskResultsRequestSearch {
     taskTitle?: string | null;
 }
 /** Get task result by id. */
@@ -363,6 +370,81 @@ export type TypeMatchedScalar = any;
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetLocalTaskResults {
+    export type Variables = {
+        taskReq: GetTaskRequest;
+        localResultsReq: GetLocalTaskResultsRequest;
+    };
+
+    export type Query = {
+        __typename?: "Query";
+
+        getTask: GetTask;
+    };
+
+    export type GetTask = {
+        __typename?: "GetTaskResponse";
+
+        task: Task;
+    };
+
+    export type Task = {
+        __typename?: "Task";
+
+        getLocalTaskResults: GetLocalTaskResults;
+    };
+
+    export type GetLocalTaskResults = {
+        __typename?: "GetLocalTaskResultsResponse";
+
+        total: number;
+
+        data: Data[];
+    };
+
+    export type Data = {
+        __typename?: "TaskResult";
+
+        id: string;
+
+        lastUpdate: string;
+
+        author: Author;
+
+        check: Check | null;
+    };
+
+    export type Author = {
+        __typename?: "User";
+
+        id: string;
+
+        avaUrl: string;
+
+        login: string;
+    };
+
+    export type Check = {
+        __typename?: "TaskResultCheck";
+
+        comment: string | null;
+
+        score: number;
+
+        author: _Author;
+    };
+
+    export type _Author = {
+        __typename?: "User";
+
+        id: string;
+
+        avaUrl: string;
+
+        login: string;
+    };
+}
 
 export namespace GetTaskResults {
     export type Variables = {
@@ -1261,6 +1343,46 @@ import gql from "graphql-tag";
 // Apollo Services
 // ====================================================
 
+@Injectable({
+    providedIn: "root"
+})
+export class GetLocalTaskResultsGQL extends Apollo.Query<
+    GetLocalTaskResults.Query,
+    GetLocalTaskResults.Variables
+> {
+    document: any = gql`
+        query getLocalTaskResults(
+            $taskReq: GetTaskRequest!
+            $localResultsReq: GetLocalTaskResultsRequest!
+        ) {
+            getTask(req: $taskReq) {
+                task {
+                    getLocalTaskResults(req: $localResultsReq) {
+                        total
+                        data {
+                            id
+                            lastUpdate
+                            author {
+                                id
+                                avaUrl
+                                login
+                            }
+                            check {
+                                comment
+                                score
+                                author {
+                                    id
+                                    avaUrl
+                                    login
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `;
+}
 @Injectable({
     providedIn: "root"
 })

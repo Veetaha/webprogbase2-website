@@ -6,6 +6,7 @@ import { UsersService             } from '@services/users';
 import { nextTick                 } from '@utils/helpers';
 
 import * as Api from '@public-api/v1';
+import * as Gql from '@services/gql';
 import * as Vts from 'vee-type-safe';
 import * as Rx  from 'rxjs';
 import * as RxO from 'rxjs/operators';
@@ -30,6 +31,10 @@ export class SessionService {
     }
 
     private expirationTimerId = 0;
+
+    canUserViewTaskResults() {
+        return Gql.Access.Task.getLocalTaskResults.has(this.userRole);
+    }
 
     constructor(
         private jwtHelper:  JwtHelperService,

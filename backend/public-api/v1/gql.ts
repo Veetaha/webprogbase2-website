@@ -28,6 +28,13 @@ export interface TasksSearch {
   title?: string | null;
 }
 
+export interface GetLocalTaskResultsRequest {
+  /** 1-based page number. */
+  page: number;
+  /** Amount of tasks per page. */
+  limit: number;
+}
+
 export interface GetGroupMembersRequest {
   /** Amount of members per page. */
   limit: number;
@@ -47,10 +54,10 @@ export interface GetTaskResultsRequest {
   /** 1-based page number. */
   page: number;
   /** Search filters. */
-  search?: TaskResultsSearch | null;
+  search?: TaskResultsRequestSearch | null;
 }
 
-export interface TaskResultsSearch {
+export interface TaskResultsRequestSearch {
   taskTitle?: string | null;
 }
 /** Get task result by id. */
@@ -485,6 +492,8 @@ export interface Task {
   course: Course;
 
   myTaskResult?: TaskResult | null;
+
+  getLocalTaskResults: GetLocalTaskResultsResponse;
 }
 
 /** Task fulfilment result */
@@ -519,6 +528,13 @@ export interface TaskResultCheck {
   comment?: string | null;
 
   score: number;
+}
+
+export interface GetLocalTaskResultsResponse {
+  /** Page of tasks that satisfy input search filters. */
+  data: TaskResult[];
+  /** Total amount of tasks that may be queried for the given search input. */
+  total: number;
 }
 
 export interface GetGroupMembersResponse {
@@ -751,6 +767,9 @@ export interface GetMembersGroupArgs {
 export interface GetTasksCourseArgs {
   req: GetCourseTasksRequest;
 }
+export interface GetLocalTaskResultsTaskArgs {
+  req: GetLocalTaskResultsRequest;
+}
 export interface CreateTaskMutationArgs {
   req: CreateTaskRequest;
 }
@@ -827,6 +846,10 @@ export namespace Access {
   };
   export const Group = {
     $: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin])
+  };
+  export const Task = {
+    myTaskResult: new Set([UserRole.Student, UserRole.Teacher, UserRole.Admin]),
+    getLocalTaskResults: new Set([UserRole.Teacher, UserRole.Admin])
   };
   export const Mutation = {
     createTask: new Set([UserRole.Teacher, UserRole.Admin]),

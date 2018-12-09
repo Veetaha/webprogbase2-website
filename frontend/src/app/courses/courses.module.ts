@@ -37,8 +37,6 @@ import { TaskResultsComponent } from './task-results/task-results.component';
         TaskResultComponent,
         TaskResultsComponent
     ],
-    providers: [
-        // MarkdownService
-    ]
+    providers: []
 })
 export class CoursesModule { }

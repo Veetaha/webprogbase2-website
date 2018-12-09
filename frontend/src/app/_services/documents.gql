@@ -1,5 +1,37 @@
 # import * from "./../../../../backend/public-api/v1/schema.gql"
 
+query getLocalTaskResults(
+    $taskReq: GetTaskRequest!
+    $localResultsReq: GetLocalTaskResultsRequest!
+) {
+    getTask(req: $taskReq) {
+        task {
+            getLocalTaskResults(req: $localResultsReq) {
+                total
+                data {
+                    id
+                    lastUpdate
+                    author {
+                        id
+                        avaUrl
+                        login
+                    }
+                    check {
+                        comment
+                        score
+                        author {
+                            id
+                            avaUrl
+                            login
+                        }
+                    }
+                }
+            }
+        }
+    }    
+}
+
+
 
 query getTaskResults($req: GetTaskResultsRequest!) {
     getTaskResults(req: $req) {

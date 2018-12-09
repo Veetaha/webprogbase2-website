@@ -8,7 +8,7 @@ import * as GqlV1     from '@declarations/gql-gen-v1';
 import * as ApiV1     from '@public-api/v1';
 import { User }       from '@models/user';
 import { Course }     from '@models/course';
-import { TaskResult } from '@models/task-result';
+import { TaskResult, TaskResultModel } from '@models/task-result';
 import { getPopulated, get_id, set_id } from '@modules/common';
 
 
@@ -76,6 +76,19 @@ const Methods: TaskMethods = {
     },
     author: getPopulated<Task>('authorId'),
     course: getPopulated<Task>('courseId'),
+    getLocalTaskResults(req) {
+        return Helpers.paginate<TaskResult, TaskResultModel>({
+            ...req,
+            model: TaskResult,
+            sort: { lastUpdate: 'asc' },
+            __filter: {
+                taskId: this._id
+            }
+        });
+    },
+
+
+    // deprecated
     toCoreJsonData() {
         return {
             id:       String(this._id),
@@ -122,6 +135,12 @@ export interface TaskMethods {
     course(this: Task): Promise<Course>;
     myTaskResult(this: Task, me: User): Promise<TaskResult | null>;
     
+    getLocalTaskResults(
+          this: Task, 
+          req: GqlV1.GetLocalTaskResultsRequest
+    ): Promise<GqlV1.GetLocalTaskResultsResponse>; 
+
+
     // deprecated
     toCoreJsonData(this: Task):  ApiTask.CoreJson;
     toBasicJsonData(this: Task): Promise<ApiTask.BasicJson>;

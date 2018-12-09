@@ -399,8 +399,31 @@ type Task {
     # Course this task is attached to.
     course:          Course!
 
-    myTaskResult:    TaskResult
+    myTaskResult:    TaskResult      @deny(roles: [guest])
+    getLocalTaskResults(
+        req: GetLocalTaskResultsRequest!
+    ): GetLocalTaskResultsResponse! @allow(roles: [teacher, admin])
 }
+
+
+
+
+input GetLocalTaskResultsRequest {
+    # 1-based page number.
+    page:  Int! @positiveInt
+    # Amount of tasks per page.
+    limit: Int! @positiveInt
+}
+type GetLocalTaskResultsResponse {
+    # Page of tasks that satisfy input search filters.
+    data: [TaskResult!]!
+    # Total amount of tasks that may be queried for the given search input.
+    total: Int!
+}
+
+
+
+
 
 
 # Represents an academic group of students.
@@ -543,9 +566,9 @@ input GetTaskResultsRequest {
     # 1-based page number.
     page:  Int! @positiveInt 
     # Search filters.
-    search: TaskResultsSearch
+    search: TaskResultsRequestSearch
 }
-input TaskResultsSearch {
+input TaskResultsRequestSearch {
     taskTitle: String
 }
 type GetTaskResultsResponse {

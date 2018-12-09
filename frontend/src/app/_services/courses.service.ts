@@ -11,20 +11,33 @@ import { ErrorHandlingService } from '@services/error-handling';
   providedIn: 'root'
 }) export class CoursesService {
     constructor(
-        private getTaskWithResultGql: Gql.GetTaskWithResultGQL,
-        private createTaskResultGql:  Gql.CreateTaskResultGQL,
-        private updateTaskResultGql:  Gql.UpdateTaskResultGQL,
-        private getTaskForEditGql:    Gql.GetTaskForEditGQL,
-        private updateTaskGql:        Gql.UpdateTaskGQL,
-        private getCoursesGql:        Gql.GetCoursesGQL,
-        private http:                 HttpClient,
-        private errHandling:          ErrorHandlingService
+        private getLocalTaskResultsGql: Gql.GetLocalTaskResultsGQL,
+        private getTaskResultsGql:      Gql.GetTaskResultsGQL,
+        private getTaskWithResultGql:   Gql.GetTaskWithResultGQL,
+        private createTaskResultGql:    Gql.CreateTaskResultGQL,
+        private updateTaskResultGql:    Gql.UpdateTaskResultGQL,
+        private getTaskForEditGql:      Gql.GetTaskForEditGQL,
+        private updateTaskGql:          Gql.UpdateTaskGQL,
+        private getCoursesGql:          Gql.GetCoursesGQL,
+        private http:                   HttpClient,
+        private errHandling:            ErrorHandlingService
     ) { }
     private options = { fetchPolicy: 'no-cache' } as { fetchPolicy: 'no-cache' };
 
 
     private errHandler<T>() {
         return this.errHandling.handler<T>();
+    }
+
+    getLocalTaskResults(
+        taskReq: Gql.GetTaskRequest, 
+        localResultsReq: Gql.GetLocalTaskResultsRequest
+    ) {
+        return this.getLocalTaskResultsGql.fetch({ taskReq, localResultsReq }, this.options);
+    }
+
+    getTaskResults(req: Gql.GetTaskResultsRequest) {
+        return this.getTaskResultsGql.fetch({ req }, this.options);
     }
 
     createTaskResult(req: Gql.CreateTaskResultRequest) {

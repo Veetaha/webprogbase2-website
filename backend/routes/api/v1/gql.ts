@@ -47,7 +47,8 @@ const UserResolvers: GqlV1.UserResolvers.Resolvers = {
 const TaskResolvers: GqlV1.TaskResolvers.Resolvers = {
     author: task => task.author(),
     course: task => task.course(),
-    myTaskResult: (task, {}, { user }) => task.myTaskResult(user!)
+    myTaskResult: (task, {}, { user }) => task.myTaskResult(user!),
+    getLocalTaskResults: (task, { req }) => task.getLocalTaskResults(req)
 };
 const CourseResolvers: GqlV1.CourseResolvers.Resolvers = {
     author:    course           => course.author(),

@@ -37,6 +37,13 @@ export class PaginationComponent<TData> implements OnInit {
     @Input() set refetchOnChanged(_value: unknown) {
         this.doSearchRequest({ page: 1 });
     }
+    _noSearch = false;
+    @Input() set noSearch(value: unknown) {
+        this._noSearch = value === '' || !!value;
+    }
+    get noSearch() {
+        return this._noSearch;
+    }
 
 
     @ContentChild(PaginatedDirective, { read: TemplateRef }) 

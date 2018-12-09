@@ -1,11 +1,11 @@
 <ng-container *ngIf="dataPage; else elseDataNotLoaded">
-    <vee-search-input
+    <vee-search-input *ngIf="!noSearch"
         (searchDemand)="doSearchRequest({ page: 1, search: $event })"
         [placeholder]="searchInputPlaceholder"
     >  
     </vee-search-input>
     <mat-paginator #paginator
-        [length]         ="dataPage.total"
+        [length]         ="dataPage!.total"
         [pageSize]       ="pagination.limit"
         [pageIndex]      ="pagination.page - 1"
         [pageSizeOptions]="pageSizeOptions"
