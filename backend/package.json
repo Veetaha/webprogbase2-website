@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "docs": "./node_modules/.bin/graphdoc -s public-api/v1.gql -o ./docs/graphdoc --force",
+        "docs": "./node_modules/.bin/graphdoc -s public-api/v1/schema.gql -o ./docs/graphdoc --force",
         "gql-gen": "./node_modules/.bin/gql-gen",
         "robo3t": "~/apps/robo3t-1.2.1-linux-x86_64-3e50a65/bin/robo3t",
         "db": "sudo mongod --dbpath data/db",

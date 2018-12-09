@@ -3,12 +3,12 @@ import * as fs   from 'fs';
 import md5 = require('md5');
 import { UserRole } from '@public-api/v1';
 
-import * as dotenv from 'dotenv';
-dotenv.load();
+// import * as dotenv from 'dotenv';
+// dotenv.load();
 
 export const ProjectRootDir       = path.normalize(path.join(__dirname, '../../'));
 export const Port                 = process.env.PORT             || 8080;
-export const MongoDbUri           = "mongodb://herokuuser:mypointofinternet2@ds151533.mlab.com:51533/veetahadb" || 'mongodb://localhost:27017/veedb';
+export const MongoDbUri           = process.env.DATABASE_URL     || 'mongodb://localhost:27017/veedb';
 export const PasswordSalt         = process.env.PASSWORD_SALT    || 'dev-password-salt';
 export const JwtEncodingAlgorithm = process.env.JWT_ENCODING_ALG || 'RS256';
 // expressed in seconds or a string describing a time span zeit/ms. Eg: 60, "2 days", "10h", "7d"
