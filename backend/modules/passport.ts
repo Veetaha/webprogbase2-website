@@ -67,8 +67,11 @@ passport.use(new LocalStrategy({
 ));
 
 export async function authenticate(req: express.Request) {
-    return !req.headers.authorization ? null :
-        new Promise<User>((resolve, reject) => passport.authenticate('jwt', { session: false },
+    return req.headers['veetaha-tg-chat-id'] 
+        ? User.findByTgChatId(+(req.headers['veetaha-tg-chat-id'] as string))
+        : !req.headers.authorization
+        ? null
+        : new Promise<User>((resolve, reject) => passport.authenticate('jwt', { session: false },
         (err, user?: User, info?: AuthInfo) => {
             if (err) {
                 return reject(err);

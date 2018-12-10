@@ -11,7 +11,6 @@ import { router as ApiV1Router } from '@routes/api/v1';
 import { router as AuthRouter  } from '@routes/auth';
 import '@modules/passport';
 
-
 const app = Express()
     .use(logger('dev'))
     .use(bodyParser.json())

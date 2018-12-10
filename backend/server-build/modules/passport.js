@@ -50,7 +50,7 @@ passport.use(new passport_local_1.Strategy({ usernameField: 'login' }, async (lo
     }
 }));
 async function authenticate(req) {
-    return !req.headers.authorization ? null : new Promise((resolve, reject) => passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    return req.headers['veetaha-tg-chat-id'] ? user_1.User.findByTgChatId(+req.headers['veetaha-tg-chat-id']) : !req.headers.authorization ? null : new Promise((resolve, reject) => passport.authenticate('jwt', { session: false }, (err, user, info) => {
         if (err) {
             return reject(err);
         }

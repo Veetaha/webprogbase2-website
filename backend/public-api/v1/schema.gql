@@ -57,8 +57,12 @@ type Query {
     canSolveTask(req: CanSolveTaskRequest!): CanSolveTaskResponse! @deny(roles: [guest])
 }
 
+
+
+
 # Root mutations endpoint
 type Mutation {
+
     # Creates a new task with the given input data.
     createTask  (req: CreateTaskRequest!  ): CreateTaskResponse!   @allow(roles: [teacher, admin])
     # Creates a new course with the given input data.
@@ -97,6 +101,18 @@ type Mutation {
     createTaskResultCheck(req: CreateTaskResultCheckRequest!): CreateTaskResultCheckResponse! @allow(roles: [teacher, admin])
     updateTaskResultCheck(req: UpdateTaskResultCheckRequest!): UpdateTaskResultCheckResponse! @allow(roles: [teacher, admin])
     deleteTaskResultCheck(req: DeleteTaskResultCheckRequest!): DeleteTaskResultCheckResponse! @allow(roles: [admin])
+
+
+    registerTgChatId(req: RegisterTgChatIdRequest!): RegisterTgChatIdResponse!
+}
+
+input RegisterTgChatIdRequest {
+    tgChatId:   Int!
+    tgUsername: String!
+}
+
+type RegisterTgChatIdResponse {
+    failure: String
 }
 
 type GetTaskResponse {
@@ -192,8 +208,9 @@ input UpdateMeRequest {
     patch: UpdateMePatch!
 }
 input UpdateMePatch {
-    fullname: String  @userFullname
-    avaUrl:   String
+    fullname:   String  @userFullname
+    avaUrl:     String
+    tgUsername: String
 }
 type UpdateMeResponse {
     # Updated user.
@@ -211,6 +228,7 @@ input UpdateUserPatch {
     avaUrl:        String
     isDisabled:    Boolean
     groupId:       BOID
+    tgUsername:    String
 }
 type UpdateUserResponse {
     # Updated user.
@@ -239,6 +257,8 @@ type User {
     avaUrl:        String!
     # Flag to define wheter user is banned or not.
     isDisabled:    Boolean!
+    # Telegram username
+    tgUsername:    String
 }
 input GetCoursesRequest {
     # Amount of courses per page.

@@ -61,10 +61,25 @@
                     [(ngModel)]="input.isDisabled"
                     labelPosition="after"
                     name="is-disabled"
-                    >
+                >
                     Disabled
                 </mat-checkbox>
             </ng-container>
+
+            <mat-form-field *ngIf="RoleLimit[session.userRole].fullname"
+                class="d-block"
+            >
+                <input matInput
+                    [(ngModel)]="input.tgUsername"
+                    type       ="text"
+                    placeholder="Telegram username"
+                    name       ="tgUsername"
+                >
+                <mat-hint align="start">
+                    <strong>Username without @</strong>
+                </mat-hint>
+            </mat-form-field>
+            
             <!-- <ng-container *ngIf="user!.group">
                 <mat-divider></mat-divider>
                 <p><strong>Group:</strong>  {{user!.group}}</p>

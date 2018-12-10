@@ -51,8 +51,8 @@ export class UserComponent extends Subscriber implements OnInit {
                         this.updateEditToolButton();
                     },
                     err => this.errHandler.handle(err)
-            )
-        );
+                )
+            );
     }
 
     onLogout() {

@@ -68,10 +68,11 @@ const MutationResolvers = {
     createTaskResultCheck: async (_p, {req}, {user}) => (await task_result_1.TaskResult.getTaskResult(req)).taskResult.createCheck(req, user.id),
     updateTaskResultCheck: async (_p, {
         req: {id, patch}
-    }) => (await task_result_1.TaskResult.getTaskResult({ id })).taskResult.updateCheck(patch),
+    }, {user}) => (await task_result_1.TaskResult.getTaskResult({ id })).taskResult.updateCheck(patch, user.id),
     deleteTaskResultCheck: async (_p, {
         req: {id}
-    }) => (await task_result_1.TaskResult.getTaskResult({ id })).taskResult.deleteCheck()
+    }) => (await task_result_1.TaskResult.getTaskResult({ id })).taskResult.deleteCheck(),
+    registerTgChatId: (_p, {req}) => user_1.User.registerTgChatId(req)
 };
 exports.apolloServer = new Apollo.ApolloServer({
     playground: true,

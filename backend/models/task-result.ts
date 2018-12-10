@@ -187,7 +187,7 @@ const Methods: TaskResultMethods = {
             taskResult: await this.save()
         };
     },
-    async updateCheck(patch) {
+    async updateCheck(patch, authorId) {
         if (!this.check) {
             throw new Apollo.ApolloError(
                 `Can't update task result check as it doesn't exits`
@@ -199,8 +199,9 @@ const Methods: TaskResultMethods = {
                 this.id, 
                 _.mapKeys(
                     { 
-                        ..._.omitBy(patch, _.isUndefined), 
-                        lastUpdate: new Date 
+                        ...Helpers.removeNilFromRequired(patch, TaskResultCheckSchema.obj), 
+                        lastUpdate: new Date,
+                        authorId
                     }, 
                     (_value, key) => `check.${key}`
                 )
@@ -282,7 +283,8 @@ export interface TaskResultMethods {
 
     updateCheck(
           this: TaskResult,
-          req:  GqlV1.UpdateTaskResultCheckPatch
+          req:  GqlV1.UpdateTaskResultCheckPatch,
+          authorId: ObjectId
     ): Promise<GqlV1.UpdateTaskResultCheckResponse>;
 
     deleteCheck(

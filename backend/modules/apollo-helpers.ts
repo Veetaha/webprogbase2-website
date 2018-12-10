@@ -202,6 +202,24 @@ export async function paginate<
     }
 }
 
+export function removeNilFromRequired(
+    obj:       Vts.BasicObject, 
+    schemaDef: Vts.BasicObjectMap<string | typeof PaginateMetasymbol, any>
+) {
+    return _.transform(obj, (result, value, key) => {
+        const meta = key in schemaDef
+            ? { key, info: schemaDef[key] }
+            : {
+                key:  schemaDef[paginate.metaSymbol][key].aliasFor,
+                info: schemaDef[paginate.metaSymbol][key]
+            };
+        if (!meta.info.required || !_.isNil(value)) {
+            (result as any)[meta.key] = value;
+        }
+        return result;
+    });
+}
+
 
 const PaginateMetasymbol = Symbol('Paginate metadata schema symbol');
 paginate.metaSymbol = PaginateMetasymbol;

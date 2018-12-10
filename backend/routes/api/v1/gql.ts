@@ -37,7 +37,7 @@ const QueryResolvers: GqlV1.QueryResolvers.Resolvers = {
     getTaskResult:     (_p, { req })           => TaskResult.getTaskResult(req),
     getUserTaskResult: (_p, { req })           => TaskResult.getUserTaskResult(req),
     canSolveTask:      (_p, { req }, { user }) => TaskResult.canSolveTask(req, user!)
-    
+
 };
 const UserResolvers: GqlV1.UserResolvers.Resolvers = {
     avaUrl: user => user.avaUrl || Config.DefaultUserAvatarUrl,
@@ -100,13 +100,14 @@ const MutationResolvers: GqlV1.MutationResolvers.Resolvers = {
         .getTaskResult(req))
         .taskResult.createCheck(req, user!.id),
 
-    updateTaskResultCheck: async (_p, { req: { id, patch } }) => (await TaskResult
+    updateTaskResultCheck: async (_p, { req: { id, patch } }, { user }) => (await TaskResult
         .getTaskResult({ id }))
-        .taskResult.updateCheck(patch),
+        .taskResult.updateCheck(patch, user!.id),
 
     deleteTaskResultCheck: async (_p, { req: { id } }) => (await TaskResult
         .getTaskResult({ id }))
-        .taskResult.deleteCheck()
+        .taskResult.deleteCheck(),
+    registerTgChatId: (_p, { req }) => User.registerTgChatId(req)
 };
 
 export const apolloServer = new Apollo.ApolloServer({

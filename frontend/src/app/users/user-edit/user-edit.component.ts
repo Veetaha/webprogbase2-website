@@ -80,6 +80,7 @@ export class UserEditComponent extends Subscriber implements OnInit {
 
     onFormSubmit() {
         const submittedUserId = this.userId;
+        this.input.tgUsername = this.input.tgUsername || null;
         const newMe = { ..._.cloneDeep(this.session.user), ..._.cloneDeep(this.input) };
         const request: Rx.Observable<unknown> = this.session.userRole !== Gql.UserRole.Admin
             ? this.backend.updateMe  ({ patch: this.input })

@@ -221,6 +221,8 @@ export interface UpdateMePatch {
   fullname?: string | null;
 
   avaUrl?: string | null;
+
+  tgUsername?: string | null;
 }
 
 export interface UpdateUserRequest {
@@ -240,6 +242,8 @@ export interface UpdateUserPatch {
   isDisabled?: boolean | null;
 
   groupId?: string | null;
+
+  tgUsername?: string | null;
 }
 
 export interface UpdateTaskRequest {
@@ -340,6 +344,12 @@ export interface DeleteTaskResultCheckRequest {
   id: string;
 }
 
+export interface RegisterTgChatIdRequest {
+  tgChatId: number;
+
+  tgUsername: string;
+}
+
 export interface DeleteUserRequest {
   /** Target user id. */
   id: string;
@@ -421,6 +431,8 @@ export interface User {
   avaUrl: string;
   /** Flag to define wheter user is banned or not. */
   isDisabled: boolean;
+  /** Telegram username */
+  tgUsername?: string | null;
 }
 
 /** Represents an academic group of students. */
@@ -636,6 +648,8 @@ export interface Mutation {
   updateTaskResultCheck: UpdateTaskResultCheckResponse;
 
   deleteTaskResultCheck: DeleteTaskResultCheckResponse;
+
+  registerTgChatId: RegisterTgChatIdResponse;
 }
 
 export interface CreateTaskResponse {
@@ -714,6 +728,10 @@ export interface UpdateTaskResultCheckResponse {
 
 export interface DeleteTaskResultCheckResponse {
   taskResult: TaskResult;
+}
+
+export interface RegisterTgChatIdResponse {
+  failure?: string | null;
 }
 
 export interface DeleteUserResponse {
@@ -820,6 +838,9 @@ export interface UpdateTaskResultCheckMutationArgs {
 }
 export interface DeleteTaskResultCheckMutationArgs {
   req: DeleteTaskResultCheckRequest;
+}
+export interface RegisterTgChatIdMutationArgs {
+  req: RegisterTgChatIdRequest;
 }
 
 export namespace Access {

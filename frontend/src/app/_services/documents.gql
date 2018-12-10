@@ -389,6 +389,7 @@ query getUserForEdit($req: GetUserRequest!) {
             avaUrl
             isDisabled
             groupId
+            tgUsername
         }
     }
 }
@@ -403,6 +404,7 @@ query getUser($req: GetUserRequest!) {
             registeredAt
             avaUrl
             isDisabled
+            tgUsername
             group {
                 id
                 name

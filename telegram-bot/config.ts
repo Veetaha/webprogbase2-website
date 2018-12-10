@@ -1,0 +1,2 @@
+export const BotToken = process.env.BOT_TOKEN || "672523842:AAEyZY1MM_zuzwr8uhzHPPAAQPK2qh6oExw";
+export const MainServerGqlEndpoint = process.env.MAIN_SERVER_GQL_ENDPOINT || 'http://localhost:8080/api/v1/gql';

@@ -8,6 +8,8 @@ const Helpers = require('../modules/apollo-helpers');
 const _ = require('lodash');
 const user_1 = require('./user');
 const course_1 = require('./course');
+const task_result_1 = require('./task-result');
+const task_1 = require('./task');
 const common_1 = require('../modules/common');
 const Schema = new Mongoose.Schema({
     [Helpers.paginate.metaSymbol]: {
@@ -94,7 +96,17 @@ Schema.methods = Methods;
 Schema.statics = Statics;
 Schema.pre('remove', async function (next) {
     try {
-        void (await user_1.User.update({ groupId: this._id }, { groupId: null }, { multi: true }).exec());
+        const [users, tasks] = await Promise.all([
+            user_1.User.find({ groupId: this._id }, { _id: 1 }).exec(),
+            task_1.Task.find({ _id: { $in: this.coursesId } }, { _id: 1 }).exec()
+        ]);
+        void (await Promise.all([
+            task_result_1.TaskResult.remove({
+                taskId: { $in: tasks.map(task => task._id) },
+                authorId: { $in: users.map(user => user._id) }
+            }).exec(),
+            user_1.User.update({ groupId: this._id }, { groupId: null }, { multi: true }).exec()
+        ]));
         return next();
     } catch (err) {
         Debug.error(`Failed to remove references to the deleted course`);

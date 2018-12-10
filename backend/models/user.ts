@@ -28,6 +28,8 @@ export interface UserData {
     avaUrl?:       string | null;
     isDisabled:    boolean;
     groupId?:      ObjectId | null;
+    tgChatId?:     number;
+    tgUsername?:   string; 
 }
 
 export const Schema = new Mongoose.Schema({
@@ -38,12 +40,14 @@ export const Schema = new Mongoose.Schema({
         }
     } as Helpers.PaginateMetadata,
     role:         { type: String,  required: true,  enum: Object.values(UserRole) },
-    login:        { type: String,  required: true },
-    password:     { type: String,  required: true },
-    fullname:     { type: String,  required: true },
+    login:        { type: String,  required: true  },
+    password:     { type: String,  required: true  },
+    fullname:     { type: String,  required: true  },
     registeredAt: { type: Date,    required: true, default: Date.now },
-    avaUrl:       { type: String,  required: false   },
+    avaUrl:       { type: String,  required: false },
     isDisabled:   { type: Boolean, required: false, default: false },
+    tgChatId:     { type: Number,  required: false },
+    tgUsername:   { type: String,  required: false },
     groupId: {
         type: Mongoose.SchemaTypes.ObjectId,
         ref: 'Group',
@@ -58,7 +62,17 @@ function patchToMongoUpdate(patch: GqlV1.UpdateMePatch | GqlV1.UpdateUserPatch) 
     ));
 }
 
-Schema.statics = {
+const Statics: UserStatics = {
+    findByTgChatId(tgChatId) {
+        return Helpers.tryFindOne(User, { tgChatId });
+    },
+    async registerTgChatId({ tgChatId, tgUsername }) {
+        const updated = await User.findOneAndUpdate({ tgUsername }, { tgChatId }).exec();
+        return updated        ? 
+            { failure: null } :
+            { failure: "telegram username is not registered" };
+    },
+
     updateUser: async ({ id, patch }) => ({
         user: await Helpers.tryUpdateById(User, id, patchToMongoUpdate(patch))
     }),
@@ -97,7 +111,7 @@ Schema.statics = {
         lean: false,
         sort: { login: 'asc' }
     })
-} as UserModel;
+};
 
 import PutUser = ApiV1.V1.User.Put;
 const Methods: UserMethods = {
@@ -153,6 +167,7 @@ const Methods: UserMethods = {
     }
 };
 
+Schema.statics = Statics;
 Schema.methods = Methods;
 // Schema.index()
 
@@ -174,7 +189,11 @@ export interface UserMethods {
 }
 export interface User extends Mongoose.Document, UserData, UserMethods {
 }
-export interface UserModel extends Mongoose.PaginateModel<User> {
+
+export interface UserStatics {
+    findByTgChatId(chatId: number): Promise<User>;
+    registerTgChatId(req: GqlV1.RegisterTgChatIdRequest): Promise<GqlV1.RegisterTgChatIdResponse>;
+
     updateUser(req: GqlV1.UpdateUserRequest): Promise<GqlV1.UpdateUserResponse>;
     deleteUser(req: GqlV1.DeleteUserRequest): Promise<GqlV1.DeleteUserResponse>;
     getUser(req: GqlV1.GetUserRequest):       Promise<GqlV1.GetUserResponse>;
@@ -188,4 +207,8 @@ export interface UserModel extends Mongoose.PaginateModel<User> {
     getPageRest(
         pageArgs: ApiV1.PaginationArgs
     ): Promise<ApiV1.Paginated<ApiUser.BasicJson>>;
+}
+
+export interface UserModel extends Mongoose.PaginateModel<User>, UserStatics {
+    
 }

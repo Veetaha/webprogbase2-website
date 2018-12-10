@@ -1,2 +1,2 @@
-export const UpdateMePatchFields   = ['fullname', 'avaUrl'];
-export const UpdateUserPatchFields = ['fullname', 'avaUrl', 'role', 'isDisabled', 'groupId'];
+export const UpdateMePatchFields   = ['fullname', 'avaUrl', 'tgUsername'];
+export const UpdateUserPatchFields = ['fullname', 'avaUrl', 'tgUsername', 'role', 'isDisabled', 'groupId'];

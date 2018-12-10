@@ -51,6 +51,14 @@ exports.Schema = new Mongoose.Schema({
         required: false,
         default: false
     },
+    tgChatId: {
+        type: Number,
+        required: false
+    },
+    tgUsername: {
+        type: String,
+        required: false
+    },
     groupId: {
         type: Mongoose.SchemaTypes.ObjectId,
         ref: 'Group',
@@ -61,7 +69,15 @@ exports.Schema.virtual('id').get(common_1.get_id).set(common_1.set_id);
 function patchToMongoUpdate(patch) {
     return _.omitBy(patch, (key, value) => key === 'avaUrl' ? _.isUndefined(value) : _.isNil(value));
 }
-exports.Schema.statics = {
+const Statics = {
+    findByTgChatId(tgChatId) {
+        return Helpers.tryFindOne(exports.User, { tgChatId });
+    },
+    async registerTgChatId({tgChatId, tgUsername}) {
+        debugger;
+        const updated = await exports.User.findOneAndUpdate({ tgUsername }, { tgChatId }).exec();
+        return updated ? { failure: null } : { failure: 'telegram username is not registered' };
+    },
     updateUser: async ({id, patch}) => ({ user: await Helpers.tryUpdateById(exports.User, id, patchToMongoUpdate(patch)) }),
     deleteUser: async ({id}) => ({ user: await Helpers.tryDeleteById(exports.User, id) }),
     getUser: async ({id}) => ({ user: await Helpers.tryFindById(exports.User, id) }),
@@ -126,6 +142,7 @@ const Methods = {
         });
     }
 };
+exports.Schema.statics = Statics;
 exports.Schema.methods = Methods;
 // Schema.index()
 exports.Schema.plugin(Paginate);

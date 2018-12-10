@@ -119,6 +119,22 @@ async function paginate({model, page, limit, search, sort, filter, __filter}) {
     }
 }
 exports.paginate = paginate;
+function removeNilFromRequired(obj, schemaDef) {
+    return _.transform(obj, (result, value, key) => {
+        const meta = key in schemaDef ? {
+            key,
+            info: schemaDef[key]
+        } : {
+            key: schemaDef[paginate.metaSymbol][key].aliasFor,
+            info: schemaDef[paginate.metaSymbol][key]
+        };
+        if (!meta.info.required || !_.isNil(value)) {
+            result[meta.key] = value;
+        }
+        return result;
+    });
+}
+exports.removeNilFromRequired = removeNilFromRequired;
 const PaginateMetasymbol = Symbol('Paginate metadata schema symbol');
 paginate.metaSymbol = PaginateMetasymbol;
 async function tryDeleteById(model, id) {

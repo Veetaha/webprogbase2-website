@@ -221,6 +221,8 @@ export interface UpdateMePatch {
     fullname?: string | null;
 
     avaUrl?: string | null;
+
+    tgUsername?: string | null;
 }
 
 export interface UpdateUserRequest {
@@ -240,6 +242,8 @@ export interface UpdateUserPatch {
     isDisabled?: boolean | null;
 
     groupId?: string | null;
+
+    tgUsername?: string | null;
 }
 
 export interface UpdateTaskRequest {
@@ -338,6 +342,12 @@ export interface UpdateTaskResultCheckPatch {
 export interface DeleteTaskResultCheckRequest {
     /** Task result id */
     id: string;
+}
+
+export interface RegisterTgChatIdRequest {
+    tgChatId: number;
+
+    tgUsername: string;
 }
 
 export interface DeleteUserRequest {
@@ -1363,6 +1373,8 @@ export namespace GetUserForEdit {
         isDisabled: boolean;
 
         groupId: string | null;
+
+        tgUsername: string | null;
     };
 }
 
@@ -1399,6 +1411,8 @@ export namespace GetUser {
         avaUrl: string;
 
         isDisabled: boolean;
+
+        tgUsername: string | null;
 
         group: Group | null;
     };
@@ -2050,6 +2064,7 @@ export class GetUserForEditGQL extends Apollo.Query<
                     avaUrl
                     isDisabled
                     groupId
+                    tgUsername
                 }
             }
         }
@@ -2070,6 +2085,7 @@ export class GetUserGQL extends Apollo.Query<GetUser.Query, GetUser.Variables> {
                     registeredAt
                     avaUrl
                     isDisabled
+                    tgUsername
                     group {
                         id
                         name

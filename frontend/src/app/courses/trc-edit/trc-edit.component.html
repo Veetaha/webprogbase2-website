@@ -17,7 +17,7 @@
         [(sourceText)]="inputCheck.comment"
     ></vee-markdown-editor>
     <mat-form-field class="mt-2">
-        <input matInput
+        <input #scoreEl matInput 
             [(ngModel)]="inputCheck.score"
             placeholder="Score"
             type="number"
@@ -34,6 +34,7 @@
 >
     <button mat-button  
         [mat-dialog-close]="submit()"
+        [disabled]="!scoreEl.validity.valid"
         type="submit"
         color="primary"
     >Submit</button>

@@ -221,6 +221,8 @@ export interface UpdateMePatch {
   fullname?: string | null;
 
   avaUrl?: string | null;
+
+  tgUsername?: string | null;
 }
 
 export interface UpdateUserRequest {
@@ -240,6 +242,8 @@ export interface UpdateUserPatch {
   isDisabled?: boolean | null;
 
   groupId?: ObjectId | null;
+
+  tgUsername?: string | null;
 }
 
 export interface UpdateTaskRequest {
@@ -340,6 +344,12 @@ export interface DeleteTaskResultCheckRequest {
   id: ObjectId;
 }
 
+export interface RegisterTgChatIdRequest {
+  tgChatId: number;
+
+  tgUsername: string;
+}
+
 export interface DeleteUserRequest {
   /** Target user id. */
   id: ObjectId;
@@ -421,6 +431,8 @@ export interface User {
   avaUrl: string;
   /** Flag to define wheter user is banned or not. */
   isDisabled: boolean;
+  /** Telegram username */
+  tgUsername?: string | null;
 }
 
 /** Represents an academic group of students. */
@@ -636,6 +648,8 @@ export interface Mutation {
   updateTaskResultCheck: UpdateTaskResultCheckResponse;
 
   deleteTaskResultCheck: DeleteTaskResultCheckResponse;
+
+  registerTgChatId: RegisterTgChatIdResponse;
 }
 
 export interface CreateTaskResponse {
@@ -714,6 +728,10 @@ export interface UpdateTaskResultCheckResponse {
 
 export interface DeleteTaskResultCheckResponse {
   taskResult: TaskResult;
+}
+
+export interface RegisterTgChatIdResponse {
+  failure?: string | null;
 }
 
 export interface DeleteUserResponse {
@@ -820,6 +838,9 @@ export interface UpdateTaskResultCheckMutationArgs {
 }
 export interface DeleteTaskResultCheckMutationArgs {
   req: DeleteTaskResultCheckRequest;
+}
+export interface RegisterTgChatIdMutationArgs {
+  req: RegisterTgChatIdRequest;
 }
 
 import { GraphQLResolveInfo, GraphQLScalarTypeConfig } from "graphql";
@@ -1056,6 +1077,8 @@ export namespace UserResolvers {
     avaUrl?: AvaUrlResolver<string, TypeParent, Context>;
     /** Flag to define wheter user is banned or not. */
     isDisabled?: IsDisabledResolver<boolean, TypeParent, Context>;
+    /** Telegram username */
+    tgUsername?: TgUsernameResolver<string | null, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -1100,6 +1123,11 @@ export namespace UserResolvers {
   > = Resolver<R, Parent, Context>;
   export type IsDisabledResolver<
     R = boolean,
+    Parent = User,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+  export type TgUsernameResolver<
+    R = string | null,
     Parent = User,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
@@ -1801,6 +1829,12 @@ export namespace MutationResolvers {
       TypeParent,
       Context
     >;
+
+    registerTgChatId?: RegisterTgChatIdResolver<
+      RegisterTgChatIdResponse,
+      TypeParent,
+      Context
+    >;
   }
 
   export type CreateTaskResolver<
@@ -1954,6 +1988,15 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, Context, DeleteTaskResultCheckArgs>;
   export interface DeleteTaskResultCheckArgs {
     req: DeleteTaskResultCheckRequest;
+  }
+
+  export type RegisterTgChatIdResolver<
+    R = RegisterTgChatIdResponse,
+    Parent = {},
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context, RegisterTgChatIdArgs>;
+  export interface RegisterTgChatIdArgs {
+    req: RegisterTgChatIdRequest;
   }
 }
 
@@ -2218,6 +2261,21 @@ export namespace DeleteTaskResultCheckResponseResolvers {
   export type TaskResultResolver<
     R = TaskResult,
     Parent = DeleteTaskResultCheckResponse,
+    Context = ResolveContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace RegisterTgChatIdResponseResolvers {
+  export interface Resolvers<
+    Context = ResolveContext,
+    TypeParent = RegisterTgChatIdResponse
+  > {
+    failure?: FailureResolver<string | null, TypeParent, Context>;
+  }
+
+  export type FailureResolver<
+    R = string | null,
+    Parent = RegisterTgChatIdResponse,
     Context = ResolveContext
   > = Resolver<R, Parent, Context>;
 }

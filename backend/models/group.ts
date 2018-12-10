@@ -7,6 +7,8 @@ import * as Helpers   from '@modules/apollo-helpers';
 import * as _         from 'lodash';
 import { User, UserModel     } from '@models/user';
 import { Course, CourseModel } from '@models/course';
+import { TaskResult          } from '@models/task-result';
+import { Task                } from '@models/task';
 // import * as Apollo    from 'apollo-server-express';
 // import UniqueArrayPlugin = require('mongoose-unique-array');
 
@@ -110,13 +112,23 @@ const Methods = {
 Schema.methods = Methods;
 Schema.statics = Statics;
 
-Schema.pre('remove', async function(this: Course, next) {
+Schema.pre('remove', async function(this: Group, next) {
     try {
-        void await User.update(
-            { groupId: this._id },
-            { groupId: null     },
-            { multi: true }
-        ).exec();
+        const [users, tasks] = await Promise.all([
+            User.find({ groupId: this._id }, { _id: 1 }).exec(),
+            Task.find({ _id: { $in: this.coursesId } }, { _id: 1 }).exec()
+        ]);
+        void await Promise.all([
+            TaskResult.remove({
+                taskId:   { $in: tasks.map(task => task._id) },
+                authorId: { $in: users.map(user => user._id) }
+            }).exec(),
+            User.update(
+                { groupId: this._id },
+                { groupId: null     },
+                { multi: true }
+            ).exec()
+        ]);
         return next();
     } catch (err) {
         Debug.error(`Failed to remove references to the deleted course`);

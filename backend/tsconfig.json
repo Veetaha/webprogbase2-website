@@ -38,6 +38,7 @@
     "./**/*"
   ],
   "exclude": [
+      "telegram-bot",
       "node_modules/**/*",
       "public/src/*",
       "server-build/*"

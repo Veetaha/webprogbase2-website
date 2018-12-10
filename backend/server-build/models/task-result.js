@@ -161,11 +161,16 @@ const Methods = {
         this.check = Object.assign({}, req.payload, { authorId });
         return { taskResult: await this.save() };
     },
-    async updateCheck(patch) {
+    async updateCheck(patch, authorId) {
         if (!this.check) {
             throw new Apollo.ApolloError(`Can't update task result check as it doesn't exits`);
         }
-        return { taskResult: await Helpers.tryUpdateById(exports.TaskResult, this.id, _.mapKeys(Object.assign({}, _.omitBy(patch, _.isUndefined), { lastUpdate: new Date() }), (_value, key) => `check.${ key }`)) };
+        return {
+            taskResult: await Helpers.tryUpdateById(exports.TaskResult, this.id, _.mapKeys(Object.assign({}, Helpers.removeNilFromRequired(patch, TaskResultCheckSchema.obj), {
+                lastUpdate: new Date(),
+                authorId
+            }), (_value, key) => `check.${ key }`))
+        };
     },
     async deleteCheck() {
         if (!this.check) {

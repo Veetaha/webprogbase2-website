@@ -6,23 +6,32 @@
                 alt="User avatar"
                 class="user-avatar"
             >
-            <mat-card-title>{{user.login}}</mat-card-title>
-            <mat-card-subtitle>{{user.fullname}}</mat-card-subtitle>
+            <mat-card-title>{{user!.login}}</mat-card-title>
+            <mat-card-subtitle>{{user!.fullname}}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-            <p><strong>Role:</strong>       {{user.role }}</p>
+            <p><strong>Role:</strong>       {{user!.role }}</p>
             <mat-divider></mat-divider>
-            <p><strong>Registered:</strong> {{user.registeredAt | date }}</p>
+            <p><strong>Registered:</strong> {{user!.registeredAt | date }}</p>
             <mat-divider></mat-divider>
-            <p><strong>Disabled:</strong>   {{user.isDisabled}}</p>
+            <p><strong>Disabled:</strong>   {{user!.isDisabled}}</p>
             <ng-container *ngIf="user!.group">
                 <mat-divider></mat-divider>
                 <p><strong>Group:</strong>
-                    <a [routerLink]="rt.to.group(user.group.id)">
-                        {{user.group.name}}
+                    <a [routerLink]="rt.to.group(user!.group!.id)">
+                        {{user!.group!.name}}
                     </a>
                 </p>
             </ng-container>
+            <p *ngIf="user!.tgUsername">
+                <strong>Telegram:</strong>
+                <a 
+                    href="https://t.me/{{user!.tgUsername}}" 
+                    target="_blank"
+                >
+                    @{{user!.tgUsername}}
+                </a>
+            </p>
         </mat-card-content>
         <mat-card-actions *ngIf="userId === session.user?.id">
             <button mat-raised-button

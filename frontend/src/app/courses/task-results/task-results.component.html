@@ -14,6 +14,12 @@
                         [user]="taskResult.author" 
                         provideLink
                     ></app-user-item>
+                    <ng-container *ngIf="taskResult.check">
+                        &nbsp; &nbsp; 
+                        <mat-icon>check_circle</mat-icon>
+                        &nbsp;
+                        <strong>{{taskResult.check.score}}</strong>
+                    </ng-container>
                 </mat-panel-title>
                 <mat-panel-description>
                     <small>{{taskResult.lastUpdate | date: 'medium'}}</small>
@@ -24,6 +30,15 @@
                 [taskResult]="taskResult"
             ></app-task-result-view>
             <br>
+            <div *ngIf="taskResult.check">
+                <mat-divider class="mt-2"></mat-divider>
+                Last review by 
+                <app-user-item 
+                    [user]="taskResult.check.author"
+                    provideLink
+                ></app-user-item>
+            </div>
+            <br>
             <button mat-button
                 (click)="checkTaskResult(taskResult)"
                 class="mt-2"
@@ -31,7 +46,7 @@
                 color="primary"
             >
                 <mat-icon>edit</mat-icon>
-                Do check
+                Check
             </button>
         </mat-expansion-panel>
         </mat-accordion>
