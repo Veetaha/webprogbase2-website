@@ -113,6 +113,7 @@ const MutationResolvers: GqlV1.MutationResolvers.Resolvers = {
 export const apolloServer = new Apollo.ApolloServer({
     playground: true,
     typeDefs: Apollo.gql(Config.GqlSchema),
+    introspection: true,
     resolvers: {
         Mutation:         MutationResolvers        as Apollo.IResolverObject,
         Query:            QueryResolvers           as Apollo.IResolverObject,

@@ -10,7 +10,7 @@ import * as Gql from '@services/gql';
 import * as _   from 'lodash';
 
 import TaskResult = Gql.GetTaskWithResult.MyTaskResult;
-import TaskResultPatch= Gql.UpdateTaskResultPatch
+import TaskResultPatch = Gql.UpdateTaskResultPatch;
 import TaskResultCreatePayload = Gql.CreateTaskResultRequest;
 
 @Component({
@@ -32,12 +32,12 @@ export class TaskResultComponent extends Subscriber implements OnInit {
     ) { super(); }
 
     private switchToEdit() {
-        this.updResult = this.srcResult 
-        ? _.cloneDeep(Vts.take(this.srcResult, ['body', 'fileUrl'])) 
-        : {
-            body: 'Result body here',
-            fileUrl: null
-        };
+        this.updResult = this.srcResult
+            ? _.cloneDeep(Vts.take(this.srcResult, ['body', 'fileUrl']))
+            : {
+                body: 'Result body here',
+                fileUrl: null
+            };
     }
 
     editTaskResult() {
@@ -49,7 +49,7 @@ export class TaskResultComponent extends Subscriber implements OnInit {
                 if (confirm) {
                     this.switchToEdit();
                 }
-            })
+            });
         } else {
             this.switchToEdit();
         }
@@ -69,7 +69,7 @@ export class TaskResultComponent extends Subscriber implements OnInit {
                     this.srcResult = res.data!.updateTaskResult.taskResult;
                     this.updResult = null;
                     this.pageHeader.flashSnackBar('Task result was successfully updated');
-                    this.srsResultChange.emit(this.srcResult);
+                    this.srsResultChange.emit(this.srcResult!);
                 });
         } else {
             this.backend.createTaskResult({ ...this.updResult, taskId: this.taskId })
@@ -78,7 +78,7 @@ export class TaskResultComponent extends Subscriber implements OnInit {
                     this.srcResult = res.data!.createTaskResult.taskResult;
                     this.updResult = null;
                     this.pageHeader.flashSnackBar('Task result was successfully created');
-                    this.srsResultChange.emit(this.srcResult);
+                    this.srsResultChange.emit(this.srcResult!);
                 });
         }
     }

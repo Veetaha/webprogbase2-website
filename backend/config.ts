@@ -3,8 +3,8 @@ import * as fs   from 'fs';
 import md5 = require('md5');
 import { UserRole } from '@public-api/v1';
 
-import * as dotenv from 'dotenv';
-dotenv.load();
+// import * as dotenv from 'dotenv';
+// dotenv.load();
 
 export const ProjectRootDir       = path.normalize(path.join(__dirname, '../../'));
 export const Port                 = process.env.PORT             || 8080;
